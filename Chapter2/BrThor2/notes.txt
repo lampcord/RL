@@ -1,0 +1,16 @@
+Importing Atari games:
+.\python.exe -m atari_py.import_roms "C:\Repo\all-laptop-code\Python\RL\Chapter2\Chapter2\cudatest\MyRoms"
+
+TODO:
+[X] 1) Fix spacing on messages
+Step 1958000Avg Rew 9.76Avg Ep Len 378.42Episodes 24061
+
+[X] 2) Swap around best / current score
+
+[/] 3) Add a best score stat to tensorboard
+
+[X] 4) Make it easier to swap games.
+
+[X] 5) Add score to saved files.
+
+[X] 6) Add epsilon to tracked stats.

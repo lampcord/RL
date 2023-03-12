@@ -1,0 +1,10 @@
+
+*.pyc
+*.pack
+*.mp4
+Chapter2/BrThor2/logs/
+Chapter2/BrThor2/recording/
+Chapter2/cudatest/
+Chapter2/BrThor2/ffprobe.exe
+Chapter2/BrThor2/ffplay.exe
+Chapter2/BrThor2/ffmpeg.exe

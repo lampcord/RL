@@ -9,11 +9,11 @@ from baselines_wrappers.atari_wrappers import NoopResetEnv, MaxAndSkipEnv, Episo
 from baselines_wrappers.wrappers import TimeLimit
 
 
-def make_atari_deepmind(env_id, max_episode_steps=None, scale_values=False, clip_rewards=True, record=False):
+def make_atari_deepmind(env_id, max_episode_steps=None, scale_values=False, clip_rewards=True, record=False, override_num_noops=None):
     env = gym.make(env_id)
     if record:
         env = gym.wrappers.Monitor(env, "recording", force=True)
-    env = NoopResetEnv(env, noop_max=30)
+    env = NoopResetEnv(env, noop_max=30, override_num_noops=override_num_noops)
 
     if 'NoFrameskip' in env.spec.id:
         env = MaxAndSkipEnv(env, skip=4)

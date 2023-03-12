@@ -12,6 +12,7 @@ from msgpack_numpy import patch as msgpack_numpy_patch
 msgpack_numpy_patch()
 
 RECORD = True
+SKIPMOVES = 30
 def nature_cnn(observation_space, depths=(32, 64, 64), final_layer=512):
     n_input_channels = observation_space.shape[0]
 
@@ -71,12 +72,12 @@ class Network(nn.Module):
 
         self.load_state_dict(params)
 
-#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-device = "cpu"
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = "cpu"
 print('device:', device)
 
 #make_env = lambda: make_atari_deepmind('BreakoutNoFrameskip-v4', scale_values=True)
-make_env = lambda: make_atari_deepmind('SpaceInvadersNoFrameskip-v4', scale_values=True, record=RECORD)
+make_env = lambda: make_atari_deepmind('SpaceInvadersNoFrameskip-v4', scale_values=True, record=RECORD, override_num_noops=SKIPMOVES)
 
 vec_env = DummyVecEnv([make_env for _ in range(1)])
 
@@ -86,13 +87,14 @@ net = Network(env, device)
 net = net.to(device)
 
 #net.load('play/atari_model_vanilla.pack')
-net.load('SpaceInvadersNoFrameskip-v4_5e-05_37.41.pack')
+net.load('SpaceInvadersNoFrameskip-v4_5e-05_45.69.pack')
 
 obs = env.reset()
 beginning_episode = True
 total_games = 10
 total_reward = 0
 total_steps = 0
+grand_total = 0
 
 for t in itertools.count():
     if isinstance(obs[0], PytorchLazyFrames):
@@ -111,17 +113,19 @@ for t in itertools.count():
     total_reward += rew
     total_steps += 1
     env.render()
-    if not RECORD:
+    if not RECORD and SKIPMOVES is None:
         time.sleep(0.02)
 
     if done[0]:
         print(f"Total Reward: {total_reward} Total Steps: {total_steps} Info: {info}")
+        grand_total += total_reward
         total_reward = 0
         total_steps = 0
         obs = env.reset()
         beginning_episode = True
 
-    if total_games <= 0:
+    if info[0]['ale.lives'] == 0:
         break
 
-time.sleep(5)
+print(f"{SKIPMOVES} Grand Total: {grand_total}")
+time.sleep(1)

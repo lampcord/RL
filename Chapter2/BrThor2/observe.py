@@ -11,8 +11,9 @@ import msgpack
 from msgpack_numpy import patch as msgpack_numpy_patch
 msgpack_numpy_patch()
 
-RECORD = True
-SKIPMOVES = 30
+RECORD = False
+SKIPMOVES = 10
+DELAY = False
 def nature_cnn(observation_space, depths=(32, 64, 64), final_layer=512):
     n_input_channels = observation_space.shape[0]
 
@@ -77,7 +78,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print('device:', device)
 
 #make_env = lambda: make_atari_deepmind('BreakoutNoFrameskip-v4', scale_values=True)
-make_env = lambda: make_atari_deepmind('SpaceInvadersNoFrameskip-v4', scale_values=True, record=RECORD, override_num_noops=SKIPMOVES)
+make_env = lambda: make_atari_deepmind('SpaceInvadersNoFrameskip-v4', scale_values=True, record=RECORD, override_num_noops=SKIPMOVES, clip_rewards=False)
 
 vec_env = DummyVecEnv([make_env for _ in range(1)])
 
@@ -113,7 +114,7 @@ for t in itertools.count():
     total_reward += rew
     total_steps += 1
     env.render()
-    if not RECORD and SKIPMOVES is None:
+    if DELAY:
         time.sleep(0.02)
 
     if done[0]:

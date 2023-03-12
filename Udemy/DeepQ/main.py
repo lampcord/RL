@@ -91,8 +91,7 @@ class Agent():
 
         q_next = self.Q.forward(states_).max()
 
-        # TODO : should this be rewards?
-        q_target = reward + self.gamma*q_next
+        q_target = rewards + self.gamma*q_next
 
         loss = self.Q.loss(q_target, q_pred).to(self.Q.device)
         loss.backward()

@@ -146,6 +146,7 @@ class Network(nn.Module):
 
 best_rew_mean = 0.0
 if __name__ == '__main__':
+    torch.set_num_threads(1)
     device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
     print('device:', device)
 

@@ -12,10 +12,10 @@ from msgpack_numpy import patch as msgpack_numpy_patch
 msgpack_numpy_patch()
 
 RECORD = True
-SKIPMOVES = 4
+SKIPMOVES = 2
 DELAY = False
-CYCLE = True
-RUNFILE = 'SpaceInvadersNoFrameskip-v4_5e-05_46.46.pack'
+CYCLE = False
+RUNFILE = 'SpaceInvadersNoFrameskip-v4_5e-05_45.25.pack'
 def nature_cnn(observation_space, depths=(32, 64, 64), final_layer=512):
     n_input_channels = observation_space.shape[0]
 
@@ -143,8 +143,8 @@ def run(skipmoves, show_render):
 
 
 if CYCLE:
-    run(SKIPMOVES, True)
-else:
     for skipmoves in range(1,31):
         print(f"Skipmoves {skipmoves}")
         run(skipmoves, False)
+else:
+    run(SKIPMOVES, True)

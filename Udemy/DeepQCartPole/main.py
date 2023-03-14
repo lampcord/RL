@@ -104,6 +104,6 @@ if __name__ == '__main__':
             print ('episodes ', i, 'score %.1f avg score %.1f epsilon %.2f' %
                    (score, avg_score, agent.epsilon))
 
-    filename = 'cartpole_naive_dqn.png'
+    filename = '../DeepQ/cartpole_naive_dqn.png'
     x = [i+1 for i in range(n_games)]
     plot_learning_curve(x, scores, eps_history, filename)

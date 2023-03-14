@@ -30,17 +30,22 @@ def plot_learning_curve(x, scores, epsilons, filename):
     plt.savefig(filename)
 
 class RepeatActionsAndMaxFrame(gym.Wrapper):
-    def __init__(self, env=None, repeat=4):
+    def __init__(self, env=None, repeat=4, clip_rewards=False, no_ops=0, fire_first=False):
         super(RepeatActionsAndMaxFrame, self).__init__(env)
         self.repeat = repeat
         self.shape = env.observation_space.low.shape
         self.frame_buffer = np.zeros_like((2, self.shape))
+        self.clip_rewards = clip_rewards
+        self.no_ops = no_ops
+        self.fire_first = fire_first
 
     def step(self, action):
         t_reward = 0.0
         done = False
         for i in range(self.repeat):
             obs, reward, done, info = self.env.steps(action)
+            if self.clip_rewards:
+                reward = np.clip(np.array([reward]), -1, 1)[0]
             t_reward += reward
             idx = i % 2
             self.frame_buffer[idx] = obs
@@ -52,6 +57,16 @@ class RepeatActionsAndMaxFrame(gym.Wrapper):
 
     def reset(self):
         obs = self.env.reset()
+        no_ops = np.random.randint(self.no_ops) + 1 if self.no_ops > 0 else 0
+        for _ in range(no_ops):
+            _, _, done, _ = self.env.step(0)
+            if done:
+                self.env.reset()
+
+        if self.fire_first:
+            assert self.env.unwrapped.get_action_meaning()[1] == 'FIRE'
+            obs, _, _, _ = self.env.step(1)
+
         self.frame_buffer = np.zeros_like((w, self.shape))
         self.frame_buffer[0] = obs
 
@@ -70,5 +85,36 @@ class PreprocessFrame(gym.ObservationWrapper):
         new_obs = new_obs / 255.0
 
         return new_obs
+
+class StackFrames(gym.ObservationWrapper):
+    def __init__(self, env, repeat):
+        super(StackFrames, self).__init__(env)
+        self.observation_space = gym.spaces.Box(
+            env.observation_space.low.repeat(repeat, axis=0),
+            env.observation_space.high.repeat(repeat, axis=0),
+            dtype=np.float32)
+        self.stack = collections.deq(maxlen=repeat)
+
+    def reset(self):
+        self.stack.clear()
+        observation = self.env.reset()
+        for _ in range(self.stack.maxlen):
+            self.stack.append(observation)
+
+        return np.array(self.stack).reshape(self.observation_space.low.shape)
+
+    def observation(self, observation):
+        self.stack.append(observation)
+
+        return np.array(self.stack).reshape(self.observation_space.low.shape)
+
+
+def make_env(env_name, shape=(84,84,1), repeat=4, clip_rewards=False, no_ops=0, fire_first=False):
+    env = gym.make(env_name)
+    env = RepeatActionsAndMaxFrame(env, repeat, clip_rewards, no_ops, fire_first)
+    env = PreprocessFrame(shape, env)
+    env = StackFrames(env, repeat)
+
+    return env
 
 

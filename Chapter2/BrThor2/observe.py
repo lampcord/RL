@@ -11,9 +11,11 @@ import msgpack
 from msgpack_numpy import patch as msgpack_numpy_patch
 msgpack_numpy_patch()
 
-RECORD = False
-SKIPMOVES = 10
+RECORD = True
+SKIPMOVES = 4
 DELAY = False
+CYCLE = True
+RUNFILE = 'SpaceInvadersNoFrameskip-v4_5e-05_46.46.pack'
 def nature_cnn(observation_space, depths=(32, 64, 64), final_layer=512):
     n_input_channels = observation_space.shape[0]
 
@@ -77,56 +79,72 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #device = "cpu"
 print('device:', device)
 
-#make_env = lambda: make_atari_deepmind('BreakoutNoFrameskip-v4', scale_values=True)
-make_env = lambda: make_atari_deepmind('SpaceInvadersNoFrameskip-v4', scale_values=True, record=RECORD, override_num_noops=SKIPMOVES, clip_rewards=False)
+def run(skipmoves, show_render):
+    #make_env = lambda: make_atari_deepmind('BreakoutNoFrameskip-v4', scale_values=True)
+    make_env = lambda: make_atari_deepmind('SpaceInvadersNoFrameskip-v4', scale_values=True, record=RECORD, override_num_noops=skipmoves, clip_rewards=False)
 
-vec_env = DummyVecEnv([make_env for _ in range(1)])
+    vec_env = DummyVecEnv([make_env for _ in range(1)])
 
-env = BatchedPytorchFrameStack(vec_env, k=4)
+    env = BatchedPytorchFrameStack(vec_env, k=4)
 
-net = Network(env, device)
-net = net.to(device)
+    net = Network(env, device)
+    net = net.to(device)
 
-#net.load('play/atari_model_vanilla.pack')
-net.load('SpaceInvadersNoFrameskip-v4_5e-05_45.69.pack')
+    #net.load('play/atari_model_vanilla.pack')
+    net.load(RUNFILE)
 
-obs = env.reset()
-beginning_episode = True
-total_games = 10
-total_reward = 0
-total_steps = 0
-grand_total = 0
+    obs = env.reset()
+    beginning_episode = True
+    total_games = 10
+    total_reward = 0
+    total_capped = 0
+    total_steps = 0
+    grand_total = 0
+    grand_total_capped = 0
 
-for t in itertools.count():
-    if isinstance(obs[0], PytorchLazyFrames):
-        act_obs = np.stack([o.get_frames() for o in obs])
-        action = net.act(act_obs, 0.0)
-    else:
-        action = net.act(obs, 0.0)
+    for t in itertools.count():
+        if isinstance(obs[0], PytorchLazyFrames):
+            act_obs = np.stack([o.get_frames() for o in obs])
+            action = net.act(act_obs, 0.0)
+        else:
+            action = net.act(obs, 0.0)
 
-    if beginning_episode:
-        time.sleep(1)
-        action = [1]
-        beginning_episode = False
-        total_games -= 1
+        if beginning_episode:
+            time.sleep(1)
+            action = [1]
+            beginning_episode = False
+            total_games -= 1
 
-    obs, rew, done, info = env.step(action)
-    total_reward += rew
-    total_steps += 1
-    env.render()
-    if DELAY:
-        time.sleep(0.02)
+        obs, rew, done, info = env.step(action)
+        total_reward += rew
+        total_capped += rew if rew <= 1 else 1
+        total_steps += 1
+        if show_render:
+            env.render()
+        if DELAY:
+            time.sleep(0.02)
 
-    if done[0]:
-        print(f"Total Reward: {total_reward} Total Steps: {total_steps} Info: {info}")
-        grand_total += total_reward
-        total_reward = 0
-        total_steps = 0
-        obs = env.reset()
-        beginning_episode = True
+        if done[0]:
+            print(f"Total Reward: {total_reward} Total Capped: {total_capped} Total Steps: {total_steps} Info: {info}")
+            grand_total += total_reward
+            grand_total_capped += total_capped
+            total_reward = 0
+            total_capped = 0
+            total_steps = 0
+            obs = env.reset()
+            beginning_episode = True
 
-    if info[0]['ale.lives'] == 0:
-        break
+        if info[0]['ale.lives'] == 0:
+            break
 
-print(f"{SKIPMOVES} Grand Total: {grand_total}")
-time.sleep(1)
+    print(f"{SKIPMOVES} Grand Total: {grand_total} Total Capped: {grand_total_capped}")
+    time.sleep(1)
+    env.close()
+
+
+if CYCLE:
+    run(SKIPMOVES, True)
+else:
+    for skipmoves in range(1,31):
+        print(f"Skipmoves {skipmoves}")
+        run(skipmoves, False)

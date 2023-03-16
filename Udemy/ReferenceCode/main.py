@@ -28,7 +28,7 @@ if __name__ == '__main__':
                             help='Batch size for replay memory sampling')
     parser.add_argument('-replace', type=int, default=1000,
                         help='interval for replacing target network')
-    parser.add_argument('-env', type=str, default='PongNoFrameskip-v4',
+    parser.add_argument('-env', type=str, default='SpaceInvadersNoFrameskip-v4',
                             help='Atari environment.\nPongNoFrameskip-v4\n \
                                   BreakoutNoFrameskip-v4\n \
                                   SpaceInvadersNoFrameskip-v4\n \

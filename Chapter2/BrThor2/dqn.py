@@ -20,7 +20,7 @@ msgpack_numpy_patch()
 
 #GAME_NAME = 'BreakoutNoFrameskip-v4'
 GAME_NAME = 'SpaceInvadersNoFrameskip-v4'
-RELEARN = True
+RELEARN = False
 GAMMA=0.99
 BATCH_SIZE=32
 BUFFER_SIZE=int(1e6)

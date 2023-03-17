@@ -45,13 +45,13 @@ class Agent():
     def learn(self):
         raise NotImplementedError
 
-    def save_models(self):
-        self.q_eval.save_checkpoint()
-        self.q_next.save_checkpoint()
+    def save_models(self, score):
+        self.q_eval.save_checkpoint(score)
+        self.q_next.save_checkpoint(score)
 
-    def load_models(self):
-        self.q_eval.load_checkpoint()
-        self.q_next.load_checkpoint()
+    def load_models(self, score):
+        self.q_eval.load_checkpoint(score)
+        self.q_next.load_checkpoint(score)
 
 class DQNAgent(Agent):
     def __init__(self, *args, **kwargs):

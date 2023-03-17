@@ -44,13 +44,13 @@ class DeepQNetwork(nn.Module):
 
         return actions
 
-    def save_checkpoint(self):
-        print('... saving checkpoint ...')
-        T.save(self.state_dict(), self.checkpoint_file)
+    def save_checkpoint(self, score):
+        print('... saving checkpoint ...' + ' ' + str(score))
+        T.save(self.state_dict(), self.checkpoint_file + '_' + str(score))
 
-    def load_checkpoint(self):
-        print('... loading checkpoint ...')
-        self.load_state_dict(T.load(self.checkpoint_file))
+    def load_checkpoint(self, score):
+        print('... loading checkpoint ...' + ' ' + str(score))
+        self.load_state_dict(T.load(self.checkpoint_file + '_' + str(score)))
 
 class DuelingDeepQNetwork(nn.Module):
     def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, device):
@@ -94,10 +94,10 @@ class DuelingDeepQNetwork(nn.Module):
 
         return V, A
 
-    def save_checkpoint(self):
-        print('... saving checkpoint ...')
-        T.save(self.state_dict(), self.checkpoint_file)
+    def save_checkpoint(self, score):
+        print('... saving checkpoint ...' + ' ' + str(score))
+        T.save(self.state_dict(), self.checkpoint_file + '_' + str(score))
 
-    def load_checkpoint(self):
-        print('... loading checkpoint ...')
-        self.load_state_dict(T.load(self.checkpoint_file))
+    def load_checkpoint(self, score):
+        print('... loading checkpoint ...' + ' ' + str(score))
+        self.load_state_dict(T.load(self.checkpoint_file + '_' + str(score)))

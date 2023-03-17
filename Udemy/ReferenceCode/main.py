@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     #################################################################################
-    args.load_checkpoint=False
+    args.load_checkpoint=True
     args.n_games = 1000
     best_score = 0
     LOG_DIR = './logs/' + args.env + '_' + str(args.lr) + '_' + datetime.datetime.now().strftime('%b%d_%H-%M-%S')
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                 )
 
     if args.load_checkpoint:
-        agent.load_models()
+        agent.load_models('')
 
     fname = args.algo + '_' + args.env + '_alpha' + str(args.lr) +'_' \
             + str(args.n_games) + 'games'
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
         if game >= 10 and avg_score > best_score:
             if not args.load_checkpoint:
-                agent.save_models()
+                agent.save_models(best_score)
             best_score = avg_score
 
         eps_history.append(agent.epsilon)

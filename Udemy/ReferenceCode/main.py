@@ -6,6 +6,7 @@ import numpy as np
 import agents as Agents
 from utils import plot_learning_curve, make_env
 from torch.utils.tensorboard import SummaryWriter
+import torch as T
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -54,7 +55,7 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     #################################################################################
-    args.load_checkpoint=True
+    args.load_checkpoint=False
     args.n_games = 1000
     best_score = 0
     LOG_DIR = './logs/' + args.env + '_' + str(args.lr) + '_' + datetime.datetime.now().strftime('%b%d_%H-%M-%S')
@@ -68,20 +69,25 @@ if __name__ == '__main__':
                   clip_rewards=args.clip_rewards, no_ops=args.no_ops,
                   fire_first=args.fire_first)
 
+    device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+
     agent_ = getattr(Agents, args.algo)
     agent = agent_(gamma=args.gamma,
-                  epsilon=args.eps,
-                  lr=args.lr,
-                  input_dims=env.observation_space.shape,
-                  n_actions=env.action_space.n,
-                  mem_size=args.max_mem,
-                  eps_min=args.eps_min,
-                  batch_size=args.bs,
-                  replace=args.replace,
-                  eps_dec=args.eps_dec,
-                  chkpt_dir=args.path,
-                  algo=args.algo,
-                  env_name=args.env)
+                    epsilon=args.eps,
+                    lr=args.lr,
+                    input_dims=env.observation_space.shape,
+                    n_actions=env.action_space.n,
+                    mem_size=args.max_mem,
+                    eps_min=args.eps_min,
+                    batch_size=args.bs,
+                    replace=args.replace,
+                    eps_dec=args.eps_dec,
+                    chkpt_dir=args.path,
+                    algo=args.algo,
+                    env_name=args.env,
+                    device=device
+                )
 
     if args.load_checkpoint:
         agent.load_models()

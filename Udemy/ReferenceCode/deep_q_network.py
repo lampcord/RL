@@ -6,7 +6,7 @@ import torch.optim as optim
 import numpy as np
 
 class DeepQNetwork(nn.Module):
-    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir):
+    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, device):
         super(DeepQNetwork, self).__init__()
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
@@ -23,7 +23,7 @@ class DeepQNetwork(nn.Module):
         self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
 
         self.loss = nn.MSELoss()
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.device = device
         self.to(self.device)
 
     def calculate_conv_output_dims(self, input_dims):
@@ -53,7 +53,7 @@ class DeepQNetwork(nn.Module):
         self.load_state_dict(T.load(self.checkpoint_file))
 
 class DuelingDeepQNetwork(nn.Module):
-    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir):
+    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, device):
         super(DuelingDeepQNetwork, self).__init__()
 
         self.checkpoint_dir = chkpt_dir
@@ -72,7 +72,7 @@ class DuelingDeepQNetwork(nn.Module):
 
         self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
         self.loss = nn.MSELoss()
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.device = device
         self.to(self.device)
 
     def calculate_conv_output_dims(self, input_dims):

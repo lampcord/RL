@@ -1,8 +1,11 @@
 import argparse, os
+import datetime
+
 import gym
 import numpy as np
 import agents as Agents
 from utils import plot_learning_curve, make_env
+from torch.utils.tensorboard import SummaryWriter
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -49,6 +52,15 @@ if __name__ == '__main__':
                         help='Set first action of episode to fire')
     args = parser.parse_args()
 
+    best_score = -np.inf
+    #################################################################################
+    args.load_checkpoint=True
+    args.n_games = 1000
+    best_score = 0
+    LOG_DIR = './logs/' + args.env + '_' + str(args.lr) + '_' + datetime.datetime.now().strftime('%b%d_%H-%M-%S')
+    summary_writer = SummaryWriter(LOG_DIR)
+    #################################################################################
+
     os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
@@ -56,7 +68,6 @@ if __name__ == '__main__':
                   clip_rewards=args.clip_rewards, no_ops=args.no_ops,
                   fire_first=args.fire_first)
 
-    best_score = -np.inf
     agent_ = getattr(Agents, args.algo)
     agent = agent_(gamma=args.gamma,
                   epsilon=args.eps,
@@ -79,11 +90,11 @@ if __name__ == '__main__':
             + str(args.n_games) + 'games'
     figure_file = 'plots/' + fname + '.png'
     scores_file = fname + '_scores.npy'
-
+    avg_score = 0
     scores, eps_history = [], []
     n_steps = 0
     steps_array = []
-    for i in range(args.n_games):
+    for game in range(args.n_games):
         done = False
         observation = env.reset()
         score = 0
@@ -92,21 +103,28 @@ if __name__ == '__main__':
             observation_, reward, done, info = env.step(action)
             score += reward
 
-            if not args.load_checkpoint:
+            if args.load_checkpoint:
+                env.render()
+            else:
                 agent.store_transition(observation, action,
                                      reward, observation_, int(done))
                 agent.learn()
             observation = observation_
             n_steps += 1
+
+            if not args.load_checkpoint and n_steps % 100 == 0:
+                summary_writer.add_scalar('AvgRew', avg_score, global_step=n_steps)
+                summary_writer.add_scalar('BestAvgRew', best_score, global_step=n_steps)
+
         scores.append(score)
         steps_array.append(n_steps)
 
         avg_score = np.mean(scores[-100:])
-        print('episode: ', i,'score: ', score,
+        print('episode: ', game, 'score: ', score,
              ' average score %.1f' % avg_score, 'best score %.2f' % best_score,
             'epsilon %.2f' % agent.epsilon, 'steps', n_steps)
 
-        if avg_score > best_score:
+        if game >= 10 and avg_score > best_score:
             if not args.load_checkpoint:
                 agent.save_models()
             best_score = avg_score

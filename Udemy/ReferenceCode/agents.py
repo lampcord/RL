@@ -23,6 +23,7 @@ class Agent():
         self.env_name = env_name
         self.chkpt_dir = chkpt_dir
         self.device = device
+        self.divisor = T.tensor(np.array([255.0]), dtype=T.float32).to(self.device)
 
         self.memory = ReplayBuffer(mem_size, input_dims, n_actions, device)
 
@@ -68,7 +69,8 @@ class DQNAgent(Agent):
 
     def choose_action(self, observation):
         if np.random.random() > self.epsilon:
-            state = T.tensor(np.array([observation]), dtype=T.float).to(self.q_eval.device)
+            state = T.tensor(np.array([observation]), dtype=T.float32).to(self.q_eval.device)
+            state = state / self.divisor
             actions = self.q_eval.forward(state)
             action = T.argmax(actions).item()
         else:

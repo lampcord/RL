@@ -1,5 +1,6 @@
 import numpy as np
 import torch as T
+import torch.nn.functional as F
 from deep_q_network import DeepQNetwork, DuelingDeepQNetwork
 from replay_memory import ReplayBuffer
 
@@ -24,7 +25,7 @@ class Agent():
         self.chkpt_dir = chkpt_dir
         self.device = device
         self.divisor = T.tensor(np.array([255.0]), dtype=T.float32).to(self.device)
-
+        self.min_memory_buffer=50000
         self.memory = ReplayBuffer(mem_size, input_dims, n_actions, device)
 
     def store_transition(self, state, action, reward, state_, done):
@@ -79,7 +80,7 @@ class DQNAgent(Agent):
         return action
 
     def learn(self):
-        if self.memory.mem_cntr < self.batch_size:
+        if self.memory.mem_cntr < self.min_memory_buffer:
             return
 
         self.q_eval.optimizer.zero_grad()
@@ -96,7 +97,7 @@ class DQNAgent(Agent):
 
         q_target = rewards + self.gamma*q_next
 
-        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
+        loss = F.smooth_l1_loss(q_target, q_pred).to(self.q_eval.device)
         loss.backward()
         self.q_eval.optimizer.step()
         self.learn_step_counter += 1
@@ -118,7 +119,8 @@ class DDQNAgent(Agent):
 
     def choose_action(self, observation):
         if np.random.random() > self.epsilon:
-            state = T.tensor([observation],dtype=T.float).to(self.q_eval.device)
+            state = T.tensor(np.array([observation]), dtype=T.float32).to(self.q_eval.device)
+            state = state / self.divisor
             actions = self.q_eval.forward(state)
             action = T.argmax(actions).item()
         else:
@@ -127,7 +129,7 @@ class DDQNAgent(Agent):
         return action
 
     def learn(self):
-        if self.memory.mem_cntr < self.batch_size:
+        if self.memory.mem_cntr < self.min_memory_buffer:
             return
 
         self.q_eval.optimizer.zero_grad()
@@ -145,7 +147,7 @@ class DDQNAgent(Agent):
         q_next[dones] = 0.0
 
         q_target = rewards + self.gamma*q_next[indices, max_actions]
-        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
+        loss = F.smooth_l1_loss(q_target, q_pred).to(self.q_eval.device)
         loss.backward()
 
         self.q_eval.optimizer.step()
@@ -177,7 +179,7 @@ class DuelingDQNAgent(Agent):
         return action
 
     def learn(self):
-        if self.memory.mem_cntr < self.batch_size:
+        if self.memory.mem_cntr < self.min_memory_buffer:
             return
 
         self.q_eval.optimizer.zero_grad()
@@ -198,7 +200,7 @@ class DuelingDQNAgent(Agent):
         q_next[dones] = 0.0
         q_target = rewards + self.gamma*q_next
 
-        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
+        loss = F.smooth_l1_loss(q_target, q_pred).to(self.q_eval.device)
         loss.backward()
         self.q_eval.optimizer.step()
 
@@ -229,7 +231,7 @@ class DuelingDDQNAgent(Agent):
         return action
 
     def learn(self):
-        if self.memory.mem_cntr < self.batch_size:
+        if self.memory.mem_cntr < self.min_memory_buffer:
             return
 
         self.q_eval.optimizer.zero_grad()
@@ -256,7 +258,7 @@ class DuelingDDQNAgent(Agent):
         q_next[dones] = 0.0
 
         q_target = rewards + self.gamma*q_next[indices, max_actions]
-        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
+        loss = F.smooth_l1_loss(q_target, q_pred).to(self.q_eval.device)
         loss.backward()
         self.q_eval.optimizer.step()
         self.learn_step_counter += 1

@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     #################################################################################
-    args.load_checkpoint = True
+    args.load_checkpoint = False
     args.clip_rewards = True
     args.max_mem = 400000
     args.n_games = 100000
@@ -66,6 +66,7 @@ if __name__ == '__main__':
     LOG_DIR = './logs/' + args.env + '_' + str(args.lr) + '_' + datetime.datetime.now().strftime('%b%d_%H-%M-%S')
     summary_writer = SummaryWriter(LOG_DIR)
     args.fire_first = True
+    args.algo = 'DDQNAgent'
     #################################################################################
 
     if args.load_checkpoint:

@@ -20,9 +20,8 @@ class DeepQNetwork(nn.Module):
         self.fc1 = nn.Linear(fc_input_dims, 512)
         self.fc2 = nn.Linear(512, n_actions)
 
-        self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
+        self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        self.loss = nn.MSELoss()
         self.device = device
         self.to(self.device)
 
@@ -70,8 +69,7 @@ class DuelingDeepQNetwork(nn.Module):
         self.V = nn.Linear(512, 1)
         self.A = nn.Linear(512, n_actions)
 
-        self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
-        self.loss = nn.MSELoss()
+        self.optimizer = optim.Adam(self.parameters(), lr=lr)
         self.device = device
         self.to(self.device)
 

@@ -108,7 +108,7 @@ def calc_loss(batch, batch_weights, net, tgt_net, gamma, device="cpu"):
     next_best_distr_v = tgt_net.apply_softmax(next_best_distr_v)
     next_best_distr = next_best_distr_v.data.cpu().numpy()
 
-    dones = dones.astype(np.bool)
+    dones = dones.astype(bool)
 
     # project our distribution using Bellman update
     proj_distr = common.distr_projection(next_best_distr, rewards, dones, Vmin, Vmax, N_ATOMS, gamma)
@@ -124,7 +124,8 @@ def calc_loss(batch, batch_weights, net, tgt_net, gamma, device="cpu"):
 
 
 if __name__ == "__main__":
-    params = common.HYPERPARAMS['pong']
+    # params = common.HYPERPARAMS['pong']
+    params = common.HYPERPARAMS['invaders']
     params['epsilon_frames'] *= 2
     parser = argparse.ArgumentParser()
     parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
@@ -157,7 +158,8 @@ if __name__ == "__main__":
                 if reward_tracker.reward(new_rewards[0], frame_idx):
                     break
 
-            if len(buffer) < params['replay_initial']:
+            # if len(buffer) < params['replay_initial']:
+            if len(buffer) < 1000:
                 continue
 
             optimizer.zero_grad()

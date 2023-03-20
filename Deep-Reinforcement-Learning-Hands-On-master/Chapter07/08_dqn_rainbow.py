@@ -130,7 +130,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
     args = parser.parse_args()
-    device = torch.device("cuda" if args.cuda else "cpu")
+    device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
 
     env = gym.make(params['env_name'])
     env = ptan.common.wrappers.wrap_dqn(env)
@@ -146,7 +147,8 @@ if __name__ == "__main__":
 
     frame_idx = 0
     beta = BETA_START
-
+    rewards = []
+    best_reward = 0.0
     with common.RewardTracker(writer, params['stop_reward']) as reward_tracker:
         while True:
             frame_idx += 1
@@ -155,11 +157,19 @@ if __name__ == "__main__":
 
             new_rewards = exp_source.pop_total_rewards()
             if new_rewards:
+                rewards.append(new_rewards[0])
+                if frame_idx > 1000:
+                    avg_reward = np.mean(rewards[-100:])
+                    if avg_reward > best_reward:
+                        best_reward = avg_reward
+                        filename = 'models/' + params['env_name'] + "_" + str(best_reward) + "-best.dat"
+                        print(f"Saving new best model {filename}")
+                        torch.save(net.state_dict(), filename)
+
                 if reward_tracker.reward(new_rewards[0], frame_idx):
                     break
 
-            # if len(buffer) < params['replay_initial']:
-            if len(buffer) < 1000:
+            if len(buffer) < params['replay_initial']:
                 continue
 
             optimizer.zero_grad()

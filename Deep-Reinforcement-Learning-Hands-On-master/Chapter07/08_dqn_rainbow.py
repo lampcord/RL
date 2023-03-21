@@ -15,18 +15,30 @@ from tensorboardX import SummaryWriter
 from lib import dqn_model, common
 
 # n-step
-REWARD_STEPS = common.RAINBOWPARAMS['multi_step_returns']
+# TBD - Inconclusive
+
+# REWARD_STEPS = common.RAINBOWPARAMS['multi_step_returns']
+REWARD_STEPS = 2
 
 # priority replay
-PRIO_REPLAY_ALPHA = common.RAINBOWPARAMS['prioritization_w']
-BETA_START = common.RAINBOWPARAMS['priority_B_start']
-BETA_END = common.RAINBOWPARAMS['priority_B_end']
-BETA_FRAMES = 1000000
+# TBD - Inconclusive
+# PRIO_REPLAY_ALPHA = common.RAINBOWPARAMS['prioritization_w']
+# BETA_START = common.RAINBOWPARAMS['priority_B_start']
+# BETA_END = common.RAINBOWPARAMS['priority_B_end']
+# BETA_FRAMES = 1000000
+PRIO_REPLAY_ALPHA = 0.6
+BETA_START = 0.4
+BETA_FRAMES = 100000
 
 # C51
-Vmax = common.RAINBOWPARAMS['distributional_vmin']
-Vmin = common.RAINBOWPARAMS['distributional_vmax']
-N_ATOMS = common.RAINBOWPARAMS['distributional_atoms']
+# TBD
+# Vmax = common.RAINBOWPARAMS['distributional_vmax']
+# Vmin = common.RAINBOWPARAMS['distributional_vmin']
+# N_ATOMS = common.RAINBOWPARAMS['distributional_atoms']
+Vmax = 10
+Vmin = -10
+N_ATOMS = 51
+
 DELTA_Z = (Vmax - Vmin) / (N_ATOMS - 1)
 
 
@@ -45,15 +57,20 @@ class RainbowDQN(nn.Module):
 
         conv_out_size = self._get_conv_out(input_shape)
         self.fc_val = nn.Sequential(
-            dqn_model.NoisyLinear(conv_out_size, 256, sigma_init=common.RAINBOWPARAMS['noisy_net_sigma']),
+            # TBD - BAD!!!
+            # dqn_model.NoisyLinear(conv_out_size, 256, sigma_init=common.RAINBOWPARAMS['noisy_net_sigma']),
+            dqn_model.NoisyLinear(conv_out_size, 256),
             nn.ReLU(),
-            dqn_model.NoisyLinear(256, N_ATOMS, sigma_init=common.RAINBOWPARAMS['noisy_net_sigma'])
+            # dqn_model.NoisyLinear(256, N_ATOMS, sigma_init=common.RAINBOWPARAMS['noisy_net_sigma'])
+            dqn_model.NoisyLinear(256, N_ATOMS)
         )
 
         self.fc_adv = nn.Sequential(
-            dqn_model.NoisyLinear(conv_out_size, 256, sigma_init=common.RAINBOWPARAMS['noisy_net_sigma']),
+            # dqn_model.NoisyLinear(conv_out_size, 256, sigma_init=common.RAINBOWPARAMS['noisy_net_sigma']),
+            dqn_model.NoisyLinear(conv_out_size, 256),
             nn.ReLU(),
-            dqn_model.NoisyLinear(256, n_actions * N_ATOMS, sigma_init=common.RAINBOWPARAMS['noisy_net_sigma'])
+            # dqn_model.NoisyLinear(256, n_actions * N_ATOMS, sigma_init=common.RAINBOWPARAMS['noisy_net_sigma'])
+            dqn_model.NoisyLinear(256, n_actions * N_ATOMS)
         )
 
         self.register_buffer("supports", torch.arange(Vmin, Vmax+DELTA_Z, DELTA_Z))
@@ -144,7 +161,10 @@ if __name__ == "__main__":
 
     exp_source = ptan.experience.ExperienceSourceFirstLast(env, agent, gamma=params['gamma'], steps_count=REWARD_STEPS)
     buffer = ptan.experience.PrioritizedReplayBuffer(exp_source, params['replay_size'], PRIO_REPLAY_ALPHA)
-    optimizer = optim.Adam(net.parameters(), lr=common.RAINBOWPARAMS['Adam_learn_rate'], eps=common.RAINBOWPARAMS['Adam_epsilon'])
+    # TBD
+    optimizer = optim.Adam(net.parameters(), lr=common.RAINBOWPARAMS['Adam_learn_rate'])
+    # optimizer = optim.Adam(net.parameters(), lr=common.RAINBOWPARAMS['Adam_learn_rate'], eps=common.RAINBOWPARAMS['Adam_epsilon'])
+    # optimizer = optim.Adam(net.parameters(), lr=params['learning_rate'])
 
     frame_idx = 0
     beta = BETA_START
@@ -154,7 +174,9 @@ if __name__ == "__main__":
         while True:
             frame_idx += 1
             buffer.populate(1)
-            beta = min(BETA_END, BETA_START + frame_idx * (BETA_END - BETA_START) / BETA_FRAMES)
+            # TBD
+            # beta = min(BETA_END, BETA_START + frame_idx * (BETA_END - BETA_START) / BETA_FRAMES)
+            beta = min(1.0, BETA_START + frame_idx * (1.0 - BETA_START) / BETA_FRAMES)
 
             new_rewards = exp_source.pop_total_rewards()
             if new_rewards:
@@ -170,7 +192,9 @@ if __name__ == "__main__":
                 if reward_tracker.reward(new_rewards[0], frame_idx):
                     break
 
-            if len(buffer) < common.RAINBOWPARAMS['min_history_learn']:
+            # TBD
+            # if len(buffer) < common.RAINBOWPARAMS['min_history_learn']:
+            if len(buffer) < params['replay_initial']:
                 continue
 
             optimizer.zero_grad()
@@ -181,5 +205,7 @@ if __name__ == "__main__":
             optimizer.step()
             buffer.update_priorities(batch_indices, sample_prios_v.data.cpu().numpy())
 
-            if frame_idx % common.RAINBOWPARAMS['target_net_period'] == 0:
+            # TBD
+            # if frame_idx % common.RAINBOWPARAMS['target_net_period'] == 0:
+            if frame_idx % params['target_net_sync'] == 0:
                 tgt_net.sync()

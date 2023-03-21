@@ -6,19 +6,20 @@ import torch.nn as nn
 
 
 RAINBOWPARAMS = {
-    'min_history_learn':        80000,
-    'Adam_learn_rate':          0.0000625,
-    'epsilon_start':            0.0,
-    'epsilon_end':              0.0,
-    'noisy_net':                0.5,
-    'target_net_period':        32000,
-    'Adam_epsilon':             1.5e-4,
-    'prioritization_w':         0.5,
-    'priority_B_start':         0.4,
-    'priority_B_end':           1.0,
-    'multi_step_returns':       3,
-    'distributional_atoms':     51,
-    'distributional_minmax':    [-10,10]
+    'min_history_learn':        80000,       # [X] Replaces HYPERPARAMS - replay_initial
+    'Adam_learn_rate':          0.0000625,   # [X] Replaces HYPERPARAMS - learning_rate
+    'epsilon_start':            0.0,         # [-] NOT USED
+    'epsilon_end':              0.0,         # [-] NOT USED
+    'noisy_net_sigma':          0.5,         # [X] Used for NoisyLinear sigma_init
+    'target_net_period':        32000,       # [X] Replaces HYPERPARAMS - target_net_sync
+    'Adam_epsilon':             1.5e-4,      # [X] Used for Adam Optimizer eps
+    'prioritization_w':         0.5,         # [X] Used for PrioritizedReplayBuffer alpha
+    'priority_B_start':         0.4,         # [X] Replaces BETA_START
+    'priority_B_end':           1.0,         # [X] Replaces BETA_END
+    'multi_step_returns':       3,           # [X] Replaces REWARD_STEPS
+    'distributional_atoms':     51,          # [X] Replaces N_ATOMS
+    'distributional_vmin':      -10,         # [X] Replaces Vmin
+    'distributional_vmax':      10           # [X] Replaces Vmax
 }
 
 HYPERPARAMS = {

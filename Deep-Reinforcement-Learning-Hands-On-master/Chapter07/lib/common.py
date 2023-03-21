@@ -5,6 +5,22 @@ import torch
 import torch.nn as nn
 
 
+RAINBOWPARAMS = {
+    'min_history_learn':        80000,
+    'Adam_learn_rate':          0.0000625,
+    'epsilon_start':            0.0,
+    'epsilon_end':              0.0,
+    'noisy_net':                0.5,
+    'target_net_period':        32000,
+    'Adam_epsilon':             1.5e-4,
+    'prioritization_w':         0.5,
+    'priority_B_start':         0.4,
+    'priority_B_end':           1.0,
+    'multi_step_returns':       3,
+    'distributional_atoms':     51,
+    'distributional_minmax':    [-10,10]
+}
+
 HYPERPARAMS = {
     'pong': {
         'env_name':         "PongNoFrameskip-v4",

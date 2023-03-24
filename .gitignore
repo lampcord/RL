@@ -12,3 +12,6 @@ Udemy/DeepQ/cartpole_naive_dqn.png
 Udemy/ReferenceCode/logs/
 Udemy/ReferenceCode/models/
 Udemy/ReferenceCode/plots/
+Rainbow/checkpoints/
+Rainbow/wandb/
+Rainbow/.idea/

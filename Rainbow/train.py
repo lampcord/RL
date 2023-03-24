@@ -18,6 +18,9 @@ from common.rainbow import Rainbow
 from common.env_wrappers import create_env, BASE_FPS_ATARI, BASE_FPS_PROCGEN
 from common.utils import LinearSchedule, get_mean_ep_length
 
+device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
+print('device:', device)
+
 torch.backends.cudnn.benchmark = True  # let cudnn heuristics choose fastest conv algorithm
 
 if __name__ == '__main__':

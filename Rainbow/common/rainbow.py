@@ -138,3 +138,17 @@ class Rainbow:
             print(f'Saved model checkpoint at {game_frame} frames.')
         except Exception as e:
             print('[bold red] Error while saving artifacts to wandb:', e)
+
+    def load(self, game_frame, **kwargs):
+        save_path = ('replay_checkpoints' + f"/checkpoint_{game_frame}.pt")
+        #torch.save({**kwargs, 'state_dict': self.q_policy.state_dict(), 'game_frame': game_frame}, save_path)
+        loaded_checkpoint = torch.load(save_path)
+        self.q_policy.load_state_dict(loaded_checkpoint['state_dict'])
+        return
+        # try:
+        #     artifact = wandb.Artifact('saved_model', type='model')
+        #     artifact.add_file(save_path)
+        #     wandb.run.log_artifact(artifact)
+        #     print(f'Saved model checkpoint at {game_frame} frames.')
+        # except Exception as e:
+        #     print('[bold red] Error while saving artifacts to wandb:', e)

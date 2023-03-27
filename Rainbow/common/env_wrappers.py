@@ -46,6 +46,7 @@ class RecordEpisodeStatistics(gym.Wrapper):
         self.episode_discounted_return += reward * self.gamma**self.episode_length
         self.episode_length += 1
         if done:
+
             info['episode_metrics'] = {'return': self.episode_return,
                                        'length': self.episode_length,
                                        'time': round(time.time() - self.t0, 6),
@@ -320,7 +321,7 @@ class ClipRewardEnv(gym.Wrapper):
 class RecorderWrapper(gym.Wrapper):
     """ Env wrapper that records the game as an .mp4 """
 
-    def __init__(self, env, fps, save_dir, label, record_every):
+    def __init__(self, env, fps, save_dir, label, record_every, record_to_end=False):
         super().__init__(env)
         self.record_every = record_every
         self.save_dir = save_dir
@@ -334,11 +335,13 @@ class RecorderWrapper(gym.Wrapper):
         self.last_recording = 0
 
         self.scale_factor = None
+        self.record_to_end = record_to_end
 
     def step(self, action):
         observation, rew, done, info = self.env.step(action)
 
         if done and self.is_recording:
+            print(f'Record wrapper finished at {self.frames_written} frames.')
             self.writer.close()
             self.writer = None
             self.frames_written = 0
@@ -351,7 +354,9 @@ class RecorderWrapper(gym.Wrapper):
             self.writer = imageio.get_writer(self.save_dir + f'/{self.label}_{self.recordings}.mp4', fps=self.fps, macro_block_size=1)
             self.last_recording = time.time()
 
-        if self.writer is not None and self.frames_written < (60 * 60 * 16 if self.label == 'preproc' else 60 * 60 * 9):
+        if self.writer is not None and (
+                self.frames_written < (60 * 60 * 16 if self.label == 'preproc' else 60 * 60 * 9) or
+                self.record_to_end):
             if self.scale_factor is None:
                 self.scale_factor = EMULATOR_REC_SCALE if self.label == 'emulator' else PREPROC_REC_SCALE
                 if observation.shape[0] <= 64 and observation.shape[1] <= 64:
@@ -458,14 +463,16 @@ class DecorrEnvWrapper(gym.Wrapper):
         return state
 
 
-def create_atari_env(config, instance_seed, instance, decorr_steps):
+def create_atari_env(config, instance_seed, instance, decorr_steps, preproc_recording=True, record_to_end=False):
     """ Creates a gym atari environment and wraps it for DeepMind-style Atari """
 
     env = gym.make(config.env_name[4:] + 'NoFrameskip-v4')
-    env = TimeLimit(env, config.time_limit)
+    print(f'create_atari_env {env.spec.max_episode_steps}')
+    if not record_to_end:
+        env = TimeLimit(env, config.time_limit)
 
     if instance == 0:
-        env = RecorderWrapper(env, fps=BASE_FPS_ATARI, save_dir=config.save_dir, label='emulator', record_every=config.record_every)
+        env = RecorderWrapper(env, fps=BASE_FPS_ATARI, save_dir=config.save_dir, label='emulator', record_every=config.record_every, record_to_end=record_to_end)
 
     env = NoopResetEnv(env, instance_seed, noop_max=30)
     env = MaxAndSkipEnv(env, skip=config.frame_skip)
@@ -483,7 +490,7 @@ def create_atari_env(config, instance_seed, instance, decorr_steps):
 
     env = WarpFrame(env, width=config.resolution[1], height=config.resolution[0], grayscale=config.grayscale)
 
-    if instance == 0:
+    if preproc_recording and instance == 0:
         env = RecorderWrapper(env, fps=BASE_FPS_ATARI // config.frame_skip, save_dir=config.save_dir, label='preproc', record_every=config.record_every)
 
     if decorr_steps is not None:
@@ -548,12 +555,12 @@ def create_procgen_env(config, instance_seed, instance):
         env = RecorderWrapper(env, fps=BASE_FPS_PROCGEN // config.frame_skip, save_dir=config.save_dir, label='preproc', record_every=config.record_every)
     return env
 
-def create_env_instance(args, instance, decorr_steps):
+def create_env_instance(args, instance, decorr_steps, preproc_recording=True, record_to_end=False):
     instance_seed = args.seed+instance
     decorr_steps = None if decorr_steps is None else decorr_steps*instance
 
     if args.env_name.startswith('retro:'): env = create_retro_env(args, instance_seed, instance, decorr_steps)
-    elif args.env_name.startswith('gym:'): env = create_atari_env(args, instance_seed, instance, decorr_steps)
+    elif args.env_name.startswith('gym:'): env = create_atari_env(args, instance_seed, instance, decorr_steps, preproc_recording=preproc_recording, record_to_end=record_to_end)
     elif args.env_name.startswith('procgen:'): env = create_procgen_env(args, instance_seed, instance)
     else: raise RuntimeError('Environment id needs to start with "gym:", "retro:" or "procgen:".')
     if not args.env_name.startswith('procgen:'):
@@ -562,8 +569,8 @@ def create_env_instance(args, instance, decorr_steps):
         env.observation_space.seed(instance_seed)
     return env
 
-def create_env(args, decorr_steps=None):
-    env_fns = [partial(create_env_instance, args=args, instance=i, decorr_steps=decorr_steps) for i in range(args.parallel_envs)]
+def create_env(args, decorr_steps=None, preproc_recording=True, record_to_end=False):
+    env_fns = [partial(create_env_instance, args=args, instance=i, decorr_steps=decorr_steps, preproc_recording=preproc_recording, record_to_end=record_to_end) for i in range(args.parallel_envs)]
     vec_env = partial(SubprocVecEnvNoFlatten) if args.subproc_vecenv else DummyVecEnvNoFlatten
     env = vec_env(env_fns)
     env = LazyVecFrameStack(env, args.frame_stack, args.parallel_envs, clone_arrays=not args.subproc_vecenv, lz4_compress=False)

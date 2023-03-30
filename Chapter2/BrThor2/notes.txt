@@ -7,7 +7,7 @@ Step 1958000Avg Rew 9.76Avg Ep Len 378.42Episodes 24061
 
 [X] 2) Swap around best / current score
 
-[/] 3) Add a best score stat to tensorboard
+[X] 3) Add a best score stat to tensorboard
 
 [X] 4) Make it easier to swap games.
 

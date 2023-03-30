@@ -78,6 +78,7 @@ if __name__ == '__main__':
     # and args.train_count training steps on batches of size args.batch_size
     t = trange(0, args.training_frames + 1, args.parallel_envs)
     game_frame = 0
+    total_reward = 0
     while True:
         iter_start = time.time()
         eps = eps_schedule(game_frame)
@@ -108,6 +109,7 @@ if __name__ == '__main__':
 
         # block until environments are ready, then collect transitions and add them to the replay buffer
         next_states, rewards, dones, infos = env.step_wait()
+        total_reward += rewards[0]
         # for state, action, reward, done, j in zip(states, actions, rewards, dones, range(args.parallel_envs)):
         #     reward_density = 0.999 * reward_density + (1 - 0.999) * (reward != 0)
         #     rainbow.buffer.put(state, action, reward, done, j=j)
@@ -115,8 +117,12 @@ if __name__ == '__main__':
         game_frame += 1
 
         # print(f"infos: {infos} dones: {dones}")
-        if game_frame > args.training_frames + 1 and dones[0] and infos[0]['ale.lives'] == 0:
-            break
+        if dones[0]:
+            print(f"Total Reward: {total_reward}")
+            total_reward = 0
+            if game_frame > args.training_frames + 1:
+                break
+
 
         # if any of the envs finished an episode, log stats to wandb
         # for info, j in zip(infos, range(args.parallel_envs)):

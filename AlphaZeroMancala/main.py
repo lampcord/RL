@@ -4,6 +4,7 @@ import gym
 import pygame
 import torch
 import TicTacToeEnv
+import numpy as np
 
 def check_for_cuda():
     if torch.cuda.is_available():
@@ -17,15 +18,25 @@ def check_for_cuda():
     return device
 
 env = TicTacToeEnv.TicTacToeEnv()
+env.reset()
 env.render()
 
-running = True
-while running:
+done = False
+while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            done = True
+
+    action_values = np.random.rand((9))
+    valid_actions = env.valid_actions()
+    action_values[valid_actions == 0] = 0
+    print(action_values)
+    action = np.argmax(action_values)
+    print(action)
+    obs, rew, done, _ = env.step(action)
 
     env.render()
+    time.sleep(1)
 
 env.close()
 

@@ -3,6 +3,7 @@ import numpy as np
 
 grey = (128, 128, 128)
 line_color = (255, 255, 255)
+win_line_color = (0, 0, 0)
 text_color = (160, 160, 160)
 blue_color = (0, 0, 255)
 red_color = (255, 0, 0)
@@ -11,6 +12,16 @@ RED = 1
 BLUE = 2
 EMPTY = 0
 
+win_test = np.array([
+    [1, 1, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 1, 1, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0],
+    [0, 1, 0, 0, 1, 0, 0, 1, 0],
+    [0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0]
+    ])
 class TicTacToeEnv:
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
@@ -61,6 +72,7 @@ class TicTacToeEnv:
         pygame.draw.line(self.window, line_color, (0, 2 * self.window_size / 3), (self.window_size, 2 * self.window_size / 3), 5)
 
         font_size = 36
+        big_font = pygame.font.Font(None, font_size * 3)  # Use the default font
         font = pygame.font.Font(None, font_size)  # Use the default font
         pos = [self.window_size / 6, self.window_size / 6]
         ndx = 0
@@ -68,9 +80,9 @@ class TicTacToeEnv:
             for col in range(3):
                 value = self.observation_space[ndx]
                 if value == RED:
-                    text_surface = font.render(str(ndx), True, red_color)
+                    text_surface = big_font.render("X", True, red_color)
                 elif value == BLUE:
-                    text_surface = font.render(str(ndx), True, blue_color)
+                    text_surface = big_font.render("O", True, blue_color)
                 else:
                     text_surface = font.render(str(ndx), True, text_color)
 
@@ -82,6 +94,27 @@ class TicTacToeEnv:
             pos[0] = self.window_size / 6
             pos[1] += self.window_size / 3
 
+        reward, t = self.check_for_win()
+        if reward != 0:
+            if t == 0:
+                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
+            elif t == 1:
+                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
+            elif t == 2:
+                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
+            elif t == 3:
+                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
+            elif t == 4:
+                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
+            elif t == 5:
+                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
+            elif t == 6:
+                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
+            elif t == 7:
+                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
+
+            pygame.draw.line(self.window, win_line_color, line_coords[0], line_coords[1], 5)
+
         pygame.display.flip()
 
     def step(self, action):
@@ -90,9 +123,28 @@ class TicTacToeEnv:
             self.observation_space[action] = self.turn
             self.turn = RED if self.turn == BLUE else BLUE
 
-        return self.observation_space, 0, np.sum(self.valid_actions()) == 0, {}
+        reward, _ = self.check_for_win()
+        done = reward != 0 or np.sum(self.valid_actions()) == 0
+        return self.observation_space, reward, done, {}
 
     def close(self):
         if self.window is not None:
             pygame.quit()
+            self.window = None
 
+    def check_for_win(self):
+        reward = 0
+        for t in range(8):
+            testarray = self.observation_space[win_test[t] == 1]
+            redcount = np.count_nonzero(testarray == RED)
+            if np.count_nonzero(self.observation_space[win_test[t] == 1] == RED) == 3:
+                reward = 1
+                break
+            elif np.count_nonzero(self.observation_space[win_test[t] == 1] == BLUE) == 3:
+                reward = -1
+                break
+        return reward, t
+
+    def test_set(self, t):
+        self.observation_space[:] = EMPTY
+        self.observation_space[win_test[t] == 1] = RED

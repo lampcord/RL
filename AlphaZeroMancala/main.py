@@ -5,6 +5,7 @@ import pygame
 import torch
 import TicTacToeEnv
 import numpy as np
+import agent
 
 def check_for_cuda():
     if torch.cuda.is_available():
@@ -21,28 +22,23 @@ env = TicTacToeEnv.TicTacToeEnv()
 env.reset()
 env.render()
 
-for t in range(8):
-    env.test_set(t)
-    env.render()
-    time.sleep(1)
+env.run_win_test()
+exit()
+TicTacToeAgent = agent.Agent (env)
 
 for x in range (10):
     done = False
-    env.reset()
+    TicTacToeAgent.reset()
     while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
 
-        action_values = np.random.rand((9))
-        valid_actions = env.valid_actions()
-        action_values[valid_actions == 0] = 0
-        # print(action_values)
-        action = np.argmax(action_values)
-        # print(action)
-        obs, rew, done, _ = env.step(action)
+        # obs, rew, done, inf = TicTacToeAgent.move_random()
+        obs, rew, done, inf = TicTacToeAgent.move_mcts()
 
-        env.render()
+        env.render_node()
+        # env.dump()
         time.sleep(.5)
 
         if done:

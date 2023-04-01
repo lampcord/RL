@@ -1,5 +1,7 @@
+import time
 import pygame
 import numpy as np
+import copy
 
 grey = (128, 128, 128)
 line_color = (255, 255, 255)
@@ -12,6 +14,7 @@ RED = 1
 BLUE = 2
 EMPTY = 0
 
+dumpchar = {EMPTY: '.', BLUE: 'O', RED: 'X'}
 win_test = np.array([
     [1, 1, 1, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 1, 1, 1, 0, 0, 0],
@@ -25,8 +28,9 @@ win_test = np.array([
 class TicTacToeEnv:
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode=None, reward_from_current_player=True):
         self.turn = RED
+        self.reward_from_current_player = reward_from_current_player
         self.size = 3  # The size of the square grid
         self.window_size = 300  # The size of the PyGame window
 
@@ -60,60 +64,85 @@ class TicTacToeEnv:
                 self.action_space[ndx] = 0
         return self.action_space
 
+    def get_legal_moves(self):
+        reward, t = self.check_for_win()
+        if reward != 0: return []
+        legal_moves = [x for x in range(9) if self.observation_space[x] == EMPTY]
+        return legal_moves
+
+    def dump(self):
+        ndx = 0
+        for y in range(3):
+            for x in range(3):
+                value = self.observation_space[ndx]
+                print(dumpchar[value], end='')
+                ndx += 1
+            print()
+
+        reward, t = self.check_for_win()
+        print(f'T:{dumpchar[self.turn]} R:{reward}')
+
+    def render_board(self, pos, screen, size, font_size=36, show_available_actions=True, line_thickness=5):
+        pygame.draw.line(screen, line_color, (size / 3, 0), (size / 3, size), line_thickness)
+        pygame.draw.line(screen, line_color, (2 * size / 3, 0), (2 * size / 3, size), line_thickness)
+        pygame.draw.line(screen, line_color, (0, size / 3), (size, size / 3), line_thickness)
+        pygame.draw.line(screen, line_color, (0, 2 * size / 3), (size, 2 * size / 3), line_thickness)
+
+        big_font = pygame.font.Font(None, font_size * 3)  # Use the default font
+        font = pygame.font.Font(None, font_size)  # Use the default font
+        pos = [size / 6, size / 6]
+        ndx = 0
+        for row in range(3):
+            for col in range(3):
+                value = self.observation_space[ndx]
+                paint_label = True
+                if value == RED:
+                    text_surface = big_font.render("X", True, red_color)
+                elif value == BLUE:
+                    text_surface = big_font.render("O", True, blue_color)
+                elif show_available_actions:
+                    text_surface = font.render(str(ndx), True, text_color)
+                else:
+                    paint_label = False
+
+                if paint_label:
+                    text_rect = text_surface.get_rect()
+                    text_rect.center = pos
+                    screen.blit(text_surface, text_rect)
+                pos[0] += size / 3
+                ndx += 1
+            pos[0] = size / 6
+            pos[1] += size / 3
+
+        reward, t = self.check_for_win()
+        if reward != 0:
+            if t == 0:
+                line_coords = ((0, size / 6), (size, size / 6))
+            elif t == 1:
+                line_coords = ((0, size / 2), (size, size / 2))
+            elif t == 2:
+                line_coords = ((0, size * 5 / 6), (size, size * 5 / 6))
+            elif t == 3:
+                line_coords = ((size / 6, 0), (size / 6, size))
+            elif t == 4:
+                line_coords = ((size / 2, 0), (size / 2, size))
+            elif t == 5:
+                line_coords = ((size * 5 / 6, 0), (size * 5 / 6, size))
+            elif t == 6:
+                line_coords = ((0, 0), (size, size))
+            elif t == 7:
+                line_coords = ((size, 0), (0, size))
+
+            pygame.draw.line(screen, win_line_color, line_coords[0], line_coords[1], line_thickness)
+
     def render(self):
         if self.window is None:
             pygame.init()
             self.window = pygame.display.set_mode((self.window_size, self.window_size))
         self.window.fill(grey)
 
-        pygame.draw.line(self.window, line_color, (self.window_size / 3, 0), (self.window_size / 3, self.window_size), 5)
-        pygame.draw.line(self.window, line_color, (2 * self.window_size / 3, 0), (2 * self.window_size / 3, self.window_size), 5)
-        pygame.draw.line(self.window, line_color, (0, self.window_size / 3), (self.window_size, self.window_size / 3), 5)
-        pygame.draw.line(self.window, line_color, (0, 2 * self.window_size / 3), (self.window_size, 2 * self.window_size / 3), 5)
-
-        font_size = 36
-        big_font = pygame.font.Font(None, font_size * 3)  # Use the default font
-        font = pygame.font.Font(None, font_size)  # Use the default font
-        pos = [self.window_size / 6, self.window_size / 6]
-        ndx = 0
-        for row in range(3):
-            for col in range(3):
-                value = self.observation_space[ndx]
-                if value == RED:
-                    text_surface = big_font.render("X", True, red_color)
-                elif value == BLUE:
-                    text_surface = big_font.render("O", True, blue_color)
-                else:
-                    text_surface = font.render(str(ndx), True, text_color)
-
-                text_rect = text_surface.get_rect()
-                text_rect.center = pos
-                self.window.blit(text_surface, text_rect)
-                pos[0] += self.window_size / 3
-                ndx += 1
-            pos[0] = self.window_size / 6
-            pos[1] += self.window_size / 3
-
-        reward, t = self.check_for_win()
-        if reward != 0:
-            if t == 0:
-                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
-            elif t == 1:
-                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
-            elif t == 2:
-                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
-            elif t == 3:
-                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
-            elif t == 4:
-                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
-            elif t == 5:
-                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
-            elif t == 6:
-                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
-            elif t == 7:
-                line_coords = ((0, self.window_size / 6), (self.window_size, self.window_size / 6))
-
-            pygame.draw.line(self.window, win_line_color, line_coords[0], line_coords[1], 5)
+        # self.render_board((0, 0), self.window, self.window_size, 36, True)
+        self.render_board((0, 0), self.window, 60, 8, False, 1)
 
         pygame.display.flip()
 
@@ -121,9 +150,11 @@ class TicTacToeEnv:
         valid_actions = self.valid_actions()
         if valid_actions[action] == 1:
             self.observation_space[action] = self.turn
-            self.turn = RED if self.turn == BLUE else BLUE
 
         reward, _ = self.check_for_win()
+        if valid_actions[action] == 1:
+            self.turn = RED if self.turn == BLUE else BLUE
+
         done = reward != 0 or np.sum(self.valid_actions()) == 0
         return self.observation_space, reward, done, {}
 
@@ -134,17 +165,44 @@ class TicTacToeEnv:
 
     def check_for_win(self):
         reward = 0
+        winner = EMPTY
         for t in range(8):
             testarray = self.observation_space[win_test[t] == 1]
             redcount = np.count_nonzero(testarray == RED)
             if np.count_nonzero(self.observation_space[win_test[t] == 1] == RED) == 3:
-                reward = 1
+                winner = RED
                 break
             elif np.count_nonzero(self.observation_space[win_test[t] == 1] == BLUE) == 3:
-                reward = -1
+                winner = BLUE
                 break
+
+        if winner != EMPTY:
+            if self.reward_from_current_player:
+                if self.turn == winner:
+                    reward = 1
+                else:
+                    reward = -1
+            else:
+                if winner == RED:
+                    reward = 1
+                else:
+                    reward = -1
         return reward, t
 
     def test_set(self, t):
         self.observation_space[:] = EMPTY
         self.observation_space[win_test[t] == 1] = RED
+
+    def run_win_test(self):
+        for t in range(8):
+            self.test_set(t)
+            self.render()
+            time.sleep(1)
+
+    def clone(self):
+        new_env = TicTacToeEnv()
+        new_env.reset()
+        new_env.observation_space = copy.deepcopy(self.observation_space)
+        new_env.turn = copy.deepcopy(self.turn)
+        return new_env
+

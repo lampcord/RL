@@ -20,29 +20,36 @@ def check_for_cuda():
 
 env = TicTacToeEnv.TicTacToeEnv()
 env.reset()
-env.render()
+# env.render()
 
-env.run_win_test()
-exit()
+# env.run_win_test()
+# exit()
 TicTacToeAgent = agent.Agent (env)
 
 for x in range (10):
     done = False
     TicTacToeAgent.reset()
+    mcts_turn = x % 2 + 1
+    print(f"MCTS is player {mcts_turn}")
+    turn_was_mcts = False
     while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
 
-        # obs, rew, done, inf = TicTacToeAgent.move_random()
-        obs, rew, done, inf = TicTacToeAgent.move_mcts()
+        if mcts_turn == TicTacToeAgent.env.turn:
+            turn_was_mcts = True
+            obs, rew, done, inf = TicTacToeAgent.move_mcts()
+        else:
+            turn_was_mcts = False
+            obs, rew, done, inf = TicTacToeAgent.move_random()
 
-        env.render_node()
+        env.render()
         # env.dump()
         time.sleep(.5)
 
         if done:
-            print(f"Reward: {rew}")
+            print(f"Reward: {rew} MCTS won: {turn_was_mcts}")
             time.sleep(3)
 
 

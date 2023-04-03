@@ -1,78 +1,52 @@
 import numpy as np
+from collections import defaultdict
+import node_painter
 
-class Node:
-    def __init__(self, parent=None, action=None, env=None):
+
+class MonteCarloTreeSearchNode:
+    def __init__(self, env, parent=None, parent_action=None):
+        self.env = env
         self.parent = parent
-        self.action = action
-        self.env = env.clone() if env else None
+        self.parent_action = parent_action
         self.children = []
-        self.num_visits = 0
-        self.total_reward = 0
-        self.is_expanded = False
+        self._number_of_visits = 0
+        self._results = defaultdict(int)
+        self._results[1] = 0
+        self._results[-1] = 0
+        self._untried_actions = None
+        self._untried_actions = self.untried_actions()
+        return
+
+    def untried_actions(self):
+        self._untried_actions = self.env.get_legal_actions()
+        return self._untried_actions
+
+    def q(self):
+        wins = self._results[1]
+        loses = self._results[-1]
+        return wins - loses
 
     def expand(self):
-        legal_moves = self.env.get_legal_moves()
-        self.children = [Node(parent=self, action=move, env=self.env) for move in legal_moves]
-        for child in self.children:
-            _, reward, done, _ = child.env.step(child.action)
-            self.backpropagate(reward)
+        action = self._untried_actions.pop()
+        new_env = self.env.clone()
+        new_env.step(action)
+        child_node = MonteCarloTreeSearchNode(
+            new_env, parent=self, parent_action=action)
 
-        self.is_expanded = True
+        self.children.append(child_node)
+        return child_node
 
-    def uct(self, c=1):
-        if self.num_visits == 0:
-            return np.inf
-        return (self.total_reward / self.num_visits) + c * np.sqrt(np.log(self.parent.num_visits) / self.num_visits)
-
-    def best_child(self, c=1):
-        return max(self.children, key=lambda child: child.uct(c))
+    def is_terminal_node(self):
+        return self.env.is_game_over()
 
     def rollout(self):
-        env_copy = self.env.clone()
-        done = False
-        reward = 0
-        mult = 1
-        while not done:
-            legal_moves = env_copy.get_legal_moves()
-            if len(legal_moves) == 0:
-                reward, t = env_copy.check_for_win()
-                break
-            random_move = np.random.choice(legal_moves)
-            if self.env.turn == env_copy.turn:
-                mult = 1
-            else:
-                mult = -1
-            _, reward, done, _ = env_copy.step(random_move)
-            reward = reward * mult
-        return reward
+        current_rollout_env = self.env.clone()
 
-    def backpropagate(self, reward):
-        self.num_visits += 1
-        self.total_reward += reward
-        if self.parent:
-            if self.parent.env.turn != self.env.turn:
-                reward = -1 * reward
-            self.parent.backpropagate(reward)
+        while not current_rollout_env.is_game_over():
+            possible_moves = current_rollout_env.get_legal_actions()
 
-    def dump(self, level=1):
-        for x in range(level):
-            print(' ', end='')
-        print(self.action, self.total_reward)
-        for c in self.children:
-            c.dump(level + 1)
+            action = self.rollout_policy(possible_moves)
+            current_rollout_env.step(action)
+        return current_rollout_env.game_result()
 
-def mcts(env, num_simulations=1000, c=0.1):
-    root = Node(env=env)
 
-    for _ in range(num_simulations):
-        node = root
-        while node.is_expanded and node.children:
-            node = node.best_child(c)
-        if not node.is_expanded:
-            node.expand()
-        rollout_reward = node.rollout()
-        node.backpropagate(rollout_reward)
-
-    best_move = root.best_child(c=0).action
-    # root.dump()
-    return best_move

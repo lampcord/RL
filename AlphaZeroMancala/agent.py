@@ -1,6 +1,6 @@
 import numpy as np
 import TicTacToeEnv
-from MCTS import mcts
+from MCTS_HOLD import mcts
 
 
 class Agent:
@@ -25,6 +25,7 @@ class Agent:
 
     def reset(self):
         self.env.reset()
-        self.env.observation_space = np.array([1,2,2,0,1,0,0,0,0])
-        self.env.turn = 1
+        # self.env.observation_space = np.array([1,2,2,0,1,0,0,0,0])
+        # self.env.observation_space = np.array([1,1,0,2,0,0,0,0,0])
+        # self.env.turn = 2
 

@@ -43,6 +43,11 @@ class NodePainter:
         pygame.display.set_caption("Tree Diagram")
         self.font = pygame.font.Font(None, 24)
 
+    def close(self):
+        if self.screen is not None:
+            pygame.quit()
+            self.screen = None
+
     def paint(self, label='', selected_node=None):
         running = True
         click_coordinates = None

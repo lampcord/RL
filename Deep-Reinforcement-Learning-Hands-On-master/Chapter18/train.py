@@ -49,6 +49,8 @@ def evaluate(net1, net2, rounds, device="cpu"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--name", required=True, help="Name of the run")
+    parser.add_argument("-l", "--load", default=None, help="Name starting model")
+    parser.add_argument("-b", "--best", default=0, help="Index of next model")
     parser.add_argument("--cuda", default=False, action="store_true", help="Enable CUDA")
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
@@ -58,6 +60,8 @@ if __name__ == "__main__":
     writer = SummaryWriter(comment="-" + args.name)
 
     net = model.Net(input_shape=model.OBS_SHAPE, actions_n=game.GAME_COLS).to(device)
+    if args.load is not None:
+        net.load_state_dict(torch.load(args.load, map_location=lambda storage, loc: storage))
     best_net = ptan.agent.TargetNet(net)
     print(net)
 
@@ -66,7 +70,7 @@ if __name__ == "__main__":
     replay_buffer = collections.deque(maxlen=REPLAY_BUFFER)
     mcts_store = mcts.MCTS()
     step_idx = 0
-    best_idx = 0
+    best_idx = int(args.best)
 
     with ptan.common.utils.TBMeanTracker(writer, batch_size=10) as tb_tracker:
         while True:

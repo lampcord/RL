@@ -23,7 +23,7 @@ Keep your token secure and store it safely, it can be used by anyone to control 
 
 For a description of the Bot API, see this page: https://core.telegram.org/bots/api
 '''
-MCTS_SEARCHES = 20
+MCTS_SEARCHES = 1000
 MCTS_BATCH_SIZE = 4
 
 
@@ -67,6 +67,8 @@ class Session:
     def move_bot(self):
         self.mcts_store.search_batch(MCTS_SEARCHES, MCTS_BATCH_SIZE, self.state, self.BOT_PLAYER, self.model)
         probs, values = self.mcts_store.get_policy_value(self.state, tau=0)
+        print(f"P:{probs}")
+        print(f"V:{values}")
         action = np.random.choice(game.GAME_COLS, p=probs)
         self.value = values[action]
         self.moves.append(action)
@@ -261,7 +263,7 @@ class Session:
 #         bot.send_message(chat_id=update.message.chat_id, text="Models reloaded, %d files have found" % len(self.models))
 
 human_is_current = True
-session = Session('saves/Test1CPU/best_004_02000.dat', human_is_current, 'Mike')
+session = Session('saves/Test1CPU/best_023_01100.dat', human_is_current, 'Mike')
 if __name__ == "__main__":
     game_over = False
     while not game_over:
@@ -269,6 +271,8 @@ if __name__ == "__main__":
         print("===========================\n")
         if human_is_current:
             move = input('Enter move:')
+            if move == 'q':
+                break
             won = session.move_player(int(move))
         else:
             won = session.move_bot()

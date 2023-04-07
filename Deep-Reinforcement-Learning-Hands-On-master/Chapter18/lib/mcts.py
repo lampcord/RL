@@ -13,7 +13,7 @@ class MCTS:
     """
     Class keeps statistics for every state encountered during the search
     """
-    def __init__(self, c_puct=1.0):
+    def __init__(self, c_puct=1.0, dirichlet_pct=0.25):
         self.c_puct = c_puct
         # count of visits, state_int -> [N(s, a)]
         self.visit_count = {}
@@ -23,6 +23,7 @@ class MCTS:
         self.value_avg = {}
         # prior probability of actions, state_int -> [P(s,a)]
         self.probs = {}
+        self.dirichlet_pct = dirichlet_pct
 
     def clear(self):
         self.visit_count.clear()
@@ -62,7 +63,7 @@ class MCTS:
             # choose action to take, in the root node add the Dirichlet noise to the probs
             if cur_state == state_int:
                 noises = np.random.dirichlet([0.03] * game.GAME_COLS)
-                probs = [0.75 * prob + 0.25 * noise for prob, noise in zip(probs, noises)]
+                probs = [(1.0 - self.dirichlet_pct) * prob + self.dirichlet_pct * noise for prob, noise in zip(probs, noises)]
             score = [value + self.c_puct * prob * total_sqrt / (1 + count)
                      for value, prob, count in zip(values_avg, probs, counts)]
             invalid_actions = set(range(game.GAME_COLS)) - set(game.possible_moves(cur_state))

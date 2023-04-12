@@ -118,6 +118,9 @@ def decode_binary(state_int):
     return res
 
 
+def get_oponent(player):
+    return 1 - player
+
 def possible_moves(state_int):
     """
     This function could be calculated directly from bits, but I'm too lazy

@@ -14,39 +14,48 @@ CELL_SIZE = min((WINDOW_WIDTH - 100) // BOARD_COLS, (WINDOW_HEIGHT - 100) // BOA
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-BLUE = (0, 0, 255)
+BLUE = (0, 192, 0)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
-GREY = (128, 128, 128)
+GREY = (190, 190, 190)
+DARK_GREY = (96, 96, 96)
 
 click_positions = []
 cell_colors = [RED, BLUE]
 font = pygame.font.Font(None, 24)
 
 
-def draw_board(screen, pos, turn, possible_moves, message):
-    screen.fill(GREY)
-    text = font.render(message, True, BLACK)
-    text_rect = text.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT - 20))
-    screen.blit(text, text_rect)
-    xoffset = (WINDOW_WIDTH - (CELL_SIZE * BOARD_COLS)) / 2
-    yoffset = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_ROWS)) / 2
+def draw_small_board(screen, offset, pos, turn):
+    draw_node(screen, 9, offset, pos, turn, [], cell_padding=0)
+
+
+def draw_node(screen, cell_size, offset, pos, turn, possible_moves, cell_padding=5):
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
-            xpos = col * CELL_SIZE + xoffset
-            ypos = row * CELL_SIZE + yoffset
+            xpos = col * cell_size + offset[0]
+            ypos = row * cell_size + offset[1]
             value = get_value_at(row, col, pos)
             cell_color = WHITE
             if value is not None:
                 cell_color = cell_colors[value]
-            pygame.draw.rect(screen, BLACK, (xpos, ypos, CELL_SIZE, CELL_SIZE), 0)
-            pygame.draw.circle(screen, cell_color, (xpos + CELL_SIZE // 2, ypos + CELL_SIZE // 2), CELL_SIZE // 2 - 5)
+            pygame.draw.rect(screen, DARK_GREY, (xpos, ypos, cell_size, cell_size), 0)
+            pygame.draw.circle(screen, cell_color, (xpos + cell_size // 2, ypos + cell_size // 2), cell_size // 2 - cell_padding)
             if row == 0:
                 if len(click_positions) <= col:
-                    click_positions.append((xpos + CELL_SIZE // 2, ypos + CELL_SIZE // 2 - CELL_SIZE))
+                    click_positions.append((xpos + cell_size // 2, ypos + cell_size // 2 - cell_size))
                 if col not in possible_moves:
                     continue
-                pygame.draw.circle(screen, cell_colors[turn], click_positions[col], CELL_SIZE // 2 - 5)
+                pygame.draw.circle(screen, cell_colors[turn], click_positions[col], cell_size // 2 - cell_padding)
+
+def draw_board(screen, pos, turn, possible_moves, message):
+    screen.fill(GREY)
+    xoffset = (WINDOW_WIDTH - (CELL_SIZE * BOARD_COLS)) / 2
+    yoffset = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_ROWS)) / 2
+    text = font.render(message, True, BLACK)
+    text_rect = text.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT - 20))
+    screen.blit(text, text_rect)
+    draw_node(screen, CELL_SIZE, (xoffset, yoffset), pos, turn, possible_moves)
+    draw_small_board(screen, (50, 70), pos, turn)
 
 def get_move(screen, possible_moves):
     best_pos = None

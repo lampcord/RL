@@ -5,208 +5,7 @@ import numpy as np
 from lib import game, model, mcts, board, mmab
 import torch
 import pygame
-'''
-'best_001_00600.dat',
-'best_002_01000.dat',
-'best_003_01200.dat',
-'best_004_02000.dat',
-'best_006_01000.dat',
-'best_007_01300.dat',
-'best_008_02100.dat'
-{'best_001_00600.dat': 42, 'best_002_01000.dat': 39, 'draw': 33, 'best_003_01200.dat': 47, 'best_004_02000.dat': 78, 'best_006_01000.dat': 58, 'best_007_01300.dat': 57, 'best_008_02100.dat': 66}
-('best_004_02000.dat', 78)
-('best_008_02100.dat', 66)
-('best_006_01000.dat', 58)
-('best_007_01300.dat', 57)
-('best_003_01200.dat', 47)
-('best_001_00600.dat', 42)
-('best_002_01000.dat', 39)
-('draw', 33)
 
-Keeping top 2 from last run
-'best_004_02000.dat',
-'best_008_02100.dat'
-'best_009_02300.dat',
-'best_010_02400.dat',
-'best_011_02500.dat',
-'best_012_02700.dat',
-'best_013_03200.dat',
-{'best_004_02000.dat': 72, 'best_008_02100.dat': 50, 'best_009_02300.dat': 75, 'best_010_02400.dat': 57, 'best_011_02500.dat': 53, 'best_012_02700.dat': 57, 'best_013_03200.dat': 50, 'draw': 6}
-('best_009_02300.dat', 75)
-('best_004_02000.dat', 72)
-('best_010_02400.dat', 57)
-('best_012_02700.dat', 57)
-('best_011_02500.dat', 53)
-('best_008_02100.dat', 50)
-('best_013_03200.dat', 50)
-('draw', 6)
-
-Keeping top 2 from last run
-'best_004_02000.dat',
-'best_009_02300.dat',
-'best_014_03300.dat',
-'best_015_03400.dat',
-'best_016_03500.dat',
-'best_017_00100.dat',
-'best_018_00200.dat',
-{'best_004_02000.dat': 48, 'best_009_02300.dat': 64, 'best_014_03300.dat': 53, 'best_015_03400.dat': 45, 'best_016_03500.dat': 57, 'draw': 22, 'best_017_00100.dat': 63, 'best_018_00200.dat': 68}
-('best_018_00200.dat', 68)
-('best_009_02300.dat', 64)
-('best_017_00100.dat', 63)
-('best_016_03500.dat', 57)
-('best_014_03300.dat', 53)
-('best_004_02000.dat', 48)
-('best_015_03400.dat', 45)
-('draw', 22)
-
-Keeping top 3 from last run
-'best_009_02300.dat',
-'best_017_00100.dat',
-'best_018_00200.dat',
-'best_019_00300.dat',
-'best_020_00500.dat',
-'best_021_00700.dat',
-'best_022_00900.dat',
-{'best_017_00100.dat': 30, 'draw': 28, 'best_009_02300.dat': 49, 'best_018_00200.dat': 58, 'best_019_00300.dat': 56, 'best_020_00500.dat': 66, 'best_021_00700.dat': 50, 'best_022_00900.dat': 83}
-('best_022_00900.dat', 83)
-('best_020_00500.dat', 66)
-('best_018_00200.dat', 58)
-('best_019_00300.dat', 56)
-('best_021_00700.dat', 50)
-('best_009_02300.dat', 49)
-('best_017_00100.dat', 30)
-('draw', 28)
-
-Keeping top 2 from last run
-'best_020_00500.dat',
-'best_022_00900.dat',
-'best_023_01100.dat',
-'best_024_00100.dat',
-'best_025_00200.dat',
-'best_025_01100.dat',
-'best_026_00300.dat',
-{'best_020_00500.dat': 32, 'best_022_00900.dat': 56, 'draw': 36, 'best_023_01100.dat': 47, 'best_024_00100.dat': 76, 'best_025_00200.dat': 74, 'best_025_01100.dat': 29, 'best_026_00300.dat': 70}
-('best_024_00100.dat', 76)
-('best_025_00200.dat', 74)
-('best_026_00300.dat', 70)
-('best_022_00900.dat', 56)
-('best_023_01100.dat', 47)
-('draw', 36)
-('best_020_00500.dat', 32)
-('best_025_01100.dat', 29)
-
-Keeping top 3 from last run
-'best_024_00100.dat',
-'best_025_00200.dat',
-'best_026_00300.dat',
-'best_026_01400.dat',
-'best_027_00600.dat',
-'best_028_00700.dat',
-'best_029_00800.dat',
-{'best_024_00100.dat': 37, 'best_025_00200.dat': 44, 'best_026_00300.dat': 40, 'best_026_01400.dat': 58, 'draw': 54, 'best_027_00600.dat': 67, 'best_028_00700.dat': 67, 'best_029_00800.dat': 53}
-('best_027_00600.dat', 67)
-('best_028_00700.dat', 67)
-('best_026_01400.dat', 58)
-('draw', 54)
-('best_029_00800.dat', 53)
-('best_025_00200.dat', 44)
-('best_026_00300.dat', 40)
-('best_024_00100.dat', 37)
-
-Keeping top 2 from last run
-'best_027_00600.dat',
-'best_028_00700.dat',
-'best_030_00900.dat',
-'best_031_01000.dat',
-'best_032_01200.dat',
-'best_033_01400.dat',
-'best_034_01600.dat',
-{'best_028_00700.dat': 45, 'draw': 88, 'best_027_00600.dat': 41, 'best_030_00900.dat': 48, 'best_031_01000.dat': 19, 'best_032_01200.dat': 62, 'best_033_01400.dat': 56, 'best_034_01600.dat': 61}
-('draw', 88)
-('best_032_01200.dat', 62)
-('best_034_01600.dat', 61)
-('best_033_01400.dat', 56)
-('best_030_00900.dat', 48)
-('best_028_00700.dat', 45)
-('best_027_00600.dat', 41)
-('best_031_01000.dat', 19)
-
-Keeping top 2 from last run
-'best_032_01200.dat',
-'best_034_01600.dat',
-'best_035_01700.dat',
-'best_036_01900.dat',
-'best_037_02000.dat',
-'best_038_02100.dat',
-'best_039_02400.dat',
-{'best_032_01200.dat': 45, 'best_034_01600.dat': 61, 'draw': 27, 'best_035_01700.dat': 57, 'best_036_01900.dat': 58, 'best_037_02000.dat': 58, 'best_038_02100.dat': 54, 'best_039_02400.dat': 60}
-('best_034_01600.dat', 61)
-('best_039_02400.dat', 60)
-('best_036_01900.dat', 58)
-('best_037_02000.dat', 58)
-('best_035_01700.dat', 57)
-('best_038_02100.dat', 54)
-('best_032_01200.dat', 45)
-
-Keeping top 2 from last run
-'best_034_01600.dat',
-'best_039_02400.dat',
-'best_040_03200.dat',
-'best_041_03400.dat',
-'best_042_04200.dat',
-'best_043_04500.dat',
-'best_044_04600.dat',
-'best_045_04700.dat',
-'best_046_04800.dat',
-{'best_034_01600.dat': 80, 'best_039_02400.dat': 72, 'draw': 86, 'best_040_03200.dat': 96, 'best_041_03400.dat': 70, 'best_042_04200.dat': 39, 'best_043_04500.dat': 53, 'best_044_04600.dat': 68, 'best_045_04700.dat': 90, 'best_046_04800.dat': 66}
-('best_040_03200.dat', 96)
-('best_045_04700.dat', 90)
-('draw', 86)
-('best_034_01600.dat', 80)
-('best_039_02400.dat', 72)
-('best_041_03400.dat', 70)
-('best_044_04600.dat', 68)
-('best_046_04800.dat', 66)
-('best_043_04500.dat', 53)
-('best_042_04200.dat', 39)
-
-New candidates
-'best_040_03200.dat',
-'best_045_04700.dat',
-'best_047_00200.dat',
-'best_048_00500.dat',
-'best_049_01000.dat',
-'best_050_01700.dat',
-'best_051_01800.dat',
-{'best_040_03200.dat': 71, 'best_047_00200.dat': 34, 2: 7.5, 0: 4.5, 3: 7.0, 'best_048_00500.dat': 54, 'best_049_01000.dat': 55, 4: 9.5, 'best_050_01700.dat': 73, 'best_051_01800.dat': 60, 'best_045_04700.dat': 26, 1: 4.0, 5: 8.5, 6: 6.0}
-('best_050_01700.dat', 73)
-('best_040_03200.dat', 71)
-('best_051_01800.dat', 60)
-('best_049_01000.dat', 55)
-('best_048_00500.dat', 54)
-('best_047_00200.dat', 34)
-('best_045_04700.dat', 26)
-(4, 9.5)
-(5, 8.5)
-(2, 7.5)
-(3, 7.0)
-(6, 6.0)
-(0, 4.5)
-(1, 4.0)
-('best_050_01700.dat', 81.5)
-('best_040_03200.dat', 75.5)
-('best_051_01800.dat', 66.0)
-('best_049_01000.dat', 64.5)
-('best_048_00500.dat', 61.0)
-('best_047_00200.dat', 41.5)
-('best_045_04700.dat', 30.0)
-
-Looks like our best by this measure is:
-('best_050_01700.dat', 96)
-
-files.txt
-
-'''
 MCTS_SEARCHES = 250
 MCTS_BATCH_SIZE = 1
 WINDOW_WIDTH = 600
@@ -222,8 +21,6 @@ class Session:
         self.model = model.Net(input_shape=model.OBS_SHAPE, actions_n=game.GAME_COLS)
         self.model.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage))
         self.state = game.INITIAL_STATE
-        # self.state = game.encode_lists([[0, 1], [0, 1], [0, 1], [], [], [], []])
-        # self.state = 7980810372892328310
         self.value = None
         self.player_moves_first = player_moves_first
         self.player_id = player_id
@@ -252,34 +49,25 @@ class Session:
         self.state, won = game.move(self.state, col, self.USER_PLAYER)
         return won
 
-    def move_bot(self, use_values=False, opponent=None):
+    def move_bot_mm(self, opponent=None):
         result = mmab.get_best_move(self.state, self.BOT_PLAYER, self.model)
         print(f"M:{result}")
         mm_action = np.argmax(result)
         action = int(mm_action)
         self.value = result[action]
-        # if (result[mm_action] > 0.0):
-        #     print(f"MinMax found winning move {mm_action}")
-        #     action = int(mm_action)
-        # else:
-        #     self.mcts_store.search_batch(MCTS_SEARCHES, MCTS_BATCH_SIZE, self.state, self.BOT_PLAYER, self.model)
-        #     probs, values = self.mcts_store.get_policy_value(self.state, tau=0)
-        #     print(f"P:{probs}")
-        #     print(f"V:{values}")
-        #     action = np.random.choice(game.GAME_COLS, p=probs)
-        #     if result[action] < 0.0:
-        #         print(f"MCTS found losing move {action} overriding...")
-        #         for x in range(len(result)):
-        #             if result[x] < 0.0:
-        #                 values[x] = -np.inf
-        #         mm_action = int(np.argmax(values))
-        #         if result[mm_action] >= 0.0:
-        #             print(f"Replacement {mm_action}")
-        #             action = mm_action
-        #         else:
-        #             print("No replacement.")
-        #     self.value = values[action]
-        #     self.moves.append(action)
+        self.state, won = game.move(self.state, action, self.BOT_PLAYER)
+        if opponent is not None:
+            opponent.state = self.state
+        return won
+
+    def move_bot(self, opponent=None):
+        self.mcts_store.search_batch(MCTS_SEARCHES, MCTS_BATCH_SIZE, self.state, self.BOT_PLAYER, self.model)
+        probs, values = self.mcts_store.get_policy_value(self.state, tau=0)
+        # print(f"P:{probs}")
+        # print(f"V:{values}")
+        action = np.random.choice(game.GAME_COLS, p=probs)
+        self.value = values[action]
+        self.moves.append(action)
         self.state, won = game.move(self.state, action, self.BOT_PLAYER)
         if opponent is not None:
             opponent.state = self.state
@@ -324,7 +112,7 @@ def play_against_human(human_is_current, session):
             won = session.move_player(int(move))
         else:
             session.gui_render(screen, current_player, [], "Bot is thinking... " + value_label)
-            won = session.move_bot(False)
+            won = session.move_bot_mm()
         if won:
             label = f"{session.player_id if human_is_current else 'Bot'} won!"
             print(label)
@@ -377,15 +165,6 @@ def self_play(session1, session2, session_1_is_first, gui_each_turn=True):
 
 
 
-sessionNames = [
-'best_040_03200.dat',
-'best_045_04700.dat',
-'best_047_00200.dat',
-'best_048_00500.dat',
-'best_049_01000.dat',
-'best_050_01700.dat',
-'best_051_01800.dat'
-]
 
 def do_tournament(sessionNames):
     sessions = []
@@ -428,9 +207,9 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     # screen = pygame.display.set_mode((1900, 1000))
     pygame.display.set_caption("Connect 4")
+
     # human_is_current = True
     human_is_current = False
-    pygame.display.set_caption("Connect 4")
 
     # do_tournament(sessionNames)
 

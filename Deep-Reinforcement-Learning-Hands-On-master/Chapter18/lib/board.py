@@ -7,6 +7,8 @@ pygame.init()
 # Constants
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 600
+# self.screen = pygame.display.set_mode((1900, 1000))
+
 BOARD_ROWS = 6
 BOARD_COLS = 7
 CELL_SIZE = min((WINDOW_WIDTH - 100) // BOARD_COLS, (WINDOW_HEIGHT - 100) // BOARD_ROWS)
@@ -25,8 +27,16 @@ cell_colors = [RED, BLUE]
 font = pygame.font.Font(None, 24)
 
 
-def draw_small_board(screen, offset, pos, turn):
-    draw_node(screen, 9, offset, pos, turn, [], cell_padding=0)
+def draw_small_board(screen, offset, pos, turn, center=True):
+    if center:
+        total_width = BOARD_COLS * 9
+        total_height = BOARD_ROWS * 9
+        target_offset = [offset[0] - total_width / 2, offset[1] - total_height / 2]
+    else:
+        target_offset = offset
+    turn_offset = [target_offset[0] + 5, target_offset[1] - 10]
+    draw_node(screen, 9, target_offset, pos, turn, [], cell_padding=0)
+    pygame.draw.circle(screen, cell_colors[turn], turn_offset, 5)
 
 
 def draw_node(screen, cell_size, offset, pos, turn, possible_moves, cell_padding=5):
@@ -55,7 +65,6 @@ def draw_board(screen, pos, turn, possible_moves, message):
     text_rect = text.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT - 20))
     screen.blit(text, text_rect)
     draw_node(screen, CELL_SIZE, (xoffset, yoffset), pos, turn, possible_moves)
-    draw_small_board(screen, (50, 70), pos, turn)
 
 def get_move(screen, possible_moves):
     best_pos = None

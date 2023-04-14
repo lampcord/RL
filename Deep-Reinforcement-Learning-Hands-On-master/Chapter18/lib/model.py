@@ -8,7 +8,7 @@ from lib import game, mcts
 
 
 OBS_SHAPE = (2, game.GAME_ROWS, game.GAME_COLS)
-NUM_FILTERS = 64
+NUM_FILTERS = 128
 
 
 class Net(nn.Module):

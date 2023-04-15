@@ -5,8 +5,10 @@ import numpy as np
 from lib import game, model, mcts, board, mmab
 import torch
 import pygame
+import move_cache
 
-MCTS_SEARCHES = 250
+# MCTS_SEARCHES = 100
+MCTS_SEARCHES = 5000
 MCTS_BATCH_SIZE = 1
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 600
@@ -16,17 +18,18 @@ class Session:
     BOT_PLAYER = game.PLAYER_BLACK
     USER_PLAYER = game.PLAYER_WHITE
 
-    def __init__(self, model_file, player_moves_first, player_id, swap_players=False):
+    def __init__(self, model_file, player_moves_first, player_id, swap_players=False, dirichlet_pct=0.25, use_move_cache=False):
         self.model_file = model_file
+        self.move_cache = move_cache.MoveCache(model_file) if use_move_cache else None
         self.model = model.Net(input_shape=model.OBS_SHAPE, actions_n=game.GAME_COLS)
         self.model.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage))
         self.state = game.INITIAL_STATE
+        # self.state = 7688512152522457160
         self.value = None
         self.player_moves_first = player_moves_first
         self.player_id = player_id
         self.moves = []
-        self.mcts_store = mcts.MCTS(dirichlet_pct=0.0)
-        # self.mcts_store = mcts.MCTS()
+        self.mcts_store = mcts.MCTS(dirichlet_pct=dirichlet_pct)
         if swap_players:
             self.BOT_PLAYER = game.PLAYER_WHITE
             self.USER_PLAYER = game.PLAYER_BLACK
@@ -61,8 +64,16 @@ class Session:
         return won
 
     def move_bot(self, opponent=None):
-        self.mcts_store.search_batch(MCTS_SEARCHES, MCTS_BATCH_SIZE, self.state, self.BOT_PLAYER, self.model)
-        probs, values = self.mcts_store.get_policy_value(self.state, tau=0)
+        data = None
+        if self.move_cache is not None:
+            data = self.move_cache.get(self.state)
+        if data is None:
+            self.mcts_store.search_batch(MCTS_SEARCHES, MCTS_BATCH_SIZE, self.state, self.BOT_PLAYER, self.model)
+            probs, values = self.mcts_store.get_policy_value(self.state, tau=0)
+            data = (probs, values)
+            if self.move_cache is not None:
+                self.move_cache.set(self.state, data)
+        probs, values = data
         # print(f"P:{probs}")
         # print(f"V:{values}")
         action = np.random.choice(game.GAME_COLS, p=probs)
@@ -112,7 +123,8 @@ def play_against_human(human_is_current, session):
             won = session.move_player(int(move))
         else:
             session.gui_render(screen, current_player, [], "Bot is thinking... " + value_label)
-            won = session.move_bot_mm()
+            won = session.move_bot()
+            # won = session.move_bot_mm()
         if won:
             label = f"{session.player_id if human_is_current else 'Bot'} won!"
             print(label)
@@ -145,7 +157,7 @@ def self_play(session1, session2, session_1_is_first, gui_each_turn=True):
             value_label = "(%.2f)" % float(session.value)
         if gui_each_turn:
             session.gui_render(screen, current_player, [], f"Bot {session.player_id} is thinking... {value_label}")
-        won = session.move_bot(False, opponent=opponent)
+        won = session.move_bot(opponent=opponent)
         if won:
             label = f"Bot {session.player_id} won!"
             winner = session.player_id
@@ -169,7 +181,7 @@ def self_play(session1, session2, session_1_is_first, gui_each_turn=True):
 def do_tournament(sessionNames):
     sessions = []
     for sessionName in sessionNames:
-        sessions.append(Session('saves/Test1CPU/' + sessionName, False, sessionName))
+        sessions.append(Session('saves/Model128/' + sessionName, False, sessionName, dirichlet_pct=0.25))
     # play_against_human(human_is_current, session)
     results = {}
 
@@ -180,13 +192,15 @@ def do_tournament(sessionNames):
             print(sessionNames[black_player], sessionNames[white_player])
             session1 = sessions[black_player]
             session1.set_bot_player_as_black(True)
+            session1Name = sessionNames[black_player]
             session2 = sessions[white_player]
             session2.set_bot_player_as_black(False)
+            session2Name = sessionNames[white_player]
             for x in range(20):
                 winner, state = self_play(session1, session2, x % 2 == 0, gui_each_turn=False)
                 if winner == 'draw':
-                    results[white_player] = results.get(white_player, 0) + 0.5
-                    results[black_player] = results.get(black_player, 0) + 0.5
+                    results[session1Name] = results.get(session1Name, 0) + 0.5
+                    results[session2Name] = results.get(session2Name, 0) + 0.5
                 else:
                     results[winner] = results.get(winner, 0) + 1
     print(results)
@@ -196,13 +210,16 @@ def do_tournament(sessionNames):
 
 if __name__ == "__main__":
     sessionNames = [
-        'best_040_03200.dat',
-        'best_045_04700.dat',
-        'best_047_00200.dat',
-        'best_048_00500.dat',
-        'best_049_01000.dat',
-        'best_050_01700.dat',
-        'best_051_01800.dat'
+        'best_001_00200.dat',
+        'best_002_00300.dat',
+        'best_003_00400.dat',
+        'best_004_00600.dat',
+        'best_005_00700.dat',
+        'best_006_01300.dat',
+        'best_007_01400.dat',
+        'best_008_01500.dat',
+        'best_009_01700.dat',
+        'best_010_01900.dat'
     ]
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     # screen = pygame.display.set_mode((1900, 1000))
@@ -211,10 +228,20 @@ if __name__ == "__main__":
     # human_is_current = True
     human_is_current = False
 
+    sessionNames = [
+        'best_005_00700.dat',
+        'best_006_01300.dat',
+        'best_007_01400.dat',
+        'best_008_01500.dat',
+        'best_009_01700.dat',
+        'best_010_01900.dat',
+        'best_011_02100.dat',
+        'best_012_00300.dat'
+    ]
     # do_tournament(sessionNames)
-
-    session1Name = 'best_040_03200.dat'
-    session1 = Session('saves/Test1CPU/' + session1Name, True, session1Name)
+    #
+    session1Name = 'best_011_02100.dat'
+    session1 = Session('saves/Model128/' + session1Name, True, session1Name, dirichlet_pct=0.0)
     play_against_human(human_is_current, session1)
 
     time.sleep(3)

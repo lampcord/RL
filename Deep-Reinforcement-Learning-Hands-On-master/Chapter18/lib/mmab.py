@@ -15,7 +15,7 @@ class game_node(minmax_alpha_beta_node):
         self.selected = False
         self.value = ""
         self.parent = None
-        self.discount = 0.0
+        self.discount = 1.0
         self.net = net
 
     def evaluate(self):
@@ -23,11 +23,12 @@ class game_node(minmax_alpha_beta_node):
             state_list = game.decode_binary(self.position)
             batch_v = model.state_lists_to_batch([state_list], [self.player])
             _, values_v = self.net(batch_v)
-            self.score = values_v[0][0].item()
+            self.score = values_v[0][0].item() * self.discount
         return self.score
 
     def is_terminal(self):
-        return self.score != 0.0
+        moves = game.possible_moves(self.position)
+        return self.score != 0.0 or len(moves) == 0
 
     def get_children(self):
         moves = game.possible_moves(self.position)
@@ -38,13 +39,13 @@ class game_node(minmax_alpha_beta_node):
             child_node.player = game.get_oponent(self.player)
             child_node.move = move
             child_node.parent = self
-            child_node.discount = self.discount + 0.1
+            child_node.discount = self.discount - 0.001
             if won:
                 if self.player == self.moving_player:
-                    score = 1.0 - child_node.discount
+                    score = 1.0
                 else:
-                    score = -1.0 + child_node.discount
-                child_node.score = score
+                    score = -1.0
+                child_node.score = score * child_node.discount
             self.children.append(child_node)
         return self.children
 
@@ -73,7 +74,7 @@ class game_node(minmax_alpha_beta_node):
 
 def get_best_move(position, moving_player, net):
     root = game_node(position, moving_player, net)
-    minimax_alpha_beta(root, 4, float('-inf'), float('inf'), True)
+    minimax_alpha_beta(root, 6, float('-inf'), float('inf'), True)
     possible_moves = game.possible_moves(position)
     # painter = node_painter.NodePainter(root)
     # painter.paint()

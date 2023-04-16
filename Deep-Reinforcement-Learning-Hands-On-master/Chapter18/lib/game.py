@@ -118,7 +118,7 @@ def decode_binary(state_int):
     return res
 
 
-def get_oponent(player):
+def get_opponent(player):
     return 1 - player
 
 def possible_moves(state_int):

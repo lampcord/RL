@@ -36,7 +36,7 @@ class game_node(minmax_alpha_beta_node):
         for move in moves:
             child_position, won = game.move(self.position, move, self.player)
             child_node = game_node(child_position, self.moving_player, self.net)
-            child_node.player = game.get_oponent(self.player)
+            child_node.player = game.get_opponent(self.player)
             child_node.move = move
             child_node.parent = self
             child_node.discount = self.discount - 0.001

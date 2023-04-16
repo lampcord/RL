@@ -23,13 +23,15 @@ This makes 62 so we can fit the entire board in a single 64 bit integer.
 '''
 import random
 
-AFIRST = 0
-ACAPTURED = 6
-BFIRST = 7
-BCAPTURED = 13
+WHITE_FIRST_BUCKET = 0
+WHITE_CASTOFF_BUCKET = 6
+BLACK_FIRST_BUCKET = 7
+BLACK_CASTOFF_BUCKET = 13
 BOARDSIZE = 14
 SEPARATORS = 13
 TOTALSTONES = 48
+PLAYER_BLACK = 1
+PLAYER_WHITE = 0
 
 
 def bits_to_int(bits):
@@ -76,7 +78,7 @@ def decode_binary(state_int):
     bits = int_to_bits(state_int, bits=TOTALSTONES + SEPARATORS + 1)
     state_list = [0] * BOARDSIZE
 
-    bucket_index = AFIRST
+    bucket_index = WHITE_FIRST_BUCKET
 
     for bit in bits:
         if bit == 0:
@@ -86,23 +88,54 @@ def decode_binary(state_int):
 
     return state_list
 
+
+def get_opponent(player):
+    return 1 - player
+
+
+def possible_moves(state_int, turn):
+    """
+    This function could be calculated directly from bits, but I'm too lazy
+    :param state_int: field representation
+    :return: the list of buckets which we can make a move
+    """
+    assert isinstance(state_int, int)
+    state_list = decode_binary(state_int)
+    if turn == PLAYER_WHITE:
+        first = WHITE_FIRST_BUCKET
+    else:
+        first = BLACK_FIRST_BUCKET
+    return [idx for idx in range(6) if state_list[idx + first] > 0]
+
+
 if __name__ == "__main__":
     encoded = INITIAL_STATE
     print (encoded)
     decoded = decode_binary(encoded)
     print(decoded)
+    print(possible_moves(encoded, PLAYER_WHITE))
+    print(possible_moves(encoded, PLAYER_BLACK))
 
-    for test in range(1_000_000):
-        if test % 100000 == 0:
+    for test in range(1_000):
+        if test % 100 == 0:
             print('')
-        if test % 1000 == 0:
-            print('.', end='')
+        print('.', end='')
         state_list = [0] * BOARDSIZE
+        total_stones = TOTALSTONES
         for x in range(TOTALSTONES):
             bucket = random.randint(0, BOARDSIZE - 1)
-            state_list[bucket] += 1
+            stones = random.randint(1, total_stones)
+            stones = min(stones, 4)
+            state_list[bucket] += stones
+            total_stones -= stones
+            if total_stones <= 0:
+                break
 
         encoded = encode_lists(state_list)
         decoded = decode_binary(encoded)
         reencoded = encode_lists(decoded)
+        if test < 10:
+            print(decoded)
+            print(possible_moves(encoded, PLAYER_WHITE))
+            print(possible_moves(encoded, PLAYER_BLACK))
         assert encoded == reencoded

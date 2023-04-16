@@ -17,3 +17,4 @@ Rainbow/wandb/
 Rainbow/.idea/
 Rainbow/replay_checkpoints/
 AlphaZeroMancala/.idea/
+*.trace

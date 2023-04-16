@@ -32,6 +32,7 @@ SEPARATORS = 13
 TOTALSTONES = 48
 PLAYER_BLACK = 1
 PLAYER_WHITE = 0
+MAX_MOVE_INDEX = 6
 
 
 def bits_to_int(bits):
@@ -107,6 +108,70 @@ def possible_moves(state_int, turn):
         first = BLACK_FIRST_BUCKET
     return [idx for idx in range(6) if state_list[idx + first] > 0]
 
+def move(state_int, move, player):
+    """
+    Perform move into given column. Assume the move could be performed, otherwise, assertion will be raised
+    :param state_int: current state
+    :param move: starting bucket from players pov
+    :param player: player index (PLAYER_WHITE or PLAYER_BLACK
+    :return: tuple of (state_new, winner, swap_players)
+    :    state_new: state after move
+    :    winner None or player that just won, NOT always player that just moved!
+    :    swap_players: False if move allows same player to continue
+    """
+    assert isinstance(state_int, int)
+    assert isinstance(move, int)
+    assert 0 <= move < MAX_MOVE_INDEX
+    assert player == PLAYER_BLACK or player == PLAYER_WHITE
+    state_list = decode_binary(state_int)
+
+    if player == PLAYER_WHITE:
+        start_bucket = move + WHITE_FIRST_BUCKET
+        skip_bucket = BLACK_CASTOFF_BUCKET
+    else:
+        start_bucket = move + BLACK_FIRST_BUCKET
+        skip_bucket = WHITE_CASTOFF_BUCKET
+
+    # pickup all stones from start bucket
+    num_stones = state_list[start_bucket]
+    state_list[start_bucket] = 0
+
+    # sequentially drop stones in each bucket moving counterclockwise around board
+    target_bucket = start_bucket
+    while num_stones > 0:
+        target_bucket = (target_bucket + 1) % BOARDSIZE
+
+        # skip opponent's castoff bucket
+        if target_bucket == skip_bucket:
+            continue
+
+        state_list[target_bucket] += 1
+        num_stones -= 1
+
+    winning_player = None
+    if state_list[WHITE_CASTOFF_BUCKET] > 24:
+        winning_player = PLAYER_WHITE
+    elif state_list[BLACK_CASTOFF_BUCKET] > 24:
+        winning_player = PLAYER_BLACK
+
+    swap_players = True
+    state_int_new = encode_lists(state_list)
+
+    return state_int_new, winning_player, swap_players
+
+
+def generate_random_board():
+    state_list = [0] * BOARDSIZE
+    total_stones = TOTALSTONES
+    for x in range(TOTALSTONES):
+        bucket = random.randint(0, BOARDSIZE - 1)
+        stones = random.randint(1, total_stones)
+        stones = min(stones, 4)
+        state_list[bucket] += stones
+        total_stones -= stones
+        if total_stones <= 0:
+            break
+    return state_list
 
 if __name__ == "__main__":
     encoded = INITIAL_STATE
@@ -120,17 +185,8 @@ if __name__ == "__main__":
         if test % 100 == 0:
             print('')
         print('.', end='')
-        state_list = [0] * BOARDSIZE
-        total_stones = TOTALSTONES
-        for x in range(TOTALSTONES):
-            bucket = random.randint(0, BOARDSIZE - 1)
-            stones = random.randint(1, total_stones)
-            stones = min(stones, 4)
-            state_list[bucket] += stones
-            total_stones -= stones
-            if total_stones <= 0:
-                break
 
+        state_list = generate_random_board()
         encoded = encode_lists(state_list)
         decoded = decode_binary(encoded)
         reencoded = encode_lists(decoded)

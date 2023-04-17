@@ -34,7 +34,6 @@ PLAYER_BLACK = 1
 PLAYER_WHITE = 0
 MAX_MOVE_INDEX = 6
 
-
 def bits_to_int(bits):
     res = 0
     for b in bits:
@@ -93,7 +92,12 @@ def decode_binary(state_int):
 def get_opponent(player):
     return 1 - player
 
-
+def get_opposite_bucket(bucket):
+    if bucket < 0 or bucket >= BOARDSIZE:
+        return None
+    if bucket == WHITE_CASTOFF_BUCKET or bucket == BLACK_CASTOFF_BUCKET:
+        return None
+    return 12 - bucket
 def possible_moves(state_int, turn):
     """
     This function could be calculated directly from bits, but I'm too lazy
@@ -121,16 +125,20 @@ def move(state_int, move, player):
     """
     assert isinstance(state_int, int)
     assert isinstance(move, int)
-    assert 0 <= move < MAX_MOVE_INDEX
     assert player == PLAYER_BLACK or player == PLAYER_WHITE
+
     state_list = decode_binary(state_int)
 
     if player == PLAYER_WHITE:
         start_bucket = move + WHITE_FIRST_BUCKET
-        skip_bucket = BLACK_CASTOFF_BUCKET
+        opponents_castoff_bucket = BLACK_CASTOFF_BUCKET
+        players_castoff_bucket = WHITE_CASTOFF_BUCKET
     else:
         start_bucket = move + BLACK_FIRST_BUCKET
-        skip_bucket = WHITE_CASTOFF_BUCKET
+        opponents_castoff_bucket = WHITE_CASTOFF_BUCKET
+        players_castoff_bucket = BLACK_CASTOFF_BUCKET
+
+    assert 0 <= move < MAX_MOVE_INDEX
 
     # pickup all stones from start bucket
     num_stones = state_list[start_bucket]
@@ -138,23 +146,58 @@ def move(state_int, move, player):
 
     # sequentially drop stones in each bucket moving counterclockwise around board
     target_bucket = start_bucket
+    last_bucket = None
     while num_stones > 0:
         target_bucket = (target_bucket + 1) % BOARDSIZE
 
         # skip opponent's castoff bucket
-        if target_bucket == skip_bucket:
+        if target_bucket == opponents_castoff_bucket:
             continue
 
         state_list[target_bucket] += 1
+        last_bucket = target_bucket
         num_stones -= 1
 
+    # RULE1: if the last stone goes in your castoff bucket, you can keep going
+    if last_bucket == players_castoff_bucket:
+        swap_players = False
+        next_player = player
+    else:
+        swap_players = True
+        next_player = get_opponent(player)
+
+    # RULE4: If the last piece you drop is in an empty hole on your side,
+    # you capture that piece and any pieces in the hole directly opposite.
+    if last_bucket is not None and last_bucket >= start_bucket and last_bucket < players_castoff_bucket and state_list[last_bucket] == 1:
+        opposite_bucket = get_opposite_bucket(last_bucket)
+        if opposite_bucket is not None:
+            state_list[players_castoff_bucket] += state_list[last_bucket]
+            state_list[last_bucket] = 0
+            state_list[players_castoff_bucket] += state_list[opposite_bucket]
+            state_list[opposite_bucket] = 0
+
+    # RULE2: if next player has no legal moves, all the stones remaining go into next player's opponent's castoff bucket
+    next_state_int = encode_lists(state_list)
+    legal_moves = possible_moves(next_state_int, next_player)
+    if len(legal_moves) == 0:
+        if next_player == PLAYER_WHITE:
+            bucket = BLACK_FIRST_BUCKET
+            target_bucket = BLACK_CASTOFF_BUCKET
+        else:
+            bucket = WHITE_FIRST_BUCKET
+            target_bucket = WHITE_CASTOFF_BUCKET
+        for _ in range(6):
+            state_list[target_bucket] += state_list[bucket]
+            state_list[bucket] = 0
+            bucket += 1
+
+    # RULE3: if either player has 25 or more stones in their castoff bucket, they win
     winning_player = None
     if state_list[WHITE_CASTOFF_BUCKET] > 24:
         winning_player = PLAYER_WHITE
     elif state_list[BLACK_CASTOFF_BUCKET] > 24:
         winning_player = PLAYER_BLACK
 
-    swap_players = True
     state_int_new = encode_lists(state_list)
 
     return state_int_new, winning_player, swap_players

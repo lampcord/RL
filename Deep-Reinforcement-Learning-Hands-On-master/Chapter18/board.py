@@ -6,8 +6,9 @@ from mancalalib import game
 def render(state_int, turn):
     state_list = game.decode_binary(state_int)
     possible_moves = game.possible_moves(state_int, turn)
-    print(state_list)
-
+    print('-' * 60)
+    print(state_int)
+    print('-' * 60)
     if turn == game.PLAYER_BLACK:
         print("     ", end='')
         ndx = game.BLACK_CASTOFF_BUCKET - 1
@@ -53,11 +54,86 @@ def render(state_int, turn):
                 print("  - ", end='')
             ndx += 1
         print("    White's Turn")
+    print('-' * 60)
 
 
-if __name__ == "__main__":
+# RULE1: if the last stone goes in your castoff bucket, you can keep going
+def test_rule_1():
+    state_int = game.encode_lists([6, 5, 4, 3, 2, 1, 3, 6, 5, 4, 3, 2, 1, 3])
+    turn = game.PLAYER_WHITE
+    render(state_int, turn)
+    move = 5
+    while move >= 0:
+        possible_moves = game.possible_moves(state_int, turn)
+        assert move in possible_moves
+        state_int, winner, swap_players = game.move(state_int, move, turn)
+        render(state_int, turn)
+        assert not winner
+        assert not swap_players
+        move -= 1
+
+    state_int, winner, swap_players = game.move(state_int, 1, turn)
+    render(state_int, turn)
+    assert not winner
+    assert swap_players
+    turn = game.get_opponent(turn)
+
+    move = 5
+    while move >= 0:
+        possible_moves = game.possible_moves(state_int, turn)
+        assert move in possible_moves
+        state_int, winner, swap_players = game.move(state_int, move, turn)
+        render(state_int, turn)
+        assert not winner
+        assert not swap_players
+        move -= 1
+
+
+# RULE2: if next player has no legal moves, all the stones remaining go into next player's opponent's castoff bucket
+def test_rule_2():
+    state_int = 148764069216649217
+    turn = game.PLAYER_BLACK
+    render(state_int, turn)
+    state_int, winner, swap_players = game.move(state_int, 5, turn)
+    assert state_int == 4539628428650872833
+    assert not swap_players
+    render(state_int, turn)
+
+    state_int = 148764069208260609
+    turn = game.PLAYER_BLACK
+    render(state_int, turn)
+    state_int, winner, swap_players = game.move(state_int, 5, turn)
+    assert swap_players
+    turn = game.get_opponent(turn)
+    render(state_int, turn)
+    state_int, winner, swap_players = game.move(state_int, 0, turn)
+    assert state_int == 4539628426520166401
+    render(state_int, turn)
+
+
+# RULE4: If the last piece you drop is in an empty hole on your side,
+# you capture that piece and any pieces in the hole directly opposite.
+def test_rule_4():
+    state_int = 2311054832843284497
+    turn = game.PLAYER_BLACK
+    render(state_int, turn)
+    state_int, winner, swap_players = game.move(state_int, 2, turn)
+    turn = game.get_opponent(turn)
+    render(state_int, turn)
+    assert state_int == 2313179504850174081
+    assert swap_players
+
+    turn = game.PLAYER_BLACK
+    state_int = 148764067119728707
+    render(state_int, turn)
+    state_int, winner, swap_players = game.move(state_int, 0, turn)
+    render(state_int, turn)
+    assert swap_players
+    assert state_int == 73201369230622977
+
+
+def play_human_against_random():
     state_int = game.INITIAL_STATE
-    # state_int = game.encode_lists([1, 2, 3, 4, 5, 6, 4, 1, 2, 3, 4, 5, 6, 2])
     done = False
     turn = game.PLAYER_WHITE
     while not done:
@@ -82,6 +158,11 @@ if __name__ == "__main__":
             render(state_int, turn)
             break
 
+if __name__ == "__main__":
+    # test_rule_1()
+    # test_rule_2()
+    test_rule_4()
+    # play_human_against_random()
     # turn = game.PLAYER_BLACK
     # for _ in range(10):
     #     print('')

@@ -32,6 +32,7 @@ SEPARATORS = 13
 TOTALSTONES = 48
 PLAYER_BLACK = 1
 PLAYER_WHITE = 0
+DRAW = 2
 MAX_MOVE_INDEX = 6
 
 def bits_to_int(bits):
@@ -197,6 +198,8 @@ def move(state_int, move, player):
         winning_player = PLAYER_WHITE
     elif state_list[BLACK_CASTOFF_BUCKET] > 24:
         winning_player = PLAYER_BLACK
+    elif state_list[WHITE_CASTOFF_BUCKET] == 24 and state_list[BLACK_CASTOFF_BUCKET] == 24:
+        winning_player = DRAW
 
     state_int_new = encode_lists(state_list)
 

@@ -209,18 +209,6 @@ def do_tournament(sessionNames):
         print(k)
 
 if __name__ == "__main__":
-    sessionNames = [
-        'best_001_00200.dat',
-        'best_002_00300.dat',
-        'best_003_00400.dat',
-        'best_004_00600.dat',
-        'best_005_00700.dat',
-        'best_006_01300.dat',
-        'best_007_01400.dat',
-        'best_008_01500.dat',
-        'best_009_01700.dat',
-        'best_010_01900.dat'
-    ]
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     # screen = pygame.display.set_mode((1900, 1000))
     pygame.display.set_caption("Connect 4")
@@ -233,7 +221,9 @@ if __name__ == "__main__":
         'best_018_01300.dat',
         'best_019_01400.dat',
         'best_020_01800.dat',
-        'best_021_02100.dat'
+        'best_020_01800.dat',
+        'best_021_02100.dat',
+        'best_022_00100.dat'
     ]
     do_tournament(sessionNames)
 

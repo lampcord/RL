@@ -1,3 +1,4 @@
+import math
 import random
 import pygame
 import sys
@@ -8,14 +9,14 @@ pygame.init()
 
 # Constants
 WINDOW_WIDTH = 1000
-WINDOW_HEIGHT = 400
+WINDOW_HEIGHT = 350
 PADDING = 50
 CELL_SIZE = min((WINDOW_WIDTH - PADDING * 2) // 8, (WINDOW_HEIGHT - PADDING * 2) // 2)
 
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-BLUE = (0, 192, 0)
+BLUE = (0, 0, 128)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 GREY = (190, 190, 190)
@@ -23,10 +24,10 @@ DARK_GREY = (96, 96, 96)
 font = pygame.font.Font(None, 24)
 click_positions = {}
 
-
 def get_move(screen, possible_moves):
     best_pos = None
-    while True:
+    done = False
+    while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -34,37 +35,75 @@ def get_move(screen, possible_moves):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 click_coordinates = event.pos
                 print(f"Mouse clicked at {click_coordinates}")
+                return 0
 
-
-def draw_bucket(screen, rect, stone_size, num_stones):
+def draw_bucket(screen, rect, stone_size, num_stones, highlight):
     pygame.draw.rect(screen, DARK_GREY, rect, 0)
-    pygame.draw.ellipse(screen, WHITE, rect)
+    pygame.draw.ellipse(screen, YELLOW if highlight else WHITE, rect)
     center = (rect[0] + rect[2] / 2, rect[1] + rect[3] / 2)
-    pos_rect = (center[0] - stone_size // 2, center[1] - stone_size // 2, stone_size, stone_size)
-    pygame.draw.ellipse(screen, BLACK, pos_rect)
+    pos_rect = [center[0] - stone_size // 2, center[1] - stone_size // 2, stone_size, stone_size]
+    cur_radius = stone_size * 5 // 4
+    cur_direction = 0
+    cur_rect = pos_rect
+    for stone in range(num_stones):
+        if stone == 0:
+            pygame.draw.ellipse(screen, BLUE, pos_rect)
+            cur_direction = 0
+        elif stone < 7:
+            cur_rect = list(pos_rect)
+            cur_rect[0] += math.cos(cur_direction) * cur_radius
+            cur_rect[1] += math.sin(cur_direction) * cur_radius
+            pygame.draw.ellipse(screen, BLUE, cur_rect)
+            cur_direction += 2 * math.pi / 6
+        elif stone < 22:
+            if stone == 7:
+                cur_direction = math.pi / 6
+                cur_radius *= 2
+            cur_rect = list(pos_rect)
+            cur_rect[0] += math.cos(cur_direction) * cur_radius
+            cur_rect[1] += math.sin(cur_direction) * cur_radius
+            pygame.draw.ellipse(screen, BLUE, cur_rect)
+            cur_direction += 2 * math.pi / 15
+        elif stone < 48:
+            if stone == 22:
+                cur_direction = 0
+                cur_radius = cur_radius * 3 / 2
+            cur_rect = list(pos_rect)
+            cur_rect[0] += math.cos(cur_direction) * cur_radius
+            cur_rect[1] += math.sin(cur_direction) * cur_radius
+            pygame.draw.ellipse(screen, BLUE, cur_rect)
+            cur_direction += 2 * math.pi / 26
+
+
     return center
 
 
 def draw_node(screen, cell_size, offset, pos, turn, possible_moves, cell_padding=5):
-    stone_size = 8
+    stone_size = 14
 
     # black castoff
-    draw_bucket(screen, (offset[0], offset[1], cell_size, cell_size * 2), stone_size, pos[game.BLACK_CASTOFF_BUCKET])
+    draw_bucket(screen, (offset[0], offset[1], cell_size, cell_size * 2), stone_size, pos[game.BLACK_CASTOFF_BUCKET], False)
 
     # white castoff
-    draw_bucket(screen, (offset[0] + cell_size * 7, offset[1], cell_size, cell_size * 2),  stone_size, pos[game.WHITE_CASTOFF_BUCKET])
+    draw_bucket(screen, (offset[0] + cell_size * 7, offset[1], cell_size, cell_size * 2),  stone_size, pos[game.WHITE_CASTOFF_BUCKET], False)
 
     bucket = game.WHITE_FIRST_BUCKET
     for bucket_offset in range(6):
-        center = draw_bucket(screen, (offset[0] + cell_size * (bucket_offset + 1), offset[1] + cell_size, cell_size, cell_size), stone_size, pos[bucket])
-        print(center)
+        center = draw_bucket(screen, (offset[0] + cell_size * (bucket_offset + 1), offset[1] + cell_size, cell_size, cell_size), stone_size, pos[bucket],
+                             bucket_offset in possible_moves and turn == game.PLAYER_WHITE)
+        if bucket not in click_positions:
+            click_positions[bucket] = center
+            print(click_positions)
         bucket += 1
 
     bucket = game.BLACK_FIRST_BUCKET
     for bucket_offset in range(6):
-        center = draw_bucket(screen, (offset[0] + cell_size * (6 - bucket_offset), offset[1], cell_size, cell_size),  stone_size, pos[bucket])
-        print(center)
-        bucket -= 1
+        center = draw_bucket(screen, (offset[0] + cell_size * (6 - bucket_offset), offset[1], cell_size, cell_size),  stone_size, pos[bucket],
+                             bucket_offset in possible_moves and turn == game.PLAYER_BLACK)
+        if bucket not in click_positions:
+            click_positions[bucket] = center
+            print(click_positions)
+        bucket += 1
 
 
 def draw_board(screen, pos, turn, possible_moves, message):
@@ -232,14 +271,19 @@ def play_human_against_random():
         if turn == game.PLAYER_WHITE:
             move = random.choice(possible_moves)
         else:
-            move = int(input("Enter move:"))
+            # move = int(input("Enter move:"))
+            move = random.choice(possible_moves)
         print(f"Move {move}")
         state_int, winner, swap_players = game.move(state_int, move, turn)
         if swap_players:
             turn = game.get_opponent(turn)
         if winner is not None:
-            message = "White " if winner == game.PLAYER_WHITE else "Black "
-            message += "wins!"
+            if winner == game.PLAYER_WHITE:
+                message = "White wins!"
+            elif winner == game.PLAYER_BLACK:
+                message = "Black wins!"
+            else:
+                message = "Draw!"
             print(message)
             render(state_int, turn)
             render_gui(screen, state_int, turn, message)

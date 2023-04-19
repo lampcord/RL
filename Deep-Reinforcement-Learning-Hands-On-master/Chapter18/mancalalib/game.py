@@ -113,7 +113,7 @@ def possible_moves(state_int, turn):
         first = BLACK_FIRST_BUCKET
     return [idx for idx in range(6) if state_list[idx + first] > 0]
 
-def move(state_int, move, player):
+def move(state_int, move, player, animate=False):
     """
     Perform move into given column. Assume the move could be performed, otherwise, assertion will be raised
     :param state_int: current state
@@ -123,19 +123,25 @@ def move(state_int, move, player):
     :    state_new: state after move
     :    winner None or player that just won, NOT always player that just moved!
     :    swap_players: False if move allows same player to continue
+    :    animate: return an additional animation list to display moves step by step
     """
     assert isinstance(state_int, int)
     assert isinstance(move, int)
     assert player == PLAYER_BLACK or player == PLAYER_WHITE
 
     state_list = decode_binary(state_int)
+    if animate:
+        animation = [player]
+        animation.append(list(state_list))
 
     if player == PLAYER_WHITE:
         start_bucket = move + WHITE_FIRST_BUCKET
+        players_first_bucket = WHITE_FIRST_BUCKET
         opponents_castoff_bucket = BLACK_CASTOFF_BUCKET
         players_castoff_bucket = WHITE_CASTOFF_BUCKET
     else:
         start_bucket = move + BLACK_FIRST_BUCKET
+        players_first_bucket = BLACK_FIRST_BUCKET
         opponents_castoff_bucket = WHITE_CASTOFF_BUCKET
         players_castoff_bucket = BLACK_CASTOFF_BUCKET
 
@@ -144,6 +150,8 @@ def move(state_int, move, player):
     # pickup all stones from start bucket
     num_stones = state_list[start_bucket]
     state_list[start_bucket] = 0
+    if animate:
+        animation.append(list(state_list))
 
     # sequentially drop stones in each bucket moving counterclockwise around board
     target_bucket = start_bucket
@@ -156,6 +164,8 @@ def move(state_int, move, player):
             continue
 
         state_list[target_bucket] += 1
+        if animate:
+            animation.append(list(state_list))
         last_bucket = target_bucket
         num_stones -= 1
 
@@ -169,13 +179,17 @@ def move(state_int, move, player):
 
     # RULE4: If the last piece you drop is in an empty hole on your side,
     # you capture that piece and any pieces in the hole directly opposite.
-    if last_bucket is not None and last_bucket >= start_bucket and last_bucket < players_castoff_bucket and state_list[last_bucket] == 1:
+    if last_bucket is not None and last_bucket >= players_first_bucket and last_bucket < players_castoff_bucket and state_list[last_bucket] == 1:
         opposite_bucket = get_opposite_bucket(last_bucket)
         if opposite_bucket is not None:
             state_list[players_castoff_bucket] += state_list[last_bucket]
             state_list[last_bucket] = 0
+            if animate:
+                animation.append(list(state_list))
             state_list[players_castoff_bucket] += state_list[opposite_bucket]
             state_list[opposite_bucket] = 0
+            if animate:
+                animation.append(list(state_list))
 
     # RULE2: if next player has no legal moves, all the stones remaining go into next player's opponent's castoff bucket
     next_state_int = encode_lists(state_list)
@@ -190,6 +204,8 @@ def move(state_int, move, player):
         for _ in range(6):
             state_list[target_bucket] += state_list[bucket]
             state_list[bucket] = 0
+            if animate:
+                animation.append(list(state_list))
             bucket += 1
 
     # RULE3: if either player has 25 or more stones in their castoff bucket, they win
@@ -203,7 +219,10 @@ def move(state_int, move, player):
 
     state_int_new = encode_lists(state_list)
 
-    return state_int_new, winning_player, swap_players
+    if animate:
+        return state_int_new, winning_player, swap_players, animation
+    else:
+        return state_int_new, winning_player, swap_players
 
 
 def generate_random_board():

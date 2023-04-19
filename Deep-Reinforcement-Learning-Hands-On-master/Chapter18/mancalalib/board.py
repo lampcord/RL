@@ -1,5 +1,7 @@
 import math
 import random
+import time
+
 import pygame
 import sys
 from mancalalib import game
@@ -9,7 +11,7 @@ pygame.init()
 
 # Constants
 WINDOW_WIDTH = 1000
-WINDOW_HEIGHT = 350
+WINDOW_HEIGHT = 500
 PADDING = 50
 CELL_SIZE = min((WINDOW_WIDTH - PADDING * 2) // 8, (WINDOW_HEIGHT - PADDING * 2) // 2)
 
@@ -18,13 +20,14 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 128)
 RED = (255, 0, 0)
+GREEN = (0, 255, 0)
 YELLOW = (255, 255, 0)
 GREY = (190, 190, 190)
 DARK_GREY = (96, 96, 96)
 font = pygame.font.Font(None, 24)
 click_positions = {}
 
-def get_move(screen, possible_moves):
+def get_move(screen, possible_moves, turn):
     best_pos = None
     done = False
     while not done:
@@ -35,11 +38,18 @@ def get_move(screen, possible_moves):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 click_coordinates = event.pos
                 print(f"Mouse clicked at {click_coordinates}")
-                return 0
+                for move in possible_moves:
+                    bucket = move + 7 if turn == game.PLAYER_BLACK else move
+                    cc = click_positions[bucket]
+                    distance = (cc[0] - click_coordinates[0]) ** 2 + (cc[1] - click_coordinates[1]) ** 2
+                    if distance < (CELL_SIZE // 2) ** 2:
+                        return move
+                return None
 
-def draw_bucket(screen, rect, stone_size, num_stones, highlight):
-    pygame.draw.rect(screen, DARK_GREY, rect, 0)
-    pygame.draw.ellipse(screen, YELLOW if highlight else WHITE, rect)
+def draw_bucket(screen, rect, stone_size, num_stones, highlight, highlightcolor=YELLOW, background=True):
+    if background:
+        pygame.draw.rect(screen, DARK_GREY, rect, 0)
+        pygame.draw.ellipse(screen, highlightcolor if highlight else WHITE, rect)
     center = (rect[0] + rect[2] / 2, rect[1] + rect[3] / 2)
     pos_rect = [center[0] - stone_size // 2, center[1] - stone_size // 2, stone_size, stone_size]
     cur_radius = stone_size * 5 // 4
@@ -78,19 +88,24 @@ def draw_bucket(screen, rect, stone_size, num_stones, highlight):
     return center
 
 
-def draw_node(screen, cell_size, offset, pos, turn, possible_moves, cell_padding=5):
+def draw_node(screen, cell_size, offset, pos, turn, possible_moves, highlight_cells=[], player=None):
     stone_size = 14
-
+    if len(highlight_cells) > 0:
+        highlight_color = GREEN
+    else:
+        highlight_color = YELLOW
     # black castoff
-    draw_bucket(screen, (offset[0], offset[1], cell_size, cell_size * 2), stone_size, pos[game.BLACK_CASTOFF_BUCKET], False)
+    draw_bucket(screen, (offset[0], offset[1], cell_size, cell_size * 2), stone_size, pos[game.BLACK_CASTOFF_BUCKET],
+                game.BLACK_CASTOFF_BUCKET in highlight_cells, highlight_color)
 
     # white castoff
-    draw_bucket(screen, (offset[0] + cell_size * 7, offset[1], cell_size, cell_size * 2),  stone_size, pos[game.WHITE_CASTOFF_BUCKET], False)
+    draw_bucket(screen, (offset[0] + cell_size * 7, offset[1], cell_size, cell_size * 2),  stone_size, pos[game.WHITE_CASTOFF_BUCKET],
+                game.WHITE_CASTOFF_BUCKET in highlight_cells, highlight_color)
 
     bucket = game.WHITE_FIRST_BUCKET
     for bucket_offset in range(6):
         center = draw_bucket(screen, (offset[0] + cell_size * (bucket_offset + 1), offset[1] + cell_size, cell_size, cell_size), stone_size, pos[bucket],
-                             bucket_offset in possible_moves and turn == game.PLAYER_WHITE)
+                             (bucket_offset in possible_moves and turn == game.PLAYER_WHITE) or bucket in highlight_cells, highlight_color)
         if bucket not in click_positions:
             click_positions[bucket] = center
             print(click_positions)
@@ -99,29 +114,52 @@ def draw_node(screen, cell_size, offset, pos, turn, possible_moves, cell_padding
     bucket = game.BLACK_FIRST_BUCKET
     for bucket_offset in range(6):
         center = draw_bucket(screen, (offset[0] + cell_size * (6 - bucket_offset), offset[1], cell_size, cell_size),  stone_size, pos[bucket],
-                             bucket_offset in possible_moves and turn == game.PLAYER_BLACK)
+                             (bucket_offset in possible_moves and turn == game.PLAYER_BLACK) or bucket in highlight_cells, highlight_color)
         if bucket not in click_positions:
             click_positions[bucket] = center
             print(click_positions)
         bucket += 1
 
+    if player is not None:
+        stones_on_board = 48
+        for stones in pos:
+            stones_on_board -= stones
+        if stones_on_board > 0:
+            y_pos = offset[1] - cell_size if player == game.PLAYER_BLACK else offset[1] + 2 * cell_size
+            _ = draw_bucket(screen, (offset[0] + cell_size * 7 // 2, y_pos, cell_size, cell_size), stone_size, stones_on_board, False, background=False)
 
-def draw_board(screen, pos, turn, possible_moves, message):
+
+
+def draw_board(screen, pos, turn, possible_moves, message, highlight_cells=[], player=None):
     screen.fill(GREY)
     xoffset = (WINDOW_WIDTH - (CELL_SIZE * 8)) // 2
     yoffset = (WINDOW_HEIGHT - (CELL_SIZE * 2)) // 2
     text = font.render(message, True, BLACK)
     text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - PADDING // 2))
     screen.blit(text, text_rect)
-    draw_node(screen, CELL_SIZE, (xoffset, yoffset), pos, turn, possible_moves)
+    draw_node(screen, CELL_SIZE, (xoffset, yoffset), pos, turn, possible_moves, highlight_cells, player)
 
 
-def render_gui(screen, state_int, turn, message):
+def render_gui(screen, state_int, turn, message, animation=None):
+    if animation is not None:
+        last_state_list = None
+        player = animation[0]
+        for state_list in animation[1:]:
+            highlight_cells = []
+            if last_state_list:
+                for ndx in range(len(state_list)):
+                    if state_list[ndx] != last_state_list[ndx]:
+                        highlight_cells.append(ndx)
+            draw_board(screen, state_list, turn, [], f"Animating {'white' if player == game.PLAYER_WHITE else 'black'} player...", highlight_cells, player)
+            pygame.display.update()
+            last_state_list = list(state_list)
+            time.sleep(.3)
+
     state_list = game.decode_binary(state_int)
     possible_moves = game.possible_moves(state_int, turn)
     draw_board(screen, state_list, turn, possible_moves, message)
     pygame.display.update()
-    get_move(screen, possible_moves)
+    time.sleep(.3)
 
 
 def render(state_int, turn):
@@ -252,6 +290,16 @@ def test_rule_4():
     assert swap_players
     assert state_int == 73201369230622977
 
+    turn = game.PLAYER_WHITE
+    state_int = 1009096596887699713
+    render(state_int, turn)
+    state_int, winner, swap_players = game.move(state_int, 5, turn)
+    render(state_int, turn)
+    assert swap_players
+    assert state_int == 504550512320315649
+
+
+
 
 def play_human_against_random():
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -259,10 +307,11 @@ def play_human_against_random():
     state_int = game.INITIAL_STATE
     done = False
     turn = game.PLAYER_WHITE
+    animation = None
     while not done:
         print('')
         render(state_int, turn)
-        render_gui(screen, state_int, turn, "White to move" if turn == game.PLAYER_WHITE else "Black to move")
+        render_gui(screen, state_int, turn, "White to move" if turn == game.PLAYER_WHITE else "Black to move", animation)
         possible_moves = game.possible_moves(state_int, turn)
         if len(possible_moves) == 0:
             print('No legal moves!')
@@ -270,11 +319,16 @@ def play_human_against_random():
             break
         if turn == game.PLAYER_WHITE:
             move = random.choice(possible_moves)
+            time.sleep(.5)
         else:
             # move = int(input("Enter move:"))
-            move = random.choice(possible_moves)
+            # move = random.choice(possible_moves)
+            while True:
+                move = get_move(screen, possible_moves, turn)
+                if move is not None:
+                    break
         print(f"Move {move}")
-        state_int, winner, swap_players = game.move(state_int, move, turn)
+        state_int, winner, swap_players, animation = game.move(state_int, move, turn, True)
         if swap_players:
             turn = game.get_opponent(turn)
         if winner is not None:
@@ -286,14 +340,15 @@ def play_human_against_random():
                 message = "Draw!"
             print(message)
             render(state_int, turn)
-            render_gui(screen, state_int, turn, message)
+            render_gui(screen, state_int, turn, message, None)
+            time.sleep(2)
             break
 
 if __name__ == "__main__":
-    # test_rule_1()
-    # test_rule_2()
-    # test_rule_4()
-    play_human_against_random()
+    test_rule_1()
+    test_rule_2()
+    test_rule_4()
+    # play_human_against_random()
     # turn = game.PLAYER_BLACK
     # for _ in range(10):
     #     print('')

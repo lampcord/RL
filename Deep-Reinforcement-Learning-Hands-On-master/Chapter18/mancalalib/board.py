@@ -317,7 +317,7 @@ def play_human_against_random():
             print('No legal moves!')
             turn = game.get_opponent(turn)
             break
-        if turn == game.PLAYER_WHITE:
+        if turn == game.PLAYER_BLACK:
             move = random.choice(possible_moves)
             time.sleep(.5)
         else:
@@ -345,10 +345,10 @@ def play_human_against_random():
             break
 
 if __name__ == "__main__":
-    test_rule_1()
-    test_rule_2()
-    test_rule_4()
-    # play_human_against_random()
+    # test_rule_1()
+    # test_rule_2()
+    # test_rule_4()
+    play_human_against_random()
     # turn = game.PLAYER_BLACK
     # for _ in range(10):
     #     print('')

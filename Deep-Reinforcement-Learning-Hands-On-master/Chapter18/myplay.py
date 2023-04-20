@@ -196,7 +196,7 @@ def do_tournament(sessionNames):
             session2 = sessions[white_player]
             session2.set_bot_player_as_black(False)
             session2Name = sessionNames[white_player]
-            for x in range(20):
+            for x in range(50):
                 winner, state = self_play(session1, session2, x % 2 == 0, gui_each_turn=False)
                 if winner == 'draw':
                     results[session1Name] = results.get(session1Name, 0) + 0.5
@@ -221,9 +221,9 @@ if __name__ == "__main__":
         'best_018_01300.dat',
         'best_019_01400.dat',
         'best_020_01800.dat',
-        'best_020_01800.dat',
         'best_021_02100.dat',
-        'best_022_00100.dat'
+        'best_022_00100.dat',
+        'best_023_01400.dat'
     ]
     do_tournament(sessionNames)
 

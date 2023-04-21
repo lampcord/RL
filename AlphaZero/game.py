@@ -11,6 +11,9 @@ Game - Represents the rules to a board game.
     Render - Render the game to stdout
 """
 
+class GameTurn(Enum):
+    PLAYER1 = 0
+    PLAYER2 = 1
 class GameResult(Enum):
     PLAYER1 = 0
     PLAYER2 = 1
@@ -35,3 +38,24 @@ class Game:
 
     def get_encoded_binary(self, list_state):
         return 0
+
+    def get_score_for_result(self, result, turn):
+        if result == GameResult.DRAW:
+            return 0
+
+        if turn == GameTurn.PLAYER1:
+            if result == GameResult.PLAYER1:
+                return 1
+            elif result == GameResult.PLAYER2:
+                return -1
+
+        if turn == GameTurn.PLAYER2:
+            if result == GameResult.PLAYER2:
+                return 1
+            elif result == GameResult.PLAYER1:
+                return -1
+
+        return None
+
+    def switch_players(self, turn):
+        return GameTurn.PLAYER1 if turn == GameTurn.PLAYER2 else GameTurn.PLAYER2

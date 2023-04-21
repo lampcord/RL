@@ -20,11 +20,15 @@ class GameResult(Enum):
     DRAW = 2
     NOT_COMPLETED = 3
 
+game_result_for_turn = {
+    GameTurn.PLAYER1: GameResult.PLAYER1,
+    GameTurn.PLAYER2: GameResult.PLAYER2
+}
 class Game:
     def __init__(self):
         pass
 
-    def reset(self):
+    def get_initial_position(self):
         return 0
 
     def move(self, binary_state, move, turn):

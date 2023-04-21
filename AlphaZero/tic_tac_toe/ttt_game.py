@@ -7,14 +7,11 @@ Position is represented as a list of 9 cells. Each cell is either:
 0 - Empty
 1 - Player1
 2 - Player2
-012
-345
-678
 """
 winning_patterns = {
-    0: [[1, 2], [4, 8], [3, 6]],
+    0: [[1, 2], [3, 6], [4, 8]],
     1: [[0, 2], [4, 7]],
-    2: [[0, 1], [5, 8], [4, 6]],
+    2: [[0, 1], [4, 6], [5, 8]],
     3: [[0, 6], [4, 5]],
     4: [[0, 8], [1, 7], [2, 6], [3, 5]],
     5: [[2, 8], [3, 4]],
@@ -22,15 +19,28 @@ winning_patterns = {
     7: [[1, 4], [6, 8]],
     8: [[0, 4], [2, 5], [6, 7]]
     }
+
+symbol_for_player = {
+    game.GameTurn.PLAYER1: 1,
+    game.GameTurn.PLAYER2: 2
+}
+
+display_char = {
+    0: '.',
+    1: 'X',
+    2: 'O'
+}
+
 class TicTacToeGame(game.Game):
     def __init__(self):
         super().__init__()
 
-    def reset(self):
+    def get_initial_position(self):
         return self.get_encoded_binary([0] * 9)
 
     def move(self, binary_state, move, turn):
         legal_moves = self.get_legal_moves(binary_state)
+
         assert move in legal_moves
 
         list_state = self.get_decoded_list(binary_state)
@@ -38,12 +48,27 @@ class TicTacToeGame(game.Game):
 
         assert turn in [game.GameTurn.PLAYER1, game.GameTurn.PLAYER2]
 
-        list_state[move] = 1 if turn == game.GameTurn.PLAYER1 else 2
+        list_state[move] = symbol_for_player[turn]
 
         new_binary_state = self.get_encoded_binary(list_state)
-        result = game.GameResult.NOT_COMPLETED
         switch_turns = True
-        return new_binary_state, result, True
+        result = game.GameResult.NOT_COMPLETED
+        info = {}
+
+        for check_set in winning_patterns[move]:
+            winning_set = [move]
+            for check_cell in check_set:
+                if list_state[check_cell] != symbol_for_player[turn]:
+                    break
+                winning_set.append(check_cell)
+            if len(winning_set) == 3:
+                info['winning_set'] = winning_set
+                result = game.game_result_for_turn[turn]
+
+        if result == game.GameResult.NOT_COMPLETED and len(legal_moves) == 1:
+            result = game.GameResult.DRAW
+
+        return new_binary_state, result, switch_turns, info
 
     def get_legal_moves(self, binary_state):
         list_state = self.get_decoded_list(binary_state)
@@ -67,31 +92,40 @@ class TicTacToeGame(game.Game):
             binary_state /= 4
         return list_state[::-1]
 
-    def render(self, binary_state):
+    def render(self, binary_state, winning_set=[]):
         list_state = self.get_decoded_list(binary_state)
         for ndx, cell in enumerate(list_state):
-            label = '.'
-            if cell == 1:
-                label = 'X'
-            elif cell == 2:
-                label = 'O'
-            print(label, end='')
-            if (ndx + 1) % 3 == 0:
+            if ndx % 3 == 0:
                 print('')
+                print('+---+---+---+')
+                print('|', end='')
+            if ndx in winning_set:
+                label = f'({display_char[list_state[ndx]]})'
+            else:
+                label = f' {display_char[list_state[ndx]]} '
+            print(label + '|', end='')
+        print('')
+        print('+---+---+---+')
+
 
 def play_random_game():
     ttt = TicTacToeGame()
-    binary_state = ttt.reset()
+    binary_state = ttt.get_initial_position()
     turn = game.GameTurn.PLAYER1
     while True:
         legal_moves = ttt.get_legal_moves(binary_state)
         if len(legal_moves) == 0:
             break
         move = random.choice(legal_moves)
-        binary_state, result, switch_players = ttt.move(binary_state, move, turn)
-        turn = ttt.switch_players(turn)
-        # print(ttt.get_decoded_list(binary_state))
-        ttt.render(binary_state)
+        binary_state, result, switch_players, info = ttt.move(binary_state, move, turn)
+
+        if switch_players:
+            turn = ttt.switch_players(turn)
+        ttt.render(binary_state, info.get('winning_set', []))
+
+        if result != game.GameResult.NOT_COMPLETED:
+            print(f'Result {result.name}')
+            break
 
 
 def test_1():
@@ -123,5 +157,6 @@ def test_2():
             print('-' * 20)
 
 if __name__ == "__main__":
-    # test_1()
+    test_1()
     test_2()
+    play_random_game()

@@ -1,30 +1,30 @@
-AlphaZero is an artificial intelligence algorithm developed by DeepMind that achieved superhuman performance in the board games of chess, shogi, and Go. The algorithm uses deep neural networks, Monte Carlo Tree Search (MCTS), and reinforcement learning to teach itself how to play games.
+Entities
 
-To implement AlphaZero for a board game, follow these steps:
+Agent - An agent can play a Game and learn from ReplayMemory using a Net
+    PlayAgainstHuman - plays a game against a human using the Board
 
-Understand the rules of the game: Make sure you have a solid understanding of the game you want to implement the algorithm for, including its rules, legal moves, and winning conditions.
+Game - Represents the rules to a board game.
+    Reset - Reset game to initial state
+    Move - Execute a move returning
+    GetEncodedBinary - Returns the encoded binary of a list based position.
+    GetDecodedList - Returns a list based position from a decoded binary.
+    GetFeedForwardVector - Returns a vector that can be used to feed into a Net.
 
-Define the game environment: Create a game environment that can represent the board state, validate moves, and check for winning conditions. This environment should have functions for:
+Board - A gui that allows the game to be played against a human.
+    Display - display a position
+    GetUserInput - respond to mouse clicks to allow user to play.
 
-Initializing the game state
-Executing moves
-Checking for legal moves
-Evaluating the game outcome (win, loss, or draw)
-Implement a neural network: Design a deep neural network to predict the policy (the probability distribution over moves) and the value function (the expected outcome of a game state). The network should take the game state as input and output both the policy and the value function. You can use popular deep learning frameworks like TensorFlow or PyTorch for this.
+ReplayMemory - A serializable record of positions and scores used to allow an Agent to learn.
+    Accumulate - add a new item to the memory
+    Sample - return a random batch of items
+    Save - save to disk
+    Load - load from disk
 
-Implement the MCTS algorithm: The Monte Carlo Tree Search algorithm helps the AI explore and evaluate game states by simulating games and backpropagating the results through the search tree. Implement the MCTS algorithm, including:
+Net - A neural network that acts as the brain of an agent.
+    GetPolicyAndValue - return a policy vector and a value scalar for a given position
+    Train - train from a batch of samples
+    Save - save to disk
+    Load - load from disk
 
-Selection: Traverse the tree from the root node to a leaf node by choosing the child node with the highest Upper Confidence Bound applied to Trees (UCT) score.
-Expansion: If the leaf node is not a terminal state, expand it by generating all possible child nodes.
-Simulation: Use the neural network to evaluate the newly expanded node and obtain its value and policy.
-Backpropagation: Update the visited nodes with the new value and policy information.
-Self-play and training: Train the neural network using reinforcement learning and self-play. Start by having the AI play games against itself, using the MCTS to generate moves. Update the neural network's weights based on the outcomes of the self-play games.
-
-Perform iterations of self-play, each consisting of a number of games.
-Store the game states and policy targets from the self-play games in a dataset.
-Train the neural network on this dataset using supervised learning techniques, like stochastic gradient descent.
-Evaluation and improvement: Periodically evaluate the performance of the trained neural network against previous versions of itself or other players. If the new network performs better, use it for further self-play and training. Repeat this process until the AI reaches the desired level of performance.
-
-Implement a user interface (optional): If you want to use your AlphaZero implementation for human players, create a user interface that allows users to play against the AI and visualize the game state.
-
-Remember that AlphaZero requires significant computational resources and time to train, especially for complex games. Depending on the board game and the desired performance, you may need to adjust the neural network architecture, MCTS settings, and training setup.
+MCTS - Monte Carlo Tree Search
+    Search - Performs a search on a Game and updates ReplayMemory with the results.

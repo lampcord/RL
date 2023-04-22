@@ -1,6 +1,8 @@
+import time
+
 import game
 import random
-
+import tic_tac_toe.ttt_board
 """
 TicTacToe
 Position is represented as a list of 9 cells. Each cell is either:
@@ -64,6 +66,7 @@ class TicTacToeGame(game.Game):
             if len(winning_set) == 3:
                 info['winning_set'] = winning_set
                 result = game.game_result_for_turn[turn]
+                break
 
         if result == game.GameResult.NOT_COMPLETED and len(legal_moves) == 1:
             result = game.GameResult.DRAW
@@ -110,6 +113,7 @@ class TicTacToeGame(game.Game):
 
 def play_random_game():
     ttt = TicTacToeGame()
+    board = tic_tac_toe.ttt_board.TicTacToeBoard()
     binary_state = ttt.get_initial_position()
     turn = game.GameTurn.PLAYER1
     while True:
@@ -122,6 +126,8 @@ def play_random_game():
         if switch_players:
             turn = ttt.switch_players(turn)
         ttt.render(binary_state, info.get('winning_set', []))
+        board.render(binary_state, info.get('winning_set', []))
+        time.sleep(1)
 
         if result != game.GameResult.NOT_COMPLETED:
             print(f'Result {result.name}')
@@ -146,17 +152,22 @@ def test_1():
 
 def test_2():
     ttt = TicTacToeGame()
+    board = tic_tac_toe.ttt_board.TicTacToeBoard()
     for move in range(9):
         for test_set in winning_patterns[move]:
             list_state = [0] * 9
-            list_state[move] = 2
+            list_state[move] = 1
+            winning_set = [move]
             for m in test_set:
                 list_state[m] = 1
+                winning_set.append(m)
             binary_state = ttt.get_encoded_binary(list_state)
-            ttt.render(binary_state)
+            ttt.render(binary_state, winning_set)
+            board.render(binary_state, winning_set)
+            time.sleep(.5)
             print('-' * 20)
 
 if __name__ == "__main__":
-    test_1()
-    test_2()
+    # test_1()
+    # test_2()
     play_random_game()

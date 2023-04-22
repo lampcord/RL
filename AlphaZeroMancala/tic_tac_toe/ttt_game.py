@@ -111,27 +111,28 @@ class TicTacToeGame(game.Game):
         print('+---+---+---+')
 
 
-def play_random_game():
-    ttt = TicTacToeGame()
-    board = tic_tac_toe.ttt_board.TicTacToeBoard()
-    binary_state = ttt.get_initial_position()
-    turn = game.GameTurn.PLAYER1
-    while True:
-        legal_moves = ttt.get_legal_moves(binary_state)
-        if len(legal_moves) == 0:
-            break
-        move = random.choice(legal_moves)
-        binary_state, result, switch_players, info = ttt.move(binary_state, move, turn)
+def play_random_games(num_games=1):
+    for _ in range(num_games):
+        ttt = TicTacToeGame()
+        board = tic_tac_toe.ttt_board.TicTacToeBoard()
+        binary_state = ttt.get_initial_position()
+        turn = game.GameTurn.PLAYER1
+        while True:
+            legal_moves = ttt.get_legal_moves(binary_state)
+            if len(legal_moves) == 0:
+                break
+            move = random.choice(legal_moves)
+            binary_state, result, switch_players, info = ttt.move(binary_state, move, turn)
 
-        if switch_players:
-            turn = ttt.switch_players(turn)
-        ttt.render(binary_state, info.get('winning_set', []))
-        board.render(binary_state, info.get('winning_set', []))
-        time.sleep(1)
+            if switch_players:
+                turn = ttt.switch_players(turn)
+            ttt.render(binary_state, info.get('winning_set', []))
+            board.render(binary_state, info.get('winning_set', []))
+            time.sleep(1)
 
-        if result != game.GameResult.NOT_COMPLETED:
-            print(f'Result {result.name}')
-            break
+            if result != game.GameResult.NOT_COMPLETED:
+                print(f'Result {result.name}')
+                break
 
 
 def test_1():
@@ -170,4 +171,4 @@ def test_2():
 if __name__ == "__main__":
     # test_1()
     # test_2()
-    play_random_game()
+    play_random_games(10)

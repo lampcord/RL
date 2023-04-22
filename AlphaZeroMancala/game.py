@@ -29,19 +29,19 @@ class Game:
         pass
 
     def get_initial_position(self):
-        return 0
+        raise NotImplementedError("get_initial_position")
 
     def move(self, binary_state, move, turn):
-        new_binary_state = 0
-        result = GameResult.NOT_COMPLETED
-        switch_turns = True
-        return new_binary_state, result, True
+        raise NotImplementedError("move")
 
     def get_legal_moves(self, binary_state):
-        return []
+        raise NotImplementedError("get_legal_moves")
 
     def get_encoded_binary(self, list_state):
-        return 0
+        raise NotImplementedError("get_encoded_binary")
+
+    def get_decoded_list(self, binary_state):
+        raise NotImplementedError("get_decoded_list")
 
     def get_score_for_result(self, result, turn):
         if result == GameResult.DRAW:

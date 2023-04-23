@@ -73,7 +73,7 @@ class TicTacToeGame(game.Game):
 
         return new_binary_state, result, switch_turns, info
 
-    def get_legal_moves(self, binary_state):
+    def get_legal_moves(self, binary_state, turn):
         list_state = self.get_decoded_list(binary_state)
         legal_moves = []
         for ndx, cell in enumerate(list_state):

@@ -13,7 +13,7 @@ class MCTSNode:
         self.turn = turn
         self.parent = parent
         self.move = move
-        self.unexplored_children = game.get_legal_moves(binary_state)
+        self.unexplored_children = game.get_legal_moves(binary_state, turn)
         self.children = []
         self.result = result
         self.num_visits = 0.0
@@ -49,7 +49,7 @@ class MCTSNode:
         turn = self.turn
         result = self.result
         while result == GameResult.NOT_COMPLETED:
-            moves = game.get_legal_moves(binary_state)
+            moves = game.get_legal_moves(binary_state, turn)
             move = random.choice(moves)
             binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
             if switch_turns:

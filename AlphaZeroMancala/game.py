@@ -1,5 +1,5 @@
 from enum import Enum
-
+from abc import ABC, abstractmethod
 """
 Game - Represents the rules to a board game.
     Reset - Reset game to initial state
@@ -24,22 +24,27 @@ game_result_for_turn = {
     GameTurn.PLAYER1: GameResult.PLAYER1,
     GameTurn.PLAYER2: GameResult.PLAYER2
 }
-class Game:
+class Game(ABC):
     def __init__(self):
         pass
 
+    @abstractmethod
     def get_initial_position(self):
         raise NotImplementedError("get_initial_position")
 
+    @abstractmethod
     def move(self, binary_state, move, turn):
         raise NotImplementedError("move")
 
-    def get_legal_moves(self, binary_state):
+    @abstractmethod
+    def get_legal_moves(self, binary_state, turn):
         raise NotImplementedError("get_legal_moves")
 
+    @abstractmethod
     def get_encoded_binary(self, list_state):
         raise NotImplementedError("get_encoded_binary")
 
+    @abstractmethod
     def get_decoded_list(self, binary_state):
         raise NotImplementedError("get_decoded_list")
 

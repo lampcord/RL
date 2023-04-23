@@ -1,114 +1,151 @@
-import time
+import random
 
-import numpy as np
 from tic_tac_toe.ttt_game import TicTacToeGame
-# import node_painter
-import pygame
+from tic_tac_toe.ttt_board import TicTacToeBoard
+from game import GameResult, GameTurn
+import math
+import node_painter
 
-
-class Node:
-    def __init__(self, parent=None, action=None, env=None, root_player=None):
+class MCTSNode:
+    def __init__(self, game, binary_state, turn, parent=None, move=None, result=GameResult.NOT_COMPLETED):
+        self.binary_state = binary_state
+        self.game = game
+        self.turn = turn
         self.parent = parent
-        self.action = action
-        self.env = env.clone() if env else None
+        self.move = move
+        self.unexplored_children = game.get_legal_moves(binary_state)
         self.children = []
-        self.num_visits = 0
-        self.total_reward = 0
-        self.is_expanded = False
-        self.root_player = root_player
+        self.result = result
+        self.num_visits = 0.0
+        self.num_wins = 0.0
+
+    def select(self, c=1.41):
+        if len(self.unexplored_children) > 0:
+            return self
+        if len(self.children) == 0:
+            return self
+        best_child = self.best_child(c)
+        return best_child.select()
 
     def expand(self):
-        legal_moves = self.env.get_legal_actions()
-        self.children = [Node(parent=self, action=move, env=self.env, root_player=self.root_player) for move in legal_moves]
-        for child in self.children:
-            child.env.step(child.action)
+        if self.result != GameResult.NOT_COMPLETED:
+            return self
+        if len(self.unexplored_children) == 0:
+            return self
 
-        self.is_expanded = True
+        move = random.choice(self.unexplored_children)
+        self.unexplored_children.remove(move)
 
-    def uct(self, c=1):
-        if self.num_visits == 0 or self.parent is None:
-            return np.inf
-        return (self.total_reward / self.num_visits) + c * np.sqrt(np.log(self.parent.num_visits) / self.num_visits)
-
-    def best_child(self, c=1):
-        return max(self.children, key=lambda child: child.uct(c))
+        turn = self.turn
+        new_binary_state, result, switch_turns, info = game.move(self.binary_state, move, self.turn)
+        if switch_turns:
+            turn = game.switch_players(turn)
+        child = MCTSNode(game, new_binary_state, turn, self, move, result)
+        self.children.append(child)
+        return child
 
     def rollout(self):
-        env_copy = self.env.clone()
-        done = False
-        while not done:
-            legal_moves = env_copy.get_legal_actions()
-            if len(legal_moves) == 0:
-                break
-            random_move = np.random.choice(legal_moves)
-            _, _, done, _ = env_copy.step(random_move)
-
-        result = env_copy.get_result()
+        binary_state = self.binary_state
+        turn = self.turn
+        result = self.result
+        while result == GameResult.NOT_COMPLETED:
+            moves = game.get_legal_moves(binary_state)
+            move = random.choice(moves)
+            binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
+            if switch_turns:
+                turn = game.switch_players(turn)
         return result
 
-    def backpropagate(self, rollout_result):
+    def back_propagate(self, rollout_result):
         self.num_visits += 1
         reward = 0
         if self.parent:
-            reward = self.parent.env.get_points_for_result(rollout_result)
-        self.total_reward += reward
+            reward = self.game.get_score_for_result(rollout_result, self.parent.turn)
+        self.num_wins += reward
         if self.parent:
-            self.parent.backpropagate(rollout_result)
+            self.parent.back_propagate(rollout_result)
 
-    def dump(self, level=1):
-        for x in range(level):
-            print(' ', end='')
-        print(self.action, self.total_reward)
-        for c in self.children:
-            c.dump(level + 1)
+    def ucb(self, c):
+        if self.parent is None:
+            return 0.0
+        if self.num_visits == 0:
+            return 0.0
+        exploitation = self.num_wins / self.num_visits
+        exploration = c * math.sqrt(math.log(self.parent.num_visits) / self.num_visits)
+        ucb = exploration + exploitation
+        return ucb
+    def best_child(self, c=1.41):
+        return max(self.children, key=lambda child: child.ucb(c))
 
-    # def render_node(self, screen, font, selected=False):
-    #     label = f"{self.total_reward}/{self.num_visits}=>{self.uct():.3}"
-    #     text = font.render(label, True, (0, 0, 0))
-    #     text_rect = text.get_rect(center=(self.pos[0], self.pos[1] - 30))
-    #     screen.blit(text, text_rect)
-    #
-    #     self.env.render_node(screen, self.pos, font, selected)
-    #
-    # def get_path_label(self):
-    #     return str(self.action)
+    def render_node(self, screen, board, font, selected=False, result=None):
+        label = f"{self.num_wins}/{self.num_visits}=>{self.ucb(c=1.41):.3}"
+        if result:
+            label += f" {result.name}"
+        text = font.render(label, True, (0, 0, 0))
+        text_rect = text.get_rect(center=(self.pos[0], self.pos[1] - 30))
+        screen.blit(text, text_rect)
+
+        board.render_node(screen, self.binary_state, self.turn, self.pos, font, selected)
+
+    def get_path_label(self):
+        return str(self.move)
+
+    def get_most_visited(self):
+        return max(self.children, key=lambda child: child.num_visits).move
 
 
+painter_on = False
+final_only = True
+def mcts_search(game, binary_state, turn, loops=500):
+    root = MCTSNode(game, binary_state, turn)
+    board = TicTacToeBoard()
+    if painter_on:
+        painter = node_painter.NodePainter(root, board)
 
-# painter_on = False
-def mcts(env, num_simulations=1000, c=1):
-    root = Node(env=env, root_player=env.turn)
-    game = TicTacToeGame()
-    # if painter_on:
-    #     painter = node_painter.NodePainter(root)
-
-    for _ in range(num_simulations):
+    for _ in range(loops):
         node = root
 
-        # if painter_on:
-        #     painter.paint('Start', node)
+        if painter_on and not final_only:
+            painter.paint('Start', node)
 
-        while node.is_expanded and node.children:
-            node = node.best_child(c)
+        node = node.select()
 
-        if not node.is_expanded:
-            node.expand()
+        if painter_on and not final_only:
+            painter.paint('Select', node)
 
-        # if painter_on:
-        #     painter.paint('Expanded', node)
+        node = node.expand()
+
+        if painter_on and not final_only:
+            painter.paint('Expand', node)
 
         rollout_result = node.rollout()
 
-        # if painter_on:
-        #     painter.paint('Rollout', node)
+        if painter_on and not final_only:
+            painter.paint('Rollout', node)
 
-        node.backpropagate(rollout_result)
+        node.back_propagate(rollout_result)
 
-        # if painter_on:
-        #     painter.paint('Backpropogate', node)
+    if painter_on:
+        painter.paint('Final', node)
 
-    # if painter_on:
-    #     painter.close()
-    best_move = root.best_child(c=0).action
-    # root.dump()
-    return best_move
+    if painter_on:
+        painter.close()
+    return root.get_most_visited()
+
+
+if __name__ == "__main__":
+    game = TicTacToeGame()
+    binary_state = game.get_initial_position()
+    # binary_state = 65826
+    turn = GameTurn.PLAYER1
+    result = GameResult.NOT_COMPLETED
+    while result == GameResult.NOT_COMPLETED:
+        game.render(binary_state)
+        print(binary_state)
+        move = mcts_search(game, binary_state, turn)
+        binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
+        if switch_turns:
+            turn = game.switch_players(turn)
+    game.render(binary_state)
+    print(binary_state)
+

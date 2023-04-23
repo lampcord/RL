@@ -44,22 +44,19 @@ class Game:
         raise NotImplementedError("get_decoded_list")
 
     def get_score_for_result(self, result, turn):
-        if result == GameResult.DRAW:
-            return 0
-
         if turn == GameTurn.PLAYER1:
             if result == GameResult.PLAYER1:
                 return 1
             elif result == GameResult.PLAYER2:
-                return -1
+                return 0
 
         if turn == GameTurn.PLAYER2:
             if result == GameResult.PLAYER2:
                 return 1
             elif result == GameResult.PLAYER1:
-                return -1
+                return 0
 
-        return None
+        return 0.5
 
     def switch_players(self, turn):
         return GameTurn.PLAYER1 if turn == GameTurn.PLAYER2 else GameTurn.PLAYER2

@@ -16,16 +16,16 @@ class TicTacToeBoard:
         self.window = None
         self.window_size = 300  # The size of the PyGame window
 
-    # def render_node(self, screen, pos, font, selected=False):
-    #     if selected:
-    #         text_color = (255, 0, 0)
-    #     else:
-    #         text_color = (0, 0, 0)
-    #     self.render_board(pos, screen, 40, 6, False, 1)
-    #     label = f"{ttt_game.display_char[self.turn]}"
-    #     text = font.render(label, True, text_color)
-    #     text_rect = text.get_rect(center=(pos[0], pos[1] + 30))
-    #     screen.blit(text, text_rect)
+    def render_node(self, screen, state_int, turn, pos, font, selected=False):
+        if selected:
+            text_color = (255, 0, 0)
+        else:
+            text_color = (0, 0, 0)
+        self.render_board(state_int, [], pos, screen, 40, 6, False, 1)
+        label = f"{ttt_game.display_char[turn.value]}"
+        text = font.render(label, True, text_color)
+        text_rect = text.get_rect(center=(pos[0], pos[1] + 30))
+        screen.blit(text, text_rect)
 
     def render_board(self, state_int, winning_set, pos, screen, size, font_size=36, show_available_actions=True, line_thickness=5):
         state_list = self.game.get_decoded_list(state_int)

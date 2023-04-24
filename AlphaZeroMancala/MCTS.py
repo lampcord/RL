@@ -2,12 +2,13 @@ import random
 
 from tic_tac_toe.ttt_game import TicTacToeGame
 from tic_tac_toe.ttt_board import TicTacToeBoard
+from replay_memory import ReplayMemory
 from game import GameResult, GameTurn
 import math
 import node_painter
 
 class MCTSNode:
-    def __init__(self, game, binary_state, turn, parent=None, move=None, result=GameResult.NOT_COMPLETED):
+    def __init__(self, game, binary_state, turn, parent=None, move=None, result=GameResult.NOT_COMPLETED, memory=None):
         self.binary_state = binary_state
         self.game = game
         self.turn = turn
@@ -16,8 +17,12 @@ class MCTSNode:
         self.unexplored_children = game.get_legal_moves(binary_state, turn)
         self.children = []
         self.result = result
-        self.num_visits = 0.0
-        self.num_wins = 0.0
+        self.memory = memory
+        if memory:
+            self.num_visits, self.num_wins = memory.get(self.binary_state, self.turn)
+        else:
+            self.num_visits = 0.0
+            self.num_wins = 0.0
 
     def select(self, c=1.41):
         if len(self.unexplored_children) > 0:
@@ -40,7 +45,7 @@ class MCTSNode:
         new_binary_state, result, switch_turns, info = game.move(self.binary_state, move, self.turn)
         if switch_turns:
             turn = game.switch_players(turn)
-        child = MCTSNode(game, new_binary_state, turn, self, move, result)
+        child = MCTSNode(game, new_binary_state, turn, self, move, result, memory=self.memory)
         self.children.append(child)
         return child
 
@@ -62,6 +67,8 @@ class MCTSNode:
         if self.parent:
             reward = self.game.get_score_for_result(rollout_result, self.parent.turn)
         self.num_wins += reward
+        if self.memory:
+            self.memory.update(self.binary_state, self.turn, self.num_visits, self.num_wins)
         if self.parent:
             self.parent.back_propagate(rollout_result)
 
@@ -96,8 +103,10 @@ class MCTSNode:
 
 painter_on = False
 final_only = True
-def mcts_search(game, binary_state, turn, loops=500):
-    root = MCTSNode(game, binary_state, turn)
+
+
+def mcts_search(game, binary_state, turn, loops=500, memory=None):
+    root = MCTSNode(game, binary_state, turn, memory=memory)
     board = TicTacToeBoard()
     if painter_on:
         painter = node_painter.NodePainter(root, board)
@@ -128,24 +137,27 @@ def mcts_search(game, binary_state, turn, loops=500):
     if painter_on:
         painter.paint('Final', node)
 
-    if painter_on:
-        painter.close()
-    return root.get_most_visited()
-
+    # if painter_on:
+    #     painter.close()
+    # return root.get_most_visited()
+    return root.best_child(c=0.0).move
 
 if __name__ == "__main__":
     game = TicTacToeGame()
-    binary_state = game.get_initial_position()
-    # binary_state = 65826
-    turn = GameTurn.PLAYER1
-    result = GameResult.NOT_COMPLETED
-    while result == GameResult.NOT_COMPLETED:
+    memory = ReplayMemory()
+
+    for _ in range(20):
+        turn = GameTurn.PLAYER1
+        binary_state = game.get_initial_position()
+        result = GameResult.NOT_COMPLETED
+        while result == GameResult.NOT_COMPLETED:
+            game.render(binary_state)
+            print(binary_state)
+            move = mcts_search(game, binary_state, turn, memory=memory)
+            binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
+            if switch_turns:
+                turn = game.switch_players(turn)
         game.render(binary_state)
         print(binary_state)
-        move = mcts_search(game, binary_state, turn)
-        binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
-        if switch_turns:
-            turn = game.switch_players(turn)
-    game.render(binary_state)
-    print(binary_state)
+        print(f"Size of replay memory: {len(memory.memory)}")
 

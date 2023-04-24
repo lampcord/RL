@@ -41,7 +41,7 @@ class TicTacToeGame(game.Game):
         return self.get_encoded_binary([0] * 9)
 
     def move(self, binary_state, move, turn):
-        legal_moves = self.get_legal_moves(binary_state)
+        legal_moves = self.get_legal_moves(binary_state, turn)
 
         assert move in legal_moves
 
@@ -118,7 +118,7 @@ def play_random_games(num_games=1):
         binary_state = ttt.get_initial_position()
         turn = game.GameTurn.PLAYER1
         while True:
-            legal_moves = ttt.get_legal_moves(binary_state)
+            legal_moves = ttt.get_legal_moves(binary_state, turn)
             if len(legal_moves) == 0:
                 break
             move = random.choice(legal_moves)

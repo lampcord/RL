@@ -144,20 +144,29 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None):
 
 if __name__ == "__main__":
     game = TicTacToeGame()
-    memory = ReplayMemory()
+    memory = ReplayMemory("TicTacToeMemory.bin")
+    mcts_turn = GameTurn.PLAYER1
+    random_turn = GameTurn.PLAYER2
 
-    for _ in range(20):
-        turn = GameTurn.PLAYER1
+    for game_number in range(1000):
+        turn = GameTurn.PLAYER1 if game_number % 2 == 0 else GameTurn.PLAYER2
         binary_state = game.get_initial_position()
         result = GameResult.NOT_COMPLETED
         while result == GameResult.NOT_COMPLETED:
             game.render(binary_state)
             print(binary_state)
-            move = mcts_search(game, binary_state, turn, memory=memory)
+            if turn == mcts_turn:
+                move = mcts_search(game, binary_state, turn, memory=memory)
+            else:
+                legal_moves = game.get_legal_moves(binary_state, turn)
+                move = int(input(f"Choose Move: {legal_moves}"))
+                # move = random.choice(legal_moves)
             binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
             if switch_turns:
                 turn = game.switch_players(turn)
         game.render(binary_state)
         print(binary_state)
         print(f"Size of replay memory: {len(memory.memory)}")
+        memory.write()
+
 

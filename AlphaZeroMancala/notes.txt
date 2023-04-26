@@ -34,6 +34,6 @@ Entities
 
 TODO:
 [X] Replay Memory Scaling
-[ ] ]Mancala
-[ ] Implement C4
-[ ] Current Player POV Binary
+[/] Current Player POV Binary
+[/] Implement C4
+[ ] Mancala

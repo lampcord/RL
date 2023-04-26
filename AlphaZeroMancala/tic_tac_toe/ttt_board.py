@@ -1,6 +1,8 @@
 import time
 
 import pygame
+
+import game
 from tic_tac_toe import ttt_game
 
 background_color = (255, 255, 255)
@@ -21,14 +23,14 @@ class TicTacToeBoard:
             text_color = (255, 0, 0)
         else:
             text_color = (0, 0, 0)
-        self.render_board(state_int, [], pos, screen, 40, 6, False, 1)
+        self.render_board(state_int, turn, [], pos, screen, 40, 6, False, 1)
         label = f"{ttt_game.display_char[turn.value]}"
         text = font.render(label, True, text_color)
         text_rect = text.get_rect(center=(pos[0], pos[1] + 30))
         screen.blit(text, text_rect)
 
-    def render_board(self, state_int, winning_set, pos, screen, size, font_size=36, show_available_actions=True, line_thickness=5):
-        state_list = self.game.get_decoded_list(state_int)
+    def render_board(self, state_int, turn, winning_set, pos, screen, size, font_size=36, show_available_actions=True, line_thickness=5):
+        state_list = self.game.get_decoded_list(state_int, turn)
         cell_size = size / 3
         left_edge = pos[0] - size / 2
         right_edge = left_edge + size
@@ -93,13 +95,13 @@ class TicTacToeBoard:
                                    (line_coords[1][0] + left_edge, line_coords[1][1] + top_edge))
                 pygame.draw.line(screen, win_line_color, adjusted_coords[0], adjusted_coords[1], line_thickness)
 
-    def render(self, state_int, winning_set=[]):
+    def render(self, state_int, turn, winning_set=[]):
         if self.window is None:
             pygame.init()
             self.window = pygame.display.set_mode((self.window_size, self.window_size))
         self.window.fill(background_color)
 
-        self.render_board(state_int, winning_set, (self.window_size / 2, self.window_size / 2), self.window, self.window_size, 36, True)
+        self.render_board(state_int, turn, winning_set, (self.window_size / 2, self.window_size / 2), self.window, self.window_size, 36, True)
 
         pygame.display.flip()
 
@@ -109,8 +111,9 @@ class TicTacToeBoard:
             self.window = None
 
 if __name__ == "__main__":
-    game = ttt_game.TicTacToeGame()
+    turn = game.GameTurn.PLAYER1
+    game_object = ttt_game.TicTacToeGame()
     board = TicTacToeBoard()
-    board.render(game.get_initial_position())
+    board.render(game_object.get_initial_position(), turn)
     time.sleep(5)
     board.close()

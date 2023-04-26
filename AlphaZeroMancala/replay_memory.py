@@ -8,14 +8,12 @@ class ReplayMemory:
         self.filename = filename
         self.read()
 
-    def update(self, binary_state, turn, visits, wins):
-        key = binary_state * 2 + turn.value
+    def update(self, binary_state, visits, wins):
         value = (visits, wins)
-        self.memory[key] = value
+        self.memory[binary_state] = value
 
-    def get(self, binary_state, turn):
-        key = binary_state * 2 + turn.value
-        return self.memory.get(key, (0.0, 0.0))
+    def get(self, binary_state):
+        return self.memory.get(binary_state, (0.0, 0.0))
 
     def read(self):
         if self.filename is None:

@@ -19,7 +19,7 @@ class MCTSNode:
         self.result = result
         self.memory = memory
         if memory:
-            self.num_visits, self.num_wins = memory.get(self.binary_state, self.turn)
+            self.num_visits, self.num_wins = memory.get(self.binary_state)
         else:
             self.num_visits = 0.0
             self.num_wins = 0.0
@@ -44,7 +44,7 @@ class MCTSNode:
         turn = self.turn
         new_binary_state, result, switch_turns, info = game.move(self.binary_state, move, self.turn)
         if switch_turns:
-            turn = game.switch_players(turn)
+            new_binary_state, turn = game.switch_players(new_binary_state, turn)
         child = MCTSNode(game, new_binary_state, turn, self, move, result, memory=self.memory)
         self.children.append(child)
         return child
@@ -58,7 +58,7 @@ class MCTSNode:
             move = random.choice(moves)
             binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
             if switch_turns:
-                turn = game.switch_players(turn)
+                binary_state, turn = game.switch_players(binary_state, turn)
         return result
 
     def back_propagate(self, rollout_result):
@@ -68,7 +68,7 @@ class MCTSNode:
             reward = self.game.get_score_for_result(rollout_result, self.parent.turn)
         self.num_wins += reward
         if self.memory:
-            self.memory.update(self.binary_state, self.turn, self.num_visits, self.num_wins)
+            self.memory.update(self.binary_state, self.num_visits, self.num_wins)
         if self.parent:
             self.parent.back_propagate(rollout_result)
 
@@ -145,8 +145,9 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None):
 
 if __name__ == "__main__":
     game = TicTacToeGame()
-    memory = ReplayMemory("TicTacToeMemory.bin")
-    # memory.scale(100000.0)
+    memory1 = ReplayMemory("TicTacToeMemory_1000.bin")
+    memory2 = ReplayMemory("TicTacToeMemory_2000.bin")
+    # memory = None
     mcts_turn = GameTurn.PLAYER1
     random_turn = GameTurn.PLAYER2
 
@@ -154,28 +155,31 @@ if __name__ == "__main__":
     results[GameResult.PLAYER1] = 0
     results[GameResult.PLAYER2] = 0
     results[GameResult.DRAW] = 0
-    for game_number in range(1000):
+    for game_number in range(100):
         turn = GameTurn.PLAYER1 if game_number % 2 == 0 else GameTurn.PLAYER2
         binary_state = game.get_initial_position()
         result = GameResult.NOT_COMPLETED
+        # game.render(binary_state, turn)
         while result == GameResult.NOT_COMPLETED:
-            # game.render(binary_state)
             # print(binary_state)
             if turn == mcts_turn:
-                move = mcts_search(game, binary_state, turn, loops=1000, memory=memory)
-            else:
-                move = mcts_search(game, binary_state, turn, loops=1000, memory=memory)
+                move = mcts_search(game, binary_state, turn, loops=10, memory=memory1)
                 # legal_moves = game.get_legal_moves(binary_state, turn)
-                # move = int(input(f"Choose Move: {legal_moves}"))
                 # move = random.choice(legal_moves)
+            else:
+                move = mcts_search(game, binary_state, turn, loops=1000, memory=None)
+                # legal_moves = game.get_legal_moves(binary_state, turn)
+                # move = random.choice(legal_moves)
+                # move = int(input(f"Choose Move: {legal_moves}"))
             binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
+            # game.render(binary_state, turn)
             if switch_turns:
-                turn = game.switch_players(turn)
-        # game.render(binary_state)
+                binary_state, turn = game.switch_players(binary_state, turn)
         results[result] += 1
-        print(binary_state)
-        print(f"Size of replay memory: {len(memory.memory)}")
-        memory.write()
+        # print(binary_state)
+        # print(f"Size of replay memory: {len(memory.memory)}")
+        print('.', end='')
+        # memory.write()
     print(results)
 
 

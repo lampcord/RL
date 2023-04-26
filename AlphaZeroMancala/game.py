@@ -41,11 +41,11 @@ class Game(ABC):
         raise NotImplementedError("get_legal_moves")
 
     @abstractmethod
-    def get_encoded_binary(self, list_state):
+    def get_encoded_binary(self, list_state, turn):
         raise NotImplementedError("get_encoded_binary")
 
     @abstractmethod
-    def get_decoded_list(self, binary_state):
+    def get_decoded_list(self, binary_state, turn):
         raise NotImplementedError("get_decoded_list")
 
     def get_score_for_result(self, result, turn):
@@ -63,5 +63,11 @@ class Game(ABC):
 
         return 0.5
 
-    def switch_players(self, turn):
+    def get_oponents_turn(self, turn):
         return GameTurn.PLAYER1 if turn == GameTurn.PLAYER2 else GameTurn.PLAYER2
+
+    def switch_players(self, binary_state, turn):
+        list_state = self.get_decoded_list(binary_state, turn)
+        turn = self.get_oponents_turn(turn)
+        binary_state = self.get_encoded_binary(list_state, turn)
+        return binary_state, turn

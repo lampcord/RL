@@ -32,3 +32,11 @@ class ReplayMemory:
         with open(self.filename, 'wb') as f:
             f.write(packed_data)
 
+    def scale(self, target=100.0):
+        max_value = max(self.memory.values())[0]
+        factor = target / max_value
+        self.memory = {key: (visits * factor, wins * factor) for key, (visits, wins) in self.memory.items()}
+        # for key, (visits, wins) in self.memory.items():
+        #     print(key, visits, wins)
+        # print(max(self.memory.values()))
+

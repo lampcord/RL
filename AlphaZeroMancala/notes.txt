@@ -28,3 +28,12 @@ Net - A neural network that acts as the brain of an agent.
 
 MCTS - Monte Carlo Tree Search
     Search - Performs a search on a Game and updates ReplayMemory with the results.
+
+
+------------------------------------------------------------------------
+
+TODO:
+[/] Replay Memory Scaling
+[ ] ]Mancala
+[ ] Implement C4
+[ ] Current Player POV Binary

@@ -85,7 +85,7 @@ class MCTSNode:
         return max(self.children, key=lambda child: child.ucb(c))
 
     def render_node(self, screen, board, font, selected=False, result=None):
-        label = f"{self.num_wins}/{self.num_visits}=>{self.ucb(c=1.41):.3}"
+        label = f"{self.num_wins:.2f}/{self.num_visits:.2f}=>{self.ucb(c=1.41):.3}"
         if result:
             label += f" {result.name}"
         text = font.render(label, True, (0, 0, 0))
@@ -102,6 +102,7 @@ class MCTSNode:
 
 
 painter_on = False
+# painter_on = True
 final_only = True
 
 
@@ -145,28 +146,36 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None):
 if __name__ == "__main__":
     game = TicTacToeGame()
     memory = ReplayMemory("TicTacToeMemory.bin")
+    # memory.scale(100000.0)
     mcts_turn = GameTurn.PLAYER1
     random_turn = GameTurn.PLAYER2
 
+    results = {}
+    results[GameResult.PLAYER1] = 0
+    results[GameResult.PLAYER2] = 0
+    results[GameResult.DRAW] = 0
     for game_number in range(1000):
         turn = GameTurn.PLAYER1 if game_number % 2 == 0 else GameTurn.PLAYER2
         binary_state = game.get_initial_position()
         result = GameResult.NOT_COMPLETED
         while result == GameResult.NOT_COMPLETED:
-            game.render(binary_state)
-            print(binary_state)
+            # game.render(binary_state)
+            # print(binary_state)
             if turn == mcts_turn:
-                move = mcts_search(game, binary_state, turn, memory=memory)
+                move = mcts_search(game, binary_state, turn, loops=1000, memory=memory)
             else:
-                legal_moves = game.get_legal_moves(binary_state, turn)
-                move = int(input(f"Choose Move: {legal_moves}"))
+                move = mcts_search(game, binary_state, turn, loops=1000, memory=memory)
+                # legal_moves = game.get_legal_moves(binary_state, turn)
+                # move = int(input(f"Choose Move: {legal_moves}"))
                 # move = random.choice(legal_moves)
             binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
             if switch_turns:
                 turn = game.switch_players(turn)
-        game.render(binary_state)
+        # game.render(binary_state)
+        results[result] += 1
         print(binary_state)
         print(f"Size of replay memory: {len(memory.memory)}")
         memory.write()
+    print(results)
 
 

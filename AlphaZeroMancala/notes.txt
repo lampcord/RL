@@ -1,39 +1,39 @@
 Entities
 
-Agent - An agent can play a Game and learn from ReplayMemory using a Net
+[ ] Agent - An agent can play a Game and learn from ReplayMemory using a Net
     PlayAgainstHuman - plays a game against a human using the Board
 
-Game - Represents the rules to a board game.
+[ ] Game - Represents the rules to a board game.
     Reset - Reset game to initial state
     Move - Execute a move returning
     GetEncodedBinary - Returns the encoded binary of a list based position.
     GetDecodedList - Returns a list based position from a decoded binary.
     GetFeedForwardVector - Returns a vector that can be used to feed into a Net.
 
-Board - A gui that allows the game to be played against a human.
+[ ] Board - A gui that allows the game to be played against a human.
     Display - display a position
     GetUserInput - respond to mouse clicks to allow user to play.
 
-ReplayMemory - A serializable record of positions and scores used to allow an Agent to learn.
+[ ] ReplayMemory - A serializable record of positions and scores used to allow an Agent to learn.
     Accumulate - add a new item to the memory
     Sample - return a random batch of items
     Save - save to disk
     Load - load from disk
 
-Net - A neural network that acts as the brain of an agent.
+[ ] Net - A neural network that acts as the brain of an agent.
     GetPolicyAndValue - return a policy vector and a value scalar for a given position
     Train - train from a batch of samples
     Save - save to disk
     Load - load from disk
 
-MCTS - Monte Carlo Tree Search
+[ ] MCTS - Monte Carlo Tree Search
     Search - Performs a search on a Game and updates ReplayMemory with the results.
 
 
 ------------------------------------------------------------------------
 
 TODO:
-[/] Replay Memory Scaling
+[X] Replay Memory Scaling
 [ ] ]Mancala
 [ ] Implement C4
 [ ] Current Player POV Binary

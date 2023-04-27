@@ -106,7 +106,7 @@ painter_on = False
 final_only = True
 
 
-def mcts_search(game, binary_state, turn, loops=500, memory=None):
+def mcts_search(game, binary_state, turn, loops=500, memory=None, c=1.41):
     root = MCTSNode(game, binary_state, turn, memory=memory)
     board = TicTacToeBoard()
     if painter_on:
@@ -118,7 +118,7 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None):
         if painter_on and not final_only:
             painter.paint('Start', node)
 
-        node = node.select()
+        node = node.select(c)
 
         if painter_on and not final_only:
             painter.paint('Select', node)
@@ -163,11 +163,11 @@ if __name__ == "__main__":
         while result == GameResult.NOT_COMPLETED:
             # print(binary_state)
             if turn == mcts_turn:
-                move = mcts_search(game, binary_state, turn, loops=10, memory=memory1)
+                move = mcts_search(game, binary_state, turn, loops=10, memory=memory1, c=1.41)
                 # legal_moves = game.get_legal_moves(binary_state, turn)
                 # move = random.choice(legal_moves)
             else:
-                move = mcts_search(game, binary_state, turn, loops=1000, memory=None)
+                move = mcts_search(game, binary_state, turn, loops=10, memory=memory2, c=1.41)
                 # legal_moves = game.get_legal_moves(binary_state, turn)
                 # move = random.choice(legal_moves)
                 # move = int(input(f"Choose Move: {legal_moves}"))

@@ -48,6 +48,8 @@ In this representation, the field above will be equal to those bits:
 All the code is generic, so, in theory you can try to adjust the field size.
 But tests could become broken.
 """
+import random
+
 import game
 
 GAME_ROWS = 6
@@ -69,11 +71,16 @@ class C4Game(game.Game):
         raise NotImplementedError("move")
 
     def get_legal_moves(self, binary_state, turn):
-        raise NotImplementedError("get_legal_moves")
+        assert isinstance(binary_state, int)
+        field = self.get_decoded_list(binary_state, turn)
+        return [idx for idx, col in enumerate(field) if len(col) < GAME_ROWS]
 
     def get_encoded_binary(self, list_state, turn):
         assert isinstance(list_state, list)
         assert len(list_state) == GAME_COLS
+
+        if turn == game.GameTurn.PLAYER2:
+            list_state = self.flip_board(list_state)
 
         bits = []
         len_bits = []
@@ -88,15 +95,19 @@ class C4Game(game.Game):
     def get_decoded_list(self, binary_state, turn):
         assert isinstance(binary_state, int)
         bits = self.int_to_bits(binary_state, bits=GAME_COLS * GAME_ROWS + GAME_COLS * BITS_IN_LEN)
-        res = []
+        list_state = []
         len_bits = bits[GAME_COLS * GAME_ROWS:]
         for col in range(GAME_COLS):
             vals = bits[col * GAME_ROWS:(col + 1) * GAME_ROWS]
             lens = self.bits_to_int(len_bits[col * BITS_IN_LEN:(col + 1) * BITS_IN_LEN])
             if lens > 0:
                 vals = vals[:-lens]
-            res.append(vals)
-        return res
+            list_state.append(vals)
+
+        if turn == game.GameTurn.PLAYER2:
+            list_state = self.flip_board(list_state)
+
+        return list_state
 
     def bits_to_int(self, bits):
         res = 0
@@ -112,6 +123,13 @@ class C4Game(game.Game):
             num //= 2
         return res[::-1]
 
+    def flip_board(selfs, list_state):
+        for col in list_state:
+            for ndx in range(len(col)):
+                col[ndx] = 1 - col[ndx]
+        return list_state
+
+
     def render(self, binary_state, turn):
         list_state = self.get_decoded_list(binary_state, turn)
         data = [[' '] * GAME_COLS for _ in range(GAME_ROWS)]
@@ -125,22 +143,19 @@ class C4Game(game.Game):
 
 if __name__ == "__main__":
     c4_game = C4Game()
-    list_state = [
-      [1, 1, 1, 1, 0, 0],
-      [0, 0, 0, 0],
-      [1],
-      [],
-      [1, 1, 0],
-      [1],
-      [1, 1, 1, 1, 1, 1]
-    ]
-
     turn = game.GameTurn.PLAYER1
+    binary_state = c4_game.get_initial_position()
 
-    binary_state = c4_game.get_encoded_binary(list_state, turn)
-
+    while True:
+        c4_game.render(binary_state, turn)
+        print()
+        legal_moves = c4_game.get_legal_moves(binary_state, turn)
+        if len(legal_moves) == 0:
+            break
+        move = random.choice(legal_moves)
+        list_state = c4_game.get_decoded_list(binary_state, turn)
+        list_state[move].append(1 if turn == game.GameTurn.PLAYER1 else 0)
+        turn = c4_game.get_oponents_turn(turn)
+        binary_state = c4_game.get_encoded_binary(list_state, turn)
     c4_game.render(binary_state, turn)
 
-    list_state = c4_game.get_decoded_list(binary_state, turn)
-    new_binary_state = c4_game.get_encoded_binary(list_state, turn)
-    print(binary_state, new_binary_state)

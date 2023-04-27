@@ -6,6 +6,7 @@ from replay_memory import ReplayMemory
 from game import GameResult, GameTurn
 import math
 import node_painter
+import time
 
 class MCTSNode:
     def __init__(self, game, binary_state, turn, parent=None, move=None, result=GameResult.NOT_COMPLETED, memory=None):
@@ -106,7 +107,7 @@ painter_on = False
 final_only = True
 
 
-def mcts_search(game, binary_state, turn, loops=500, memory=None, c=1.41):
+def mcts_search(game, binary_state, turn, loops=500, memory=None, c=1.41, learn=False):
     root = MCTSNode(game, binary_state, turn, memory=memory)
     board = TicTacToeBoard()
     if painter_on:
@@ -128,12 +129,13 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, c=1.41):
         if painter_on and not final_only:
             painter.paint('Expand', node)
 
-        rollout_result = node.rollout()
+        if learn or node.num_visits == 0:
+            rollout_result = node.rollout()
 
-        if painter_on and not final_only:
-            painter.paint('Rollout', node)
+            if painter_on and not final_only:
+                painter.paint('Rollout', node)
 
-        node.back_propagate(rollout_result)
+            node.back_propagate(rollout_result)
 
     if painter_on:
         painter.paint('Final', node)
@@ -155,24 +157,32 @@ if __name__ == "__main__":
     results[GameResult.PLAYER1] = 0
     results[GameResult.PLAYER2] = 0
     results[GameResult.DRAW] = 0
+
+    accumulated_time = {}
+    accumulated_time[GameTurn.PLAYER1] = 0.0
+    accumulated_time[GameTurn.PLAYER2] = 0.0
+
     for game_number in range(100):
         turn = GameTurn.PLAYER1 if game_number % 2 == 0 else GameTurn.PLAYER2
         binary_state = game.get_initial_position()
         result = GameResult.NOT_COMPLETED
-        # game.render(binary_state, turn)
+        game.render(binary_state, turn)
         while result == GameResult.NOT_COMPLETED:
             # print(binary_state)
+            start = time.time_ns()
             if turn == mcts_turn:
-                move = mcts_search(game, binary_state, turn, loops=10, memory=memory1, c=1.41)
-                # legal_moves = game.get_legal_moves(binary_state, turn)
+                # move = mcts_search(game, binary_state, turn, loops=1000, memory=None, c=1.41)
+                legal_moves = game.get_legal_moves(binary_state, turn)
                 # move = random.choice(legal_moves)
+                move = int(input(f"Choose Move: {legal_moves}"))
             else:
-                move = mcts_search(game, binary_state, turn, loops=10, memory=memory2, c=1.41)
+                move = mcts_search(game, binary_state, turn, loops=8, memory=memory2, c=1.41)
                 # legal_moves = game.get_legal_moves(binary_state, turn)
                 # move = random.choice(legal_moves)
                 # move = int(input(f"Choose Move: {legal_moves}"))
+            accumulated_time[turn] += (time.time_ns() - start) / 1000000000.0
             binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
-            # game.render(binary_state, turn)
+            game.render(binary_state, turn)
             if switch_turns:
                 binary_state, turn = game.switch_players(binary_state, turn)
         results[result] += 1
@@ -180,6 +190,7 @@ if __name__ == "__main__":
         # print(f"Size of replay memory: {len(memory.memory)}")
         print('.', end='')
         # memory.write()
+    print('')
     print(results)
-
+    print(accumulated_time)
 

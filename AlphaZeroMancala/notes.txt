@@ -36,4 +36,5 @@ TODO:
 [X] Replay Memory Scaling
 [X] Current Player POV Binary
 [/] Implement C4
+[!] Bug! Misses wins on vertical columns
 [ ] Mancala

@@ -49,8 +49,12 @@ All the code is generic, so, in theory you can try to adjust the field size.
 But tests could become broken.
 """
 import random
+import time
+
 import numpy as np
 import game
+import pygame
+import c4_board
 
 GAME_ROWS = 6
 GAME_COLS = 7
@@ -232,7 +236,7 @@ class C4Game(game.Game):
         return None
 
 
-def play_random_game(show=False):
+def play_random_game(show=False, screen=False):
     c4_game = C4Game()
     turn = game.GameTurn.PLAYER1
     binary_state = c4_game.get_initial_position()
@@ -245,6 +249,12 @@ def play_random_game(show=False):
             c4_game.render(binary_state, turn, win_set)
             print()
         legal_moves = c4_game.get_legal_moves(binary_state, turn)
+        if screen:
+            board_list_state = c4_game.get_decoded_list(binary_state, turn)
+            c4_board.draw_board(screen, board_list_state, turn.value, legal_moves, "", win_set)
+            pygame.display.update()
+            c4_board.get_move(screen, legal_moves)
+            time.sleep(.3)
         if len(legal_moves) == 0:
             break
         move = random.choice(legal_moves)
@@ -267,13 +277,18 @@ def play_random_game(show=False):
     if show:
         print(binary_state)
         c4_game.render(binary_state, turn, win_set)
+    if screen:
+        board_list_state = c4_game.get_decoded_list(binary_state, turn)
+        c4_board.draw_board(screen, board_list_state, turn.value, legal_moves, "", win_set)
+        pygame.display.update()
+        c4_board.get_move(screen, legal_moves)
+        time.sleep(.3)
+
 
 if __name__ == "__main__":
-    max = 10000
-    for ndx in range(max):
-        if ndx % (max / 100) == 0:
-            print()
-        print('.', end='')
-        play_random_game()
+    screen = pygame.display.set_mode((c4_board.WINDOW_WIDTH, c4_board.WINDOW_HEIGHT))
+    pygame.display.set_caption("Connect 4")
+    play_random_game(show=True, screen=screen)
+
 
 

@@ -7,8 +7,8 @@ import torch
 import pygame
 import move_cache
 
-# MCTS_SEARCHES = 100
-MCTS_SEARCHES = 5000
+MCTS_SEARCHES = 1000
+# MCTS_SEARCHES = 5000
 MCTS_BATCH_SIZE = 1
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 600
@@ -196,7 +196,7 @@ def do_tournament(sessionNames):
             session2 = sessions[white_player]
             session2.set_bot_player_as_black(False)
             session2Name = sessionNames[white_player]
-            for x in range(20):
+            for x in range(50):
                 winner, state = self_play(session1, session2, x % 2 == 0, gui_each_turn=False)
                 if winner == 'draw':
                     results[session1Name] = results.get(session1Name, 0) + 0.5
@@ -209,18 +209,6 @@ def do_tournament(sessionNames):
         print(k)
 
 if __name__ == "__main__":
-    sessionNames = [
-        'best_001_00200.dat',
-        'best_002_00300.dat',
-        'best_003_00400.dat',
-        'best_004_00600.dat',
-        'best_005_00700.dat',
-        'best_006_01300.dat',
-        'best_007_01400.dat',
-        'best_008_01500.dat',
-        'best_009_01700.dat',
-        'best_010_01900.dat'
-    ]
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     # screen = pygame.display.set_mode((1900, 1000))
     pygame.display.set_caption("Connect 4")
@@ -229,18 +217,17 @@ if __name__ == "__main__":
     human_is_current = False
 
     sessionNames = [
-        'best_005_00700.dat',
-        'best_006_01300.dat',
-        'best_007_01400.dat',
-        'best_008_01500.dat',
-        'best_009_01700.dat',
-        'best_010_01900.dat',
         'best_011_02100.dat',
-        'best_012_00300.dat'
+        'best_018_01300.dat',
+        'best_019_01400.dat',
+        'best_020_01800.dat',
+        'best_021_02100.dat',
+        'best_022_00100.dat',
+        'best_023_01400.dat'
     ]
     # do_tournament(sessionNames)
     #
-    session1Name = 'best_011_02100.dat'
+    session1Name = 'best_020_01800.dat'
     session1 = Session('saves/Model128/' + session1Name, True, session1Name, dirichlet_pct=0.0)
     play_against_human(human_is_current, session1)
 

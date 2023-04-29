@@ -1,7 +1,10 @@
 import random
 
 from tic_tac_toe.ttt_game import TicTacToeGame
-from tic_tac_toe.ttt_board import TicTacToeBoard
+# from tic_tac_toe.ttt_board import TicTacToeBoard
+from Connect4.c4_game import C4Game
+from Connect4.c4_board import C4Board
+
 from replay_memory import ReplayMemory
 from game import GameResult, GameTurn
 import math
@@ -107,49 +110,58 @@ painter_on = False
 final_only = True
 
 
-def mcts_search(game, binary_state, turn, loops=500, memory=None, c=1.41, learn=False):
+def mcts_search(game, binary_state, turn, loops=500, memory=None, c=1.41, learn=False, board=None):
     root = MCTSNode(game, binary_state, turn, memory=memory)
-    board = TicTacToeBoard()
-    if painter_on:
+    if painter_on and board:
         painter = node_painter.NodePainter(root, board)
 
+    stats = {}
     for _ in range(loops):
         node = root
 
-        if painter_on and not final_only:
+        if painter_on and board and not final_only:
             painter.paint('Start', node)
 
         node = node.select(c)
+        stats["S"] = stats.get("S", 0) + 1
 
-        if painter_on and not final_only:
+        if painter_on and board and not final_only:
             painter.paint('Select', node)
 
         node = node.expand()
+        stats["E"] = stats.get("E", 0) + 1
 
-        if painter_on and not final_only:
+        if painter_on and board and not final_only:
             painter.paint('Expand', node)
 
         if learn or node.num_visits == 0:
             rollout_result = node.rollout()
+            stats["R"] = stats.get("R", 0) + 1
 
-            if painter_on and not final_only:
+            if painter_on and board and not final_only:
                 painter.paint('Rollout', node)
 
             node.back_propagate(rollout_result)
+            stats["B"] = stats.get("B", 0) + 1
 
-    if painter_on:
+    if painter_on and board:
         painter.paint('Final', node)
 
-    # if painter_on:
+    # if painter_on and board:
     #     painter.close()
     # return root.get_most_visited()
+    print(stats)
     return root.best_child(c=0.0).move
 
 if __name__ == "__main__":
-    game = TicTacToeGame()
-    memory1 = ReplayMemory("TicTacToeMemory_1000.bin")
-    memory2 = ReplayMemory("TicTacToeMemory_2000.bin")
-    # memory = None
+    # game = TicTacToeGame()
+    # board = TicTacToeBoard()
+    game = C4Game()
+    # board = C4Board()
+    # memory1 = ReplayMemory("TicTacToeMemory_1000.bin")
+    # memory2 = ReplayMemory("TicTacToeMemory_2000.bin")
+    memory1 = None
+    memory2 = None
     mcts_turn = GameTurn.PLAYER1
     random_turn = GameTurn.PLAYER2
 
@@ -162,27 +174,35 @@ if __name__ == "__main__":
     accumulated_time[GameTurn.PLAYER1] = 0.0
     accumulated_time[GameTurn.PLAYER2] = 0.0
 
-    for game_number in range(100):
+    for game_number in range(1):
         turn = GameTurn.PLAYER1 if game_number % 2 == 0 else GameTurn.PLAYER2
         binary_state = game.get_initial_position()
+        # turn = GameTurn.PLAYER2
+        # binary_state = 1711255632655510
+        # binary_state, turn = game.switch_players(binary_state, turn)
+
         result = GameResult.NOT_COMPLETED
         game.render(binary_state, turn)
+        win = None
         while result == GameResult.NOT_COMPLETED:
             # print(binary_state)
+            # legal_moves = game.get_legal_moves(binary_state, turn)
+            # list_state = game.get_decoded_list(binary_state, turn)
+            # board.draw_board(list_state, turn.value, legal_moves, "", win)
             start = time.time_ns()
             if turn == mcts_turn:
-                # move = mcts_search(game, binary_state, turn, loops=1000, memory=None, c=1.41)
-                legal_moves = game.get_legal_moves(binary_state, turn)
-                # move = random.choice(legal_moves)
-                move = int(input(f"Choose Move: {legal_moves}"))
-            else:
-                move = mcts_search(game, binary_state, turn, loops=8, memory=memory2, c=1.41)
-                # legal_moves = game.get_legal_moves(binary_state, turn)
+                move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
                 # move = random.choice(legal_moves)
                 # move = int(input(f"Choose Move: {legal_moves}"))
+            else:
+                move = mcts_search(game, binary_state, turn, loops=1000, memory=memory2, c=1.41, learn=True)
+                # move = random.choice(legal_moves)
+                # move = int(input(f"Choose Move: {legal_moves}"))
+                # move = board.get_move(legal_moves)
             accumulated_time[turn] += (time.time_ns() - start) / 1000000000.0
             binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
-            game.render(binary_state, turn)
+            win = game.check_for_win(binary_state, turn) if result == GameResult.PLAYER1 or result == GameResult.PLAYER2 else None
+            game.render(binary_state, turn, win)
             if switch_turns:
                 binary_state, turn = game.switch_players(binary_state, turn)
         results[result] += 1
@@ -190,6 +210,10 @@ if __name__ == "__main__":
         # print(f"Size of replay memory: {len(memory.memory)}")
         print('.', end='')
         # memory.write()
+    # legal_moves = game.get_legal_moves(binary_state, turn)
+    # list_state = game.get_decoded_list(binary_state, turn)
+    # board.draw_board(list_state, turn.value, legal_moves, "", win)
+    # board.wait_for_click()
     print('')
     print(results)
     print(accumulated_time)

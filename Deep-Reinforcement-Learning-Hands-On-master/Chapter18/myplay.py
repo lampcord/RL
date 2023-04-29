@@ -7,7 +7,7 @@ import torch
 import pygame
 import move_cache
 
-MCTS_SEARCHES = 100
+MCTS_SEARCHES = 1000
 # MCTS_SEARCHES = 5000
 MCTS_BATCH_SIZE = 1
 WINDOW_WIDTH = 600
@@ -213,8 +213,8 @@ if __name__ == "__main__":
     # screen = pygame.display.set_mode((1900, 1000))
     pygame.display.set_caption("Connect 4")
 
-    human_is_current = True
-    # human_is_current = False
+    # human_is_current = True
+    human_is_current = False
 
     sessionNames = [
         'best_011_02100.dat',
@@ -225,11 +225,11 @@ if __name__ == "__main__":
         'best_022_00100.dat',
         'best_023_01400.dat'
     ]
-    do_tournament(sessionNames)
-
-    # session1Name = 'best_020_01800.dat'
-    # session1 = Session('saves/Model128/' + session1Name, True, session1Name, dirichlet_pct=0.0)
-    # play_against_human(human_is_current, session1)
+    # do_tournament(sessionNames)
+    #
+    session1Name = 'best_020_01800.dat'
+    session1 = Session('saves/Model128/' + session1Name, True, session1Name, dirichlet_pct=0.0)
+    play_against_human(human_is_current, session1)
 
     time.sleep(3)
 

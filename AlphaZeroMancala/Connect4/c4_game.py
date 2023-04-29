@@ -54,7 +54,8 @@ import time
 import numpy as np
 import game
 import pygame
-import c4_board
+from Connect4 import c4_board
+from Connect4.c4_board import C4Board
 
 GAME_ROWS = 6
 GAME_COLS = 7
@@ -201,9 +202,11 @@ class C4Game(game.Game):
                     data[row_idx][col_idx] = f" {str(cell)} "
         display_state = ['|'.join(row) for row in data]
         for line in display_state:
-            print ('+---+---+---+---+---+---+---+')
+            print('+---+---+---+---+---+---+---+')
             print('|' + line + '|')
-        print ('+---+---+---+---+---+---+---+')
+        print('+---+---+---+---+---+---+---+')
+        print('  0   1   2   3   4   5   6')
+        print(binary_state, turn.name)
 
     def check_for_win(self, binary_state, turn):
         table = np.full((GAME_COLS, GAME_ROWS), -1)
@@ -236,8 +239,10 @@ class C4Game(game.Game):
         return None
 
 
-def play_random_game(show=False, screen=False):
+def play_random_game(show=False, use_board=False):
     c4_game = C4Game()
+    if use_board:
+        board = C4Board()
     turn = game.GameTurn.PLAYER1
     binary_state = c4_game.get_initial_position()
 
@@ -251,11 +256,11 @@ def play_random_game(show=False, screen=False):
         legal_moves = c4_game.get_legal_moves(binary_state, turn)
         if len(legal_moves) == 0:
             break
-        if screen:
+        if use_board:
             board_list_state = c4_game.get_decoded_list(binary_state, turn)
-            c4_board.draw_board(screen, board_list_state, turn.value, legal_moves, "", win_set)
+            board.draw_board(board_list_state, turn.value, legal_moves, "", win_set)
             pygame.display.update()
-            move = c4_board.get_move(screen, legal_moves)
+            move = board.get_move(legal_moves)
             time.sleep(.3)
         else:
             move = random.choice(legal_moves)
@@ -278,18 +283,17 @@ def play_random_game(show=False, screen=False):
     if show:
         print(binary_state)
         c4_game.render(binary_state, turn, win_set)
-    if screen:
+    if use_board:
         board_list_state = c4_game.get_decoded_list(binary_state, turn)
-        c4_board.draw_board(screen, board_list_state, turn.value, legal_moves, "", win_set)
-        pygame.display.update()
-        c4_board.get_move(screen, legal_moves)
+        board.draw_board(board_list_state, turn.value, legal_moves, "", win_set)
+        board.get_move(legal_moves)
         time.sleep(.3)
 
 
 if __name__ == "__main__":
     screen = pygame.display.set_mode((c4_board.WINDOW_WIDTH, c4_board.WINDOW_HEIGHT))
     pygame.display.set_caption("Connect 4")
-    play_random_game(show=True, screen=screen)
+    play_random_game(show=True, use_board=True)
 
 
 

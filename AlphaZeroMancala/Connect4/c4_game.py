@@ -249,15 +249,16 @@ def play_random_game(show=False, screen=False):
             c4_game.render(binary_state, turn, win_set)
             print()
         legal_moves = c4_game.get_legal_moves(binary_state, turn)
+        if len(legal_moves) == 0:
+            break
         if screen:
             board_list_state = c4_game.get_decoded_list(binary_state, turn)
             c4_board.draw_board(screen, board_list_state, turn.value, legal_moves, "", win_set)
             pygame.display.update()
-            c4_board.get_move(screen, legal_moves)
+            move = c4_board.get_move(screen, legal_moves)
             time.sleep(.3)
-        if len(legal_moves) == 0:
-            break
-        move = random.choice(legal_moves)
+        else:
+            move = random.choice(legal_moves)
         binary_state, result, swap_players, info = c4_game.move(binary_state, move, turn)
         win_set = c4_game.check_for_win(binary_state, turn)
 

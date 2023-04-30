@@ -7,13 +7,22 @@ class ReplayMemory:
         self.memory = {}
         self.filename = filename
         self.read()
+        self.memory_found = 0.0
+        self.memory_checks = 0.0
 
     def update(self, binary_state, visits, wins):
-        value = (visits, wins)
+        current_visits, current_wins = self.memory.get(binary_state, (0, 0))
+        value = (visits + current_visits, wins + current_wins)
         self.memory[binary_state] = value
 
     def get(self, binary_state):
-        return self.memory.get(binary_state, (0.0, 0.0))
+        result = self.memory.get(binary_state, None)
+        self.memory_checks += 1
+        if result:
+            self.memory_found += 1
+        else:
+            result = (0, 0)
+        return result
 
     def read(self):
         if self.filename is None:

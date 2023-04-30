@@ -29,11 +29,16 @@ font = pygame.font.Font(None, 24)
 
 
 class C4Board:
-    def __init__(self):
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    def __init__(self, width=WINDOW_WIDTH, height=WINDOW_HEIGHT, game=None):
+        self.screen = pygame.display.set_mode((width, height))
+        self.width = width
+        self.height = height
+        self.game = game
         pygame.display.set_caption("Connect 4")
 
-    def draw_small_board(self, offset, pos, turn, center=True):
+    def render_node(self, binary_state, turn, offset, font, selected, center=True):
+        assert self.game is not None
+        list_state = self.game.get_decoded_list(binary_state, turn)
         if center:
             total_width = BOARD_COLS * 9
             total_height = BOARD_ROWS * 9
@@ -41,7 +46,7 @@ class C4Board:
         else:
             target_offset = offset
         turn_offset = [target_offset[0] + 5, target_offset[1] - 10]
-        self.draw_node(9, target_offset, pos, turn, [], cell_padding=0)
+        self.draw_node(9, target_offset, list_state, turn, [], cell_padding=0)
         pygame.draw.circle(self.screen, cell_colors[turn], turn_offset, 5)
 
     def draw_node(self, cell_size, offset, pos, turn, possible_moves, cell_padding=5, win_set=None):
@@ -68,10 +73,10 @@ class C4Board:
 
     def draw_board(self, pos, turn, possible_moves, message, win_set=None):
         self.screen.fill(GREY)
-        xoffset = (WINDOW_WIDTH - (CELL_SIZE * BOARD_COLS)) / 2
-        yoffset = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_ROWS)) / 2
+        xoffset = (self.width - (CELL_SIZE * BOARD_COLS)) / 2
+        yoffset = (self.height - (CELL_SIZE * BOARD_ROWS)) / 2
         text = font.render(message, True, BLACK)
-        text_rect = text.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT - 20))
+        text_rect = text.get_rect(center=(self.width / 2, self.height - 20))
         self.screen.blit(text, text_rect)
         self.draw_node(CELL_SIZE, (xoffset, yoffset), pos, turn, possible_moves, win_set=win_set)
         pygame.display.update()

@@ -107,10 +107,10 @@ class MCTSNode:
         return max(self.children, key=lambda child: child.num_visits).move
 
 
-# painter_on = False
-painter_on = True
-# final_only = True
-final_only = False
+painter_on = False
+# painter_on = True
+final_only = True
+# final_only = False
 
 def update_memory(memory, node):
     memory.update(node.binary_state, node.num_visits, node.num_wins)
@@ -168,26 +168,30 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, memory_depth=0
     print(stats)
     # if painter_on and board:
     #     painter.close()
-    print(f"cycles {cycles}")
-    if memory:
-        print(f"{memory.memory_found}/{memory.memory_checks}")
+    # print(f"cycles {cycles}")
+    # if memory:
+    #     print(f"{memory.memory_found}/{memory.memory_checks}")
     if most_visits:
         return root.get_most_visited()
     else:
         return root.best_child(c=0.0).move
 
 if __name__ == "__main__":
+    mode = "train"
+    # mode = "test"
+
     # game = TicTacToeGame()
     # board = TicTacToeBoard()
-    game = C4Game()
-    board = C4Board(1900, 1000, game)
     # memory1 = ReplayMemory("TicTacToeMemory_1000.bin")
     # memory2 = ReplayMemory("TicTacToeMemory_2000.bin")
+
+    game = C4Game()
+    # board = C4Board(1900, 1000, game)
+    board = None
     memory1 = ReplayMemory("C4Game_1000.bin")
     # memory1 = ReplayMemory("C4Game_2000.bin")
-
     # memory1 = None
-    memory2 = None
+    # memory2 = None
 
     mcts_turn = GameTurn.PLAYER1
     random_turn = GameTurn.PLAYER2
@@ -201,7 +205,7 @@ if __name__ == "__main__":
     accumulated_time[GameTurn.PLAYER1] = 0.0
     accumulated_time[GameTurn.PLAYER2] = 0.0
 
-    for game_number in range(10):
+    for game_number in range(990):
         turn = GameTurn.PLAYER1 if game_number % 2 == 0 else GameTurn.PLAYER2
         binary_state = game.get_initial_position()
         # turn = GameTurn.PLAYER2
@@ -218,11 +222,17 @@ if __name__ == "__main__":
             # board.draw_board(list_state, turn.value, legal_moves, "", win)
             start = time.time_ns()
             if turn == mcts_turn:
-                move = mcts_search(game, binary_state, turn, loops=10000000, memory=memory1, memory_depth=3, c=1.41, learn=True, board=board)
+                if mode == "train":
+                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
+                elif mode == "test":
+                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, memory_depth=3, c=1.41, learn=False, board=board)
                 # move = random.choice(legal_moves)
                 # move = int(input(f"Choose Move: {legal_moves}"))
             else:
-                move = mcts_search(game, binary_state, turn, loops=10000000, memory=memory2, c=1.41, learn=True)
+                if mode == "train":
+                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
+                elif mode == "test":
+                    move = mcts_search(game, binary_state, turn, loops=1000, memory=None, c=1.41, learn=True)
                 # move = random.choice(legal_moves)
                 # move = int(input(f"Choose Move: {legal_moves}"))
                 # move = board.get_move(legal_moves)
@@ -233,12 +243,13 @@ if __name__ == "__main__":
             if switch_turns:
                 binary_state, turn = game.switch_players(binary_state, turn)
         results[result] += 1
-        print(results)
+        print(f"game_number: {game_number} {results}")
 
         # print(binary_state)
-        # print(f"Size of replay memory: {len(memory.memory)}")
         print('.', end='')
-        # memory.write()
+        if mode == "train":
+            memory1.write()
+            print(f"Size of replay memory: {len(memory1.memory)}")
     # legal_moves = game.get_legal_moves(binary_state, turn)
     # list_state = game.get_decoded_list(binary_state, turn)
     # board.draw_board(list_state, turn.value, legal_moves, "", win)

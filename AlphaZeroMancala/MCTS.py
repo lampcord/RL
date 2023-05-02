@@ -124,8 +124,13 @@ def update_memory(game, memory, node, root_turn):
         update_memory(game, memory, child, root_turn)
 
 
+
 def mcts_search(game, binary_state, turn, loops=500, memory=None, memory_depth=0, memory_learn=False, c=1.41, learn=False, board=None, most_visits=False):
-    root = MCTSNode(game, binary_state, turn, memory=memory, memory_depth=memory_depth)
+    if memory is not None:
+        move = memory.get_move_from_memory(game, binary_state, turn, loops)
+        if move is not None:
+            return move
+    root = MCTSNode(game, binary_state, turn, memory=None, memory_depth=0)
     if board:
         painter = node_painter.NodePainter(root, board)
 
@@ -198,8 +203,8 @@ if __name__ == "__main__":
     game = C4Game()
     # board = C4Board(1900, 1000, game)
     board = None
-    memory1 = ReplayMemory("C4Game_1000.bin")
-    # memory1 = ReplayMemory("C4Game_2000.bin")
+    # memory1 = ReplayMemory("C4Game_1000.bin")
+    memory1 = ReplayMemory("C4Game_2000.bin")
     # memory1 = None
     # memory2 = None
 
@@ -215,7 +220,7 @@ if __name__ == "__main__":
     accumulated_time[GameTurn.PLAYER1] = 0.0
     accumulated_time[GameTurn.PLAYER2] = 0.0
 
-    for game_number in range(10):
+    for game_number in range(100):
         print("=" * 60)
         turn = GameTurn.PLAYER1 if game_number % 2 == 0 else GameTurn.PLAYER2
         binary_state = game.get_initial_position()
@@ -238,14 +243,14 @@ if __name__ == "__main__":
                 if mode == "train":
                     move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, memory_learn=True, c=1.41, learn=True)
                 elif mode == "test":
-                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, memory_depth=3, c=1.41, learn=True, board=board)
+                    move = mcts_search(game, binary_state, turn, loops=100, memory=memory1, memory_depth=3, c=1.41, learn=True, board=board)
                 # move = random.choice(legal_moves)
                 # move = int(input(f"Choose Move: {legal_moves}"))
             else:
                 if mode == "train":
                     move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, memory_learn=True, c=1.41, learn=True)
                 elif mode == "test":
-                    move = mcts_search(game, binary_state, turn, loops=1000, memory=None, c=1.41, learn=True)
+                    move = mcts_search(game, binary_state, turn, loops=100, memory=None, c=1.41, learn=True)
                 # move = random.choice(legal_moves)
                 # move = int(input(f"Choose Move: {legal_moves}"))
                 # move = board.get_move(legal_moves)

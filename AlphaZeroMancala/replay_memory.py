@@ -1,6 +1,8 @@
 import msgpack
 import os
 
+from Connect4.c4_game import C4Game
+from game import GameResult, GameTurn
 
 class ReplayMemory:
     def __init__(self, filename=None):
@@ -47,3 +49,56 @@ class ReplayMemory:
         #     print(key, visits, wins)
         # print(max(self.memory.values()))
 
+    def get_move_from_memory(self, game, binary_state, turn, min_visits):
+        # print("Checking memory for position...")
+        num_visits, num_wins = self.get(binary_state)
+        # print(num_visits, num_wins)
+        legal_moves = game.get_legal_moves(binary_state, turn)
+        total_visits = 0
+        best_move = None
+        best_score = 0
+        for move in legal_moves:
+            test_state, _, switch_turns, _ = game.move(binary_state, move, turn)
+            if switch_turns:
+                test_state, test_turn = game.switch_players(test_state, turn)
+            num_visits, num_wins = self.get(test_state)
+            score = 0 if num_visits == 0 else num_wins / num_visits
+            if best_move is None or score > best_score:
+                best_move = move
+                best_score = score
+            total_visits += num_visits
+            # print(move, num_visits, num_wins, score)
+            # game.render(test_state, test_turn)
+        # print(f"Total Visits: {total_visits}")
+        if total_visits < min_visits:
+            best_move = None
+        # print(f"Best Move: {str(best_move)}")
+        # input()
+        return best_move
+
+    def condense(self, game, turn, min_visits):
+        condensed_filename = self.filename.replace(".bin", "_C" + str(min_visits) + ".bin")
+        print(condensed_filename)
+        condensed_memory = {}
+        print()
+        ndx = 0
+        for key in self.memory.keys():
+            ndx += 1
+            if ndx % 100 == 0:
+                print()
+            move = self.get_move_from_memory(game, key, turn, min_visits)
+            if move is None:
+                print('.', end='')
+            else:
+                condensed_memory[key] = move
+                print('X', end='')
+        packed_data = msgpack.packb(condensed_memory)
+        with open(condensed_filename, 'wb') as f:
+            f.write(packed_data)
+
+
+
+if __name__ == "__main__":
+    game = C4Game()
+    memory1 = ReplayMemory("C4Game_2000.bin")
+    memory1.condense(game, GameTurn.PLAYER1, 1000)

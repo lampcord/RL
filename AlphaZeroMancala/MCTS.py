@@ -5,7 +5,7 @@ from tic_tac_toe.ttt_game import TicTacToeGame
 from Connect4.c4_game import C4Game
 from Connect4.c4_board import C4Board
 
-from replay_memory import ReplayMemory
+from replay_memory import ReplayMemory, get_condensed_memory
 from game import GameResult, GameTurn
 import math
 import node_painter
@@ -21,18 +21,18 @@ class MCTSNode:
         self.unexplored_children = game.get_legal_moves(binary_state, turn)
         self.children = []
         self.result = result
-        self.memory_depth = memory_depth
-        self.memory = memory
-        self.used_memory = False
-        if memory and memory_depth > 0:
-            self.num_visits, self.num_wins = memory.get(self.binary_state)
-            if self.num_visits > 0:
-                self.num_wins = self.num_wins / self.num_visits
-                self.num_visits = 1
-                self.used_memory = True
-        else:
-            self.num_visits = 0.0
-            self.num_wins = 0.0
+        # self.memory_depth = memory_depth
+        # self.memory = memory
+        # self.used_memory = False
+        # if memory and memory_depth > 0:
+        #     self.num_visits, self.num_wins = memory.get(self.binary_state)
+        #     if self.num_visits > 0:
+        #         self.num_wins = self.num_wins / self.num_visits
+        #         self.num_visits = 1
+        #         self.used_memory = True
+        # else:
+        self.num_visits = 0.0
+        self.num_wins = 0.0
 
     def select(self, c=1.41):
         if len(self.unexplored_children) > 0:
@@ -55,10 +55,10 @@ class MCTSNode:
         new_binary_state, result, switch_turns, info = game.move(self.binary_state, move, self.turn)
         if switch_turns:
             new_binary_state, turn = game.switch_players(new_binary_state, turn)
-        child = MCTSNode(game, new_binary_state, turn, self, move, result, memory=self.memory, memory_depth=self.memory_depth - 1)
+        child = MCTSNode(game, new_binary_state, turn, self, move, result, memory=None, memory_depth=0)
         self.children.append(child)
-        if child.used_memory:
-            return None
+        # if child.used_memory:
+        #     return None
         return child
 
     def rollout(self):
@@ -125,9 +125,12 @@ def update_memory(game, memory, node, root_turn):
 
 
 
-def mcts_search(game, binary_state, turn, loops=500, memory=None, memory_depth=0, memory_learn=False, c=1.41, learn=False, board=None, most_visits=False):
-    if memory is not None:
-        move = memory.get_move_from_memory(game, binary_state, turn, loops)
+def mcts_search(game, binary_state, turn, loops=500, memory=None, c=1.41, learn=False, board=None, most_visits=False):
+    if memory and not memory_learn:
+        if binary_state == game.get_initial_position():
+            move = 3
+        else:
+            move = memory.get(binary_state, None)
         if move is not None:
             return move
     root = MCTSNode(game, binary_state, turn, memory=None, memory_depth=0)
@@ -137,9 +140,9 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, memory_depth=0
     stats = {}
     start = time.time_ns()
     cycles = 0
-    if memory:
-        memory.memory_found = 0.0
-        memory.memory_checks = 0.0
+    # if memory:
+    #     memory.memory_found = 0.0
+    #     memory.memory_checks = 0.0
     for _ in range(loops):
         node = root
         cycles += 1
@@ -184,8 +187,8 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, memory_depth=0
     # if painter_on and board:
     #     painter.close()
     # print(f"cycles {cycles}")
-    if memory:
-        print(f"{memory.memory_found}/{memory.memory_checks}")
+    # if memory:
+    #     print(f"{memory.memory_found}/{memory.memory_checks}")
     if most_visits:
         return root.get_most_visited()
     else:
@@ -204,7 +207,7 @@ if __name__ == "__main__":
     # board = C4Board(1900, 1000, game)
     board = None
     # memory1 = ReplayMemory("C4Game_1000.bin")
-    memory1 = ReplayMemory("C4Game_2000.bin")
+    memory1 = get_condensed_memory("C4Game_2000.bin", 1000)
     # memory1 = None
     # memory2 = None
 
@@ -241,14 +244,14 @@ if __name__ == "__main__":
             start = time.time_ns()
             if turn == mcts_turn:
                 if mode == "train":
-                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, memory_learn=True, c=1.41, learn=True)
+                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
                 elif mode == "test":
-                    move = mcts_search(game, binary_state, turn, loops=100, memory=memory1, memory_depth=3, c=1.41, learn=True, board=board)
+                    move = mcts_search(game, binary_state, turn, loops=100, memory=memory1, c=1.41, learn=True, board=board)
                 # move = random.choice(legal_moves)
                 # move = int(input(f"Choose Move: {legal_moves}"))
             else:
                 if mode == "train":
-                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, memory_learn=True, c=1.41, learn=True)
+                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
                 elif mode == "test":
                     move = mcts_search(game, binary_state, turn, loops=100, memory=None, c=1.41, learn=True)
                 # move = random.choice(legal_moves)

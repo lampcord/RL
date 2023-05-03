@@ -3,6 +3,20 @@ import os
 
 from Connect4.c4_game import C4Game
 from game import GameResult, GameTurn
+import random
+
+def get_condensed_filename(filename, min_visits):
+    condensed_filename = filename.replace(".bin", "_C" + str(min_visits) + ".bin")
+    return condensed_filename
+
+def get_condensed_memory(filename, min_visits):
+    cmemory = None
+    cfilename = get_condensed_filename(filename, 1000)
+    if os.path.exists(cfilename):
+        with open(cfilename, 'rb') as f:
+            packed_data = f.read()
+            cmemory = msgpack.unpackb(packed_data, strict_map_key=False)
+    return cmemory
 
 class ReplayMemory:
     def __init__(self, filename=None):
@@ -77,11 +91,16 @@ class ReplayMemory:
         return best_move
 
     def condense(self, game, turn, min_visits):
-        condensed_filename = self.filename.replace(".bin", "_C" + str(min_visits) + ".bin")
+        condensed_filename = get_condensed_filename(self.filename, min_visits)
         print(condensed_filename)
         condensed_memory = {}
         print()
         ndx = 0
+        # initial position is not stored
+        key = game.get_initial_position()
+        move = self.get_move_from_memory(game, key, turn, min_visits)
+        condensed_memory[key] = move
+
         for key in self.memory.keys():
             ndx += 1
             if ndx % 100 == 0:
@@ -95,10 +114,20 @@ class ReplayMemory:
         packed_data = msgpack.packb(condensed_memory)
         with open(condensed_filename, 'wb') as f:
             f.write(packed_data)
-
+        return condensed_filename
 
 
 if __name__ == "__main__":
     game = C4Game()
-    memory1 = ReplayMemory("C4Game_2000.bin")
-    memory1.condense(game, GameTurn.PLAYER1, 1000)
+    filename = "C4Game_2000.bin"
+    # memory1 = ReplayMemory(filename)
+    # move = memory1.get_move_from_memory(game, 1797558, GameTurn.PLAYER1, 1000)
+    # memory1.condense(game, GameTurn.PLAYER1, 1000)
+    cmemory = get_condensed_memory(filename, 1000)
+    keys = random.sample(list(cmemory.keys()), 1000)
+    for key in keys:
+        key = 1797558
+        # move = memory1.get_move_from_memory(game, key, GameTurn.PLAYER1, 1000)
+        cmove = cmemory[key]
+        # print(key, move, cmove)
+        # assert move == cmove

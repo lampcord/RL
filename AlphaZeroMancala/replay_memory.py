@@ -18,6 +18,13 @@ def get_condensed_memory(filename, min_visits):
             cmemory = msgpack.unpackb(packed_data, strict_map_key=False)
     return cmemory
 
+class CondensedMemory:
+    def __init__(self, filename, min_visits):
+        self.condensed_memory = get_condensed_memory(filename, min_visits)
+
+    def get(self, binary_state):
+        return self.condensed_memory.get(binary_state, None)
+
 class ReplayMemory:
     def __init__(self, filename=None):
         self.memory = {}

@@ -80,6 +80,10 @@ class C4Board:
         self.screen.blit(text, text_rect)
         self.draw_node(CELL_SIZE, (xoffset, yoffset), pos, turn, possible_moves, win_set=win_set)
         pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
     def get_move(self, possible_moves):
         best_pos = None

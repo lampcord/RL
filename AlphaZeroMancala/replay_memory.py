@@ -126,15 +126,14 @@ class ReplayMemory:
 
 if __name__ == "__main__":
     game = C4Game()
-    filename = "C4Game_2000.bin"
-    # memory1 = ReplayMemory(filename)
-    # move = memory1.get_move_from_memory(game, 1797558, GameTurn.PLAYER1, 1000)
+    filename = "C4Game_1000_10000.bin"
+    memory1 = ReplayMemory(filename)
     # memory1.condense(game, GameTurn.PLAYER1, 1000)
-    cmemory = get_condensed_memory(filename, 1000)
-    keys = random.sample(list(cmemory.keys()), 1000)
+    cmemory = CondensedMemory(filename, 1000)
+    # keys = random.sample(list(cmemory.keys()), 1000)
+    keys = [1797558]
     for key in keys:
-        key = 1797558
-        # move = memory1.get_move_from_memory(game, key, GameTurn.PLAYER1, 1000)
-        cmove = cmemory[key]
-        # print(key, move, cmove)
+        move = memory1.get_move_from_memory(game, key, GameTurn.PLAYER1, 1000)
+        cmove = cmemory.get(key)
+        print(key, move, cmove)
         # assert move == cmove

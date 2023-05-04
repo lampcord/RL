@@ -114,10 +114,7 @@ def update_memory(game, memory, node, root_turn):
 def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memory=None, c=1.41, learn=False, board=None, most_visits=False):
     info = {}
     if condensed_memory:
-        if binary_state == game.get_initial_position():
-            move = 3
-        else:
-            move = condensed_memory.get(binary_state)
+        move = condensed_memory.get(binary_state)
         if move is not None:
             info["CondensedMemory"] = True
             return move, info
@@ -127,10 +124,9 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memo
     if board:
         painter = node_painter.NodePainter(root, board)
 
-    cycles = 0
     for _ in range(loops):
         node = root
-        cycles += 1
+
         if board and not final_only:
             painter.paint('Start', node)
 
@@ -165,8 +161,8 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memo
     else:
         best_child = root.best_child(c=0.0)
 
-    info["Visits"] = best_child.num_visits
-    info["Wins"] = best_child.num_wins
+    info["num_visits"] = best_child.num_visits
+    info["num_wins"] = best_child.num_wins
 
     return root.best_child(c=0.0).move, info
 
@@ -191,7 +187,7 @@ if __name__ == "__main__":
     # player1_mode = PLAYMODE.RANDOM
     # memory1 = ReplayMemory("C4Game_1000.bin")
     memory1 = None
-    condensed_memory1 = CondensedMemory("C4Game_2000.bin", 1000)
+    condensed_memory1 = CondensedMemory("C4Game_1000_10000.bin", 1000)
     # condensed_memory1 = None
 
     # player2_mode = PLAYMODE.TRAIN
@@ -212,7 +208,7 @@ if __name__ == "__main__":
     accumulated_time[GameTurn.PLAYER2] = 0.0
     condensed_memory_tracker = []
 
-    for game_number in range(10):
+    for game_number in range(100):
         print("=" * 60)
         turn = GameTurn.PLAYER1 if game_number % 2 == 0 else GameTurn.PLAYER2
         binary_state = game.get_initial_position()
@@ -231,12 +227,12 @@ if __name__ == "__main__":
             print('_' * 60)
             print(f"Player {turn.name} is thinking ...")
             start = time.time_ns()
-            info = {}
+            mcts_info = {}
             if turn == GameTurn.PLAYER1:
                 if player1_mode == PLAYMODE.TRAIN:
-                    move, info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
                 elif player1_mode == PLAYMODE.TEST:
-                    move, info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory1, c=1.41, learn=True, board=None)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory1, c=1.41, learn=True, board=None)
                 elif player1_mode == PLAYMODE.RANDOM:
                     legal_moves = game.get_legal_moves(binary_state, turn)
                     move = random.choice(legal_moves)
@@ -249,9 +245,9 @@ if __name__ == "__main__":
                         move = int(input(f"Choose Move: {legal_moves}"))
             else:
                 if player2_mode == PLAYMODE.TRAIN:
-                    move, info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
                 elif player2_mode == PLAYMODE.TEST:
-                    move, info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory2, c=1.41, learn=True, board=None)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory2, c=1.41, learn=True, board=None)
                 elif player2_mode == PLAYMODE.RANDOM:
                     legal_moves = game.get_legal_moves(binary_state, turn)
                     move = random.choice(legal_moves)
@@ -263,20 +259,26 @@ if __name__ == "__main__":
                     else:
                         move = int(input(f"Choose Move: {legal_moves}"))
 
-            condensed_memory_test = info.get("CondensedMemory", None)
+            condensed_memory_test = mcts_info.get("CondensedMemory", None)
             if condensed_memory_test is not None:
-                condensed_memory_set.append(info["CondensedMemory"])
-            print(f"Move {move} Info {str(info)}")
+                condensed_memory_set.append(mcts_info["CondensedMemory"])
+
+            print(f"Move {move} Info {str(mcts_info)}")
+
             accumulated_time[turn] += (time.time_ns() - start) / 1000000000.0
             binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
             win = game.check_for_win(binary_state, turn) if result == GameResult.PLAYER1 or result == GameResult.PLAYER2 else None
             game.render(binary_state, turn, win)
+
             if switch_turns:
                 binary_state, turn = game.switch_players(binary_state, turn)
             if play_on_board:
+                num_visits = mcts_info.get("num_visits", 1)
+                num_wins = mcts_info.get("num_wins", 0)
+                score = f"Score: {num_wins / num_visits:.3}"
                 legal_moves = game.get_legal_moves(binary_state, turn)
                 list_state = game.get_decoded_list(binary_state, turn)
-                board.draw_board(list_state, turn.value, legal_moves, "", win_set=win)
+                board.draw_board(list_state, turn.value, legal_moves, score, win_set=win)
                 if win:
                     time.sleep(5)
                 else:
@@ -286,8 +288,6 @@ if __name__ == "__main__":
         print(f"game_number: {game_number} {results}")
         condensed_memory_tracker.append(condensed_memory_set)
 
-        # print(binary_state)
-        # print('.', end='')
         if player1_mode == PLAYMODE.TRAIN:
             memory1.write()
             print(f"Size of replay memory: {len(memory1.memory)}")

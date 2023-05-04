@@ -13,8 +13,9 @@ import node_painter
 import time
 
 class UCB_Type(Enum):
-    UCB1 = 0
-    UCB1_TRAINED = 1
+    UCB0 = 0
+    UCB1 = 1
+    UCB1_TUNED = 2
 
 class MCTSNode:
     def __init__(self, game, binary_state, turn, parent=None, move=None, result=GameResult.NOT_COMPLETED):
@@ -26,7 +27,7 @@ class MCTSNode:
         self.unexplored_children = game.get_legal_moves(binary_state, turn)
         self.children = []
         self.result = result
-        self.result_history = {}
+        self.reward_history = {}
         self.num_visits = 0.0
         self.num_wins = 0.0
 
@@ -73,19 +74,53 @@ class MCTSNode:
         if self.parent:
             reward = self.game.get_score_for_result(rollout_result, self.parent.turn)
         self.num_wins += reward
-        self.result_history[reward] = self.result_history.get(reward, 0) + 1
+        self.reward_history[reward] = self.reward_history.get(reward, 0) + 1
         if self.parent:
             self.parent.back_propagate(rollout_result)
 
     def ucb(self, c, ucb_type=UCB_Type.UCB1):
+        ucb = 0.0
+
         if self.parent is None:
-            return 0.0
+            return ucb
+
         if self.num_visits == 0 or self.parent.num_visits == 0:
-            return 1000000.0
-        exploitation = self.num_wins / self.num_visits
-        exploration = c * math.sqrt(math.log(self.parent.num_visits) / self.num_visits)
+            exploration = 1000000.0
+            exploitation = 0.0
+        else:
+            exploitation = self.num_wins / self.num_visits
+
+        if ucb_type == UCB_Type.UCB0:
+            '''
+            Fabricated UCB to return only the exploitation value
+            '''
+            exploration = 0.0
+        elif ucb_type == UCB_Type.UCB1:
+            '''
+            Bandit Upper Confidence Index = Sample Mean + c * √(logN / n)
+            where 
+              N = total rounds (parents visits)
+              n = number of node's visits
+            '''
+            exploration = c * math.sqrt(math.log(self.parent.num_visits) / self.num_visits)
+        elif ucb_type == UCB_Type.UCB1_TUNED:
+            '''
+            C = √( (logN / n) x min(1/4, V(n)) )
+            where V(n) is an upper confidence bound on the variance
+            V(n) = Σ(x_i² / n) - (Σ x_i / n)² + √(2log(N) / n) 
+            and x_i are the rewards we got from the bandit so far.
+            '''
+            rewards_squared = 0.0
+            for key in self.reward_history.keys():
+                rewards_squared += self.reward_history[key] * key ** 2
+            variance = rewards_squared / self.num_visits
+            variance -= exploitation ** 2
+            variance += math.sqrt(2 * math.log(self.parent.num_visits) / self.num_visits)
+            exploration = math.sqrt((math.log(self.parent.num_visits) / self.num_visits) * min(variance, 0.25))
+
         ucb = exploration + exploitation
         return ucb
+
     def best_child(self, c=1.41, ucb_type=UCB_Type.UCB1):
         return max(self.children, key=lambda child: child.ucb(c, ucb_type))
 
@@ -165,11 +200,11 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memo
     if most_visits:
         best_child = root.get_most_visited()
     else:
-        best_child = root.best_child(c=0.0, ucb_type=ucb_type)
+        best_child = root.best_child(ucb_type=UCB_Type.UCB0)
 
     info["num_visits"] = best_child.num_visits
     info["num_wins"] = best_child.num_wins
-    info["result_history"] = best_child.result_history
+    info["reward_history"] = best_child.reward_history
 
     return root.best_child(c=0.0).move, info
 
@@ -182,7 +217,7 @@ class PLAYMODE(Enum):
 
 if __name__ == "__main__":
     game = C4Game()
-    num_games = 10
+    num_games = 100
     # board = C4Board(1900, 1000, game)
     # board = C4Board(game=game)
     board = None
@@ -193,6 +228,8 @@ if __name__ == "__main__":
     player1_mode = PLAYMODE.TEST
     # player1_mode = PLAYMODE.HUMAN
     # player1_mode = PLAYMODE.RANDOM
+    player1_ucb = UCB_Type.UCB1
+    # player1_ucb = UCB_Type.UCB1_TUNED
     # memory1 = ReplayMemory("C4Game_1000.bin")
     memory1 = None
     # condensed_memory1 = CondensedMemory("C4Game_1000_10000.bin", 1000)
@@ -202,6 +239,8 @@ if __name__ == "__main__":
     player2_mode = PLAYMODE.TEST
     # player2_mode = PLAYMODE.HUMAN
     # player2_mode = PLAYMODE.RANDOM
+    # player2_ucb = UCB_Type.UCB1
+    player2_ucb = UCB_Type.UCB1_TUNED
     memory2 = None
     # condensed_memory2 = CondensedMemory("C4Game_2000.bin", 1000)
     condensed_memory2 = None
@@ -240,7 +279,7 @@ if __name__ == "__main__":
                 if player1_mode == PLAYMODE.TRAIN:
                     move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
                 elif player1_mode == PLAYMODE.TEST:
-                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory1, c=1.41, learn=True, board=None)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory1, c=1.41, learn=True, board=None, ucb_type=player1_ucb, most_visits=True)
                 elif player1_mode == PLAYMODE.RANDOM:
                     legal_moves = game.get_legal_moves(binary_state, turn)
                     move = random.choice(legal_moves)
@@ -255,7 +294,7 @@ if __name__ == "__main__":
                 if player2_mode == PLAYMODE.TRAIN:
                     move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
                 elif player2_mode == PLAYMODE.TEST:
-                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory2, c=1.41, learn=True, board=None)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory2, c=1.41, learn=True, board=None, ucb_type=player2_ucb, most_visits=True)
                 elif player2_mode == PLAYMODE.RANDOM:
                     legal_moves = game.get_legal_moves(binary_state, turn)
                     move = random.choice(legal_moves)

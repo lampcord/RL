@@ -12,6 +12,10 @@ import math
 import node_painter
 import time
 
+class UCB_Type(Enum):
+    UCB1 = 0
+    UCB1_TRAINED = 1
+
 class MCTSNode:
     def __init__(self, game, binary_state, turn, parent=None, move=None, result=GameResult.NOT_COMPLETED):
         self.binary_state = binary_state
@@ -22,15 +26,16 @@ class MCTSNode:
         self.unexplored_children = game.get_legal_moves(binary_state, turn)
         self.children = []
         self.result = result
+        self.result_history = {}
         self.num_visits = 0.0
         self.num_wins = 0.0
 
-    def select(self, c=1.41):
+    def select(self, c=1.41, ucb_type=UCB_Type.UCB1):
         if len(self.unexplored_children) > 0:
             return self
         if len(self.children) == 0:
             return self
-        best_child = self.best_child(c)
+        best_child = self.best_child(c, ucb_type)
         return best_child.select()
 
     def expand(self):
@@ -68,20 +73,21 @@ class MCTSNode:
         if self.parent:
             reward = self.game.get_score_for_result(rollout_result, self.parent.turn)
         self.num_wins += reward
+        self.result_history[reward] = self.result_history.get(reward, 0) + 1
         if self.parent:
             self.parent.back_propagate(rollout_result)
 
-    def ucb(self, c):
+    def ucb(self, c, ucb_type=UCB_Type.UCB1):
         if self.parent is None:
             return 0.0
         if self.num_visits == 0 or self.parent.num_visits == 0:
-            return 0.0
+            return 1000000.0
         exploitation = self.num_wins / self.num_visits
         exploration = c * math.sqrt(math.log(self.parent.num_visits) / self.num_visits)
         ucb = exploration + exploitation
         return ucb
-    def best_child(self, c=1.41):
-        return max(self.children, key=lambda child: child.ucb(c))
+    def best_child(self, c=1.41, ucb_type=UCB_Type.UCB1):
+        return max(self.children, key=lambda child: child.ucb(c, ucb_type))
 
     def render_node(self, screen, board, font, selected=False, result=None):
         label = f"{self.num_wins:.2f}/{self.num_visits:.2f}=>{self.ucb(c=1.41):.3}"
@@ -111,7 +117,7 @@ def update_memory(game, memory, node, root_turn):
     for child in node.children:
         update_memory(game, memory, child, root_turn)
 
-def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memory=None, c=1.41, learn=False, board=None, most_visits=False):
+def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memory=None, c=1.41, learn=False, board=None, most_visits=False, ucb_type=UCB_Type.UCB1):
     info = {}
     if condensed_memory:
         move = condensed_memory.get(binary_state)
@@ -130,7 +136,7 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memo
         if board and not final_only:
             painter.paint('Start', node)
 
-        node = node.select(c)
+        node = node.select(c, ucb_type)
 
         if board and not final_only:
             painter.paint('Select', node)
@@ -159,10 +165,11 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memo
     if most_visits:
         best_child = root.get_most_visited()
     else:
-        best_child = root.best_child(c=0.0)
+        best_child = root.best_child(c=0.0, ucb_type=ucb_type)
 
     info["num_visits"] = best_child.num_visits
     info["num_wins"] = best_child.num_wins
+    info["result_history"] = best_child.result_history
 
     return root.best_child(c=0.0).move, info
 
@@ -175,6 +182,7 @@ class PLAYMODE(Enum):
 
 if __name__ == "__main__":
     game = C4Game()
+    num_games = 10
     # board = C4Board(1900, 1000, game)
     # board = C4Board(game=game)
     board = None
@@ -187,8 +195,8 @@ if __name__ == "__main__":
     # player1_mode = PLAYMODE.RANDOM
     # memory1 = ReplayMemory("C4Game_1000.bin")
     memory1 = None
-    condensed_memory1 = CondensedMemory("C4Game_1000_10000.bin", 1000)
-    # condensed_memory1 = None
+    # condensed_memory1 = CondensedMemory("C4Game_1000_10000.bin", 1000)
+    condensed_memory1 = None
 
     # player2_mode = PLAYMODE.TRAIN
     player2_mode = PLAYMODE.TEST
@@ -208,7 +216,7 @@ if __name__ == "__main__":
     accumulated_time[GameTurn.PLAYER2] = 0.0
     condensed_memory_tracker = []
 
-    for game_number in range(100):
+    for game_number in range(num_games):
         print("=" * 60)
         turn = GameTurn.PLAYER1 if game_number % 2 == 0 else GameTurn.PLAYER2
         binary_state = game.get_initial_position()

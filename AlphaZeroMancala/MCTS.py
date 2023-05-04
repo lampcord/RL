@@ -97,7 +97,7 @@ class MCTSNode:
         return str(self.move)
 
     def get_most_visited(self):
-        return max(self.children, key=lambda child: child.num_visits).move
+        return max(self.children, key=lambda child: child.num_visits)
 
 # final_only = True
 final_only = False
@@ -112,13 +112,17 @@ def update_memory(game, memory, node, root_turn):
         update_memory(game, memory, child, root_turn)
 
 def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memory=None, c=1.41, learn=False, board=None, most_visits=False):
+    info = {}
     if condensed_memory:
         if binary_state == game.get_initial_position():
             move = 3
         else:
             move = condensed_memory.get(binary_state)
         if move is not None:
-            return move
+            info["CondensedMemory"] = True
+            return move, info
+        info["CondensedMemory"] = False
+
     root = MCTSNode(game, binary_state, turn)
     if board:
         painter = node_painter.NodePainter(root, board)
@@ -157,9 +161,14 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memo
         painter.close()
 
     if most_visits:
-        return root.get_most_visited()
+        best_child = root.get_most_visited()
     else:
-        return root.best_child(c=0.0).move
+        best_child = root.best_child(c=0.0)
+
+    info["Visits"] = best_child.num_visits
+    info["Wins"] = best_child.num_wins
+
+    return root.best_child(c=0.0).move, info
 
 class PLAYMODE(Enum):
     TRAIN = 0
@@ -182,16 +191,16 @@ if __name__ == "__main__":
     # player1_mode = PLAYMODE.RANDOM
     # memory1 = ReplayMemory("C4Game_1000.bin")
     memory1 = None
-    # condensed_memory1 = CondensedMemory("C4Game_2000.bin", 1000)
-    condensed_memory1 = None
+    condensed_memory1 = CondensedMemory("C4Game_2000.bin", 1000)
+    # condensed_memory1 = None
 
     # player2_mode = PLAYMODE.TRAIN
     player2_mode = PLAYMODE.TEST
     # player2_mode = PLAYMODE.HUMAN
     # player2_mode = PLAYMODE.RANDOM
     memory2 = None
-    condensed_memory2 = CondensedMemory("C4Game_2000.bin", 1000)
-    # condensed_memory2 = None
+    # condensed_memory2 = CondensedMemory("C4Game_2000.bin", 1000)
+    condensed_memory2 = None
 
     results = {}
     results[GameResult.PLAYER1] = 0
@@ -201,6 +210,7 @@ if __name__ == "__main__":
     accumulated_time = {}
     accumulated_time[GameTurn.PLAYER1] = 0.0
     accumulated_time[GameTurn.PLAYER2] = 0.0
+    condensed_memory_tracker = []
 
     for game_number in range(10):
         print("=" * 60)
@@ -210,6 +220,8 @@ if __name__ == "__main__":
         result = GameResult.NOT_COMPLETED
         game.render(binary_state, turn)
         win = None
+
+        condensed_memory_set = []
         if play_on_board:
             legal_moves = game.get_legal_moves(binary_state, turn)
             list_state = game.get_decoded_list(binary_state, turn)
@@ -219,11 +231,12 @@ if __name__ == "__main__":
             print('_' * 60)
             print(f"Player {turn.name} is thinking ...")
             start = time.time_ns()
+            info = {}
             if turn == GameTurn.PLAYER1:
                 if player1_mode == PLAYMODE.TRAIN:
-                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
+                    move, info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
                 elif player1_mode == PLAYMODE.TEST:
-                    move = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory1, c=1.41, learn=True, board=None)
+                    move, info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory1, c=1.41, learn=True, board=None)
                 elif player1_mode == PLAYMODE.RANDOM:
                     legal_moves = game.get_legal_moves(binary_state, turn)
                     move = random.choice(legal_moves)
@@ -236,9 +249,9 @@ if __name__ == "__main__":
                         move = int(input(f"Choose Move: {legal_moves}"))
             else:
                 if player2_mode == PLAYMODE.TRAIN:
-                    move = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
+                    move, info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
                 elif player2_mode == PLAYMODE.TEST:
-                    move = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory2, c=1.41, learn=True, board=None)
+                    move, info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory2, c=1.41, learn=True, board=None)
                 elif player2_mode == PLAYMODE.RANDOM:
                     legal_moves = game.get_legal_moves(binary_state, turn)
                     move = random.choice(legal_moves)
@@ -250,7 +263,10 @@ if __name__ == "__main__":
                     else:
                         move = int(input(f"Choose Move: {legal_moves}"))
 
-            print(f"Move {move}")
+            condensed_memory_test = info.get("CondensedMemory", None)
+            if condensed_memory_test is not None:
+                condensed_memory_set.append(info["CondensedMemory"])
+            print(f"Move {move} Info {str(info)}")
             accumulated_time[turn] += (time.time_ns() - start) / 1000000000.0
             binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
             win = game.check_for_win(binary_state, turn) if result == GameResult.PLAYER1 or result == GameResult.PLAYER2 else None
@@ -268,12 +284,16 @@ if __name__ == "__main__":
 
         results[result] += 1
         print(f"game_number: {game_number} {results}")
+        condensed_memory_tracker.append(condensed_memory_set)
 
         # print(binary_state)
-        print('.', end='')
+        # print('.', end='')
         if player1_mode == PLAYMODE.TRAIN:
             memory1.write()
             print(f"Size of replay memory: {len(memory1.memory)}")
+
+    for cmemory_set in condensed_memory_tracker:
+        print(str(cmemory_set))
 
     print('')
     print(results)

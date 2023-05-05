@@ -19,6 +19,14 @@ class UCB_Type(Enum):
 
 class MCTSNode:
     def __init__(self, game, binary_state, turn, parent=None, move=None, result=GameResult.NOT_COMPLETED):
+        """
+        :param game:
+        :param binary_state:
+        :param turn:
+        :param parent:
+        :param move:
+        :param result:
+        """
         self.binary_state = binary_state
         self.game = game
         self.turn = turn
@@ -152,7 +160,23 @@ def update_memory(game, memory, node, root_turn):
     for child in node.children:
         update_memory(game, memory, child, root_turn)
 
-def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memory=None, c=1.41, learn=False, board=None, most_visits=False, ucb_type=UCB_Type.UCB1):
+
+def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memory=None, c=1.41,
+                board=None, most_visits=False, ucb_type=UCB_Type.UCB1):
+    """
+    Monte Carlo Tree Search - perform a MCTS from a given game, state and player turn and return the best move.
+    :param game: game class
+    :param binary_state: starting binary state
+    :param turn: turn of searching player
+    :param loops: how many iterations to run
+    :param memory: memory to be trained by this run
+    :param condensed_memory: condensed memory used to look up moves
+    :param c: exploration constant usd by UCB1
+    :param board: used if displaying tree for debugging
+    :param most_visits: use most visits for the move choice instead of best score
+    :param ucb_type: UCB1 or UCB1-Tuned
+    :return: move, info. Info contains diagnostic info from search.
+    """
     info = {}
     if condensed_memory:
         move = condensed_memory.get(binary_state)
@@ -162,6 +186,7 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memo
         info["CondensedMemory"] = False
 
     root = MCTSNode(game, binary_state, turn)
+
     if board:
         painter = node_painter.NodePainter(root, board)
 
@@ -217,7 +242,7 @@ class PLAYMODE(Enum):
 
 if __name__ == "__main__":
     game = C4Game()
-    num_games = 100
+    num_games = 10
     # board = C4Board(1900, 1000, game)
     # board = C4Board(game=game)
     board = None
@@ -228,8 +253,8 @@ if __name__ == "__main__":
     player1_mode = PLAYMODE.TEST
     # player1_mode = PLAYMODE.HUMAN
     # player1_mode = PLAYMODE.RANDOM
-    player1_ucb = UCB_Type.UCB1
-    # player1_ucb = UCB_Type.UCB1_TUNED
+    # player1_ucb = UCB_Type.UCB1
+    player1_ucb = UCB_Type.UCB1_TUNED
     # memory1 = ReplayMemory("C4Game_1000.bin")
     memory1 = None
     # condensed_memory1 = CondensedMemory("C4Game_1000_10000.bin", 1000)
@@ -277,9 +302,11 @@ if __name__ == "__main__":
             mcts_info = {}
             if turn == GameTurn.PLAYER1:
                 if player1_mode == PLAYMODE.TRAIN:
-                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41)
                 elif player1_mode == PLAYMODE.TEST:
-                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory1, c=1.41, learn=True, board=None, ucb_type=player1_ucb, most_visits=True)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000,
+                                                  condensed_memory=condensed_memory1, c=1.41, board=None,
+                                                  ucb_type=player1_ucb, most_visits=True)
                 elif player1_mode == PLAYMODE.RANDOM:
                     legal_moves = game.get_legal_moves(binary_state, turn)
                     move = random.choice(legal_moves)
@@ -292,9 +319,11 @@ if __name__ == "__main__":
                         move = int(input(f"Choose Move: {legal_moves}"))
             else:
                 if player2_mode == PLAYMODE.TRAIN:
-                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41, learn=True)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41)
                 elif player2_mode == PLAYMODE.TEST:
-                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, condensed_memory=condensed_memory2, c=1.41, learn=True, board=None, ucb_type=player2_ucb, most_visits=True)
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000,
+                                                  condensed_memory=condensed_memory2, c=1.41, board=None,
+                                                  ucb_type=player2_ucb, most_visits=True)
                 elif player2_mode == PLAYMODE.RANDOM:
                     legal_moves = game.get_legal_moves(binary_state, turn)
                     move = random.choice(legal_moves)

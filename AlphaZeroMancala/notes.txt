@@ -29,12 +29,16 @@ Entities
 [ ] MCTS - Monte Carlo Tree Search
     Search - Performs a search on a Game and updates ReplayMemory with the results.
 
-
+[ ] Findings:
+    [?] UCB1-Tuned outperforms UCB1
 ------------------------------------------------------------------------
 
 TODO:
 [X] Replay Memory Scaling
 [X] Current Player POV Binary
-[/] Implement C4
-[!] Bug! Misses wins on vertical columns
+[X] Implement C4
+[X] Bug! Misses wins on vertical columns
+[ ] Create a random number table so we can reproduce results
+[ ] MCTS and MinimaxSolver
+[ ] Keeping tree alive from selected node
 [ ] Mancala

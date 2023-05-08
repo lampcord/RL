@@ -31,6 +31,13 @@ Entities
 
 [ ] Findings:
     [?] UCB1-Tuned outperforms UCB1
+    {<GameResult.PLAYER1: 0>: 489, <GameResult.PLAYER2: 1>: 468, <GameResult.DRAW: 2>: 43}
+    {<GameTurn.PLAYER1: 0>: 5537.328882499984, <GameTurn.PLAYER2: 1>: 5464.933246399994}
+
+    [?] UCB1-Tuned + Condensed Memory (C4Game_1000_10000_C1000) vs UCB1 No Condensed
+    {<GameResult.PLAYER1: 0>: 518, <GameResult.PLAYER2: 1>: 443, <GameResult.DRAW: 2>: 39}
+    {<GameTurn.PLAYER1: 0>: 1964.669341599996, <GameTurn.PLAYER2: 1>: 5296.620903399998}
+    (See LogOfCompressedMemory.txt)
 ------------------------------------------------------------------------
 
 TODO:
@@ -38,7 +45,9 @@ TODO:
 [X] Current Player POV Binary
 [X] Implement C4
 [X] Bug! Misses wins on vertical columns
-[ ] Create a random number table so we can reproduce results
 [ ] MCTS and MinimaxSolver
 [ ] Keeping tree alive from selected node
+[ ] Create a random number table so we can reproduce results
 [ ] Mancala
+[ ] Reversi
+[ ] Backgammon

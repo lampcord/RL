@@ -242,7 +242,7 @@ class PLAYMODE(Enum):
 
 if __name__ == "__main__":
     game = C4Game()
-    num_games = 10
+    num_games = 1000
     # board = C4Board(1900, 1000, game)
     # board = C4Board(game=game)
     board = None
@@ -257,15 +257,15 @@ if __name__ == "__main__":
     player1_ucb = UCB_Type.UCB1_TUNED
     # memory1 = ReplayMemory("C4Game_1000.bin")
     memory1 = None
-    # condensed_memory1 = CondensedMemory("C4Game_1000_10000.bin", 1000)
-    condensed_memory1 = None
+    condensed_memory1 = CondensedMemory("C4Game_1000_10000.bin", 1000)
+    # condensed_memory1 = None
 
     # player2_mode = PLAYMODE.TRAIN
     player2_mode = PLAYMODE.TEST
     # player2_mode = PLAYMODE.HUMAN
     # player2_mode = PLAYMODE.RANDOM
-    # player2_ucb = UCB_Type.UCB1
-    player2_ucb = UCB_Type.UCB1_TUNED
+    player2_ucb = UCB_Type.UCB1
+    # player2_ucb = UCB_Type.UCB1_TUNED
     memory2 = None
     # condensed_memory2 = CondensedMemory("C4Game_2000.bin", 1000)
     condensed_memory2 = None

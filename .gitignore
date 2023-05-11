@@ -19,3 +19,8 @@ Rainbow/replay_checkpoints/
 AlphaZeroMancala/.idea/
 *.trace
 *.bin
+FastRollout/.vs/FastRollout/FileContentIndex/
+FastRollout/.vs/FastRollout/v16/
+FastRollout/.vs/FastRollout/v17/
+FastRollout/FastRollout/x64/
+FastRollout/x64/

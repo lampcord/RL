@@ -242,12 +242,12 @@ class PLAYMODE(Enum):
 
 if __name__ == "__main__":
     game = C4Game()
-    num_games = 1000
+    num_games = 10
     # board = C4Board(1900, 1000, game)
-    # board = C4Board(game=game)
-    board = None
-    # play_on_board = True
-    play_on_board = False
+    board = C4Board(game=game)
+    # board = None
+    play_on_board = True
+    # play_on_board = False
 
     # player1_mode = PLAYMODE.TRAIN
     player1_mode = PLAYMODE.TEST
@@ -257,12 +257,12 @@ if __name__ == "__main__":
     player1_ucb = UCB_Type.UCB1_TUNED
     # memory1 = ReplayMemory("C4Game_1000.bin")
     memory1 = None
-    condensed_memory1 = CondensedMemory("C4Game_1000_10000.bin", 1000)
-    # condensed_memory1 = None
+    # condensed_memory1 = CondensedMemory("C4Game_1000_10000.bin", 1000)
+    condensed_memory1 = None
 
     # player2_mode = PLAYMODE.TRAIN
-    player2_mode = PLAYMODE.TEST
-    # player2_mode = PLAYMODE.HUMAN
+    # player2_mode = PLAYMODE.TEST
+    player2_mode = PLAYMODE.HUMAN
     # player2_mode = PLAYMODE.RANDOM
     player2_ucb = UCB_Type.UCB1
     # player2_ucb = UCB_Type.UCB1_TUNED
@@ -304,7 +304,7 @@ if __name__ == "__main__":
                 if player1_mode == PLAYMODE.TRAIN:
                     move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41)
                 elif player1_mode == PLAYMODE.TEST:
-                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000,
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=10000,
                                                   condensed_memory=condensed_memory1, c=1.41, board=None,
                                                   ucb_type=player1_ucb, most_visits=True)
                 elif player1_mode == PLAYMODE.RANDOM:

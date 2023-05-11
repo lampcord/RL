@@ -48,6 +48,8 @@ In this representation, the field above will be equal to those bits:
 All the code is generic, so, in theory you can try to adjust the field size.
 But tests could become broken.
 """
+import ctypes
+import os
 import random
 import time
 

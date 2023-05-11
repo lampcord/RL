@@ -213,8 +213,8 @@ if __name__ == "__main__":
     # screen = pygame.display.set_mode((1900, 1000))
     pygame.display.set_caption("Connect 4")
 
-    # human_is_current = True
-    human_is_current = False
+    human_is_current = True
+    # human_is_current = False
 
     sessionNames = [
         'best_011_02100.dat',

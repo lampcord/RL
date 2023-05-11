@@ -3,17 +3,38 @@
 #include "squirrel3.h"
 #include <iostream>
 #include <random>
+#include <iomanip>
 
 using namespace std;
 
 namespace C4
 {
-    const int num_cols = 7;
-    const int num_rows = 6;
-    const int bits_in_length = 3;
     const char player_1_symbol = 'X';
     const char player_2_symbol = 'O';
     const char blank_symbol = '.';
+
+    const int num_cols = 7;
+    const int num_rows = 6;
+    const int bits_in_length = 3;
+    const int win_length = 4;
+
+    const int max_win_sets = 13;
+    const int win_check_row_size = (win_length - 1) * max_win_sets;
+    const int win_check_table_size = num_cols * num_rows * win_check_row_size;
+
+    static int win_check_table[win_check_table_size];
+    static bool win_check_table_filled = false;
+
+    const int direction_size = (win_length - 1) * 2;
+
+    const int vert_co[direction_size] = { 0, 0, 0, 0, 0, 0 };
+    const int vert_row[direction_size] = { -3, -2, -1, 1, 2, 3 };
+    const int horiz_co[direction_size] = { -3, -2, -1, 1, 2, 3 };
+    const int horiz_row[direction_size] = { 0, 0, 0, 0, 0, 0 };
+    const int diag1_co[direction_size] = { -3, -2, -1, 1, 2, 3 };
+    const int diag1_row[direction_size] = { -3, -2, -1, 1, 2, 3 };
+    const int diag2_co[direction_size] = { 3, 2, 1, -1, -2, -3 };
+    const int diag2_row[direction_size] = { -3, -2, -1, 1, 2, 3 };
 
     enum class GameResult
     {
@@ -22,6 +43,122 @@ namespace C4
         draw = 2,
         not_completed = 3
     };
+
+    void render(char(&array_pos)[num_cols * num_rows]);
+
+    void dump_win_check_table()
+    {
+        for (auto col = 0; col < (int)num_cols; col++)
+        {
+            for (auto row = 0; row < (int)num_rows; row++)
+            {
+                auto ndx = col * num_rows + row;
+                cout << setw(3) << ndx << " | ";
+                for (auto win_check_set = 0u; win_check_set < max_win_sets; win_check_set++)
+                {
+                    for (auto win_check_item = 0u; win_check_item < (win_length - 1); win_check_item++)
+                    {
+                        auto win_check_ndx = ndx * win_check_row_size + win_check_set * (win_length - 1) + win_check_item;
+                        cout << setw(3) << win_check_table[win_check_ndx] << " ";
+                    }
+                    cout << "| ";
+                }
+                cout << endl;
+            }
+        }
+
+        char array_pos[num_cols * num_rows];
+        for (auto col = 0; col < (int)num_cols; col++)
+        {
+            for (auto row = 0; row < (int)num_rows; row++)
+            {
+                auto test_ndx = col * num_rows + row;
+                
+                for (auto win_check_set = 0u; win_check_set < max_win_sets; win_check_set++)
+                {
+                    for (auto ndx = 0u; ndx < num_cols * num_rows; ndx++) array_pos[ndx] = blank_symbol;
+                    array_pos[test_ndx] = player_2_symbol;
+
+                    bool valid = true;
+                    for (auto win_check_item = 0; win_check_item < (win_length - 1); win_check_item++)
+                    {
+                        auto win_check_ndx = test_ndx * win_check_row_size + win_check_set * (win_length - 1) + win_check_item;
+                        auto target_ndx = win_check_table[win_check_ndx];
+                        if (target_ndx < 0)
+                        {
+                            valid = false;
+                            break;
+                        }
+                        array_pos[target_ndx] = player_1_symbol;
+                    }
+                    
+                    if (!valid) break;
+                    render(array_pos);
+                }
+            }
+        }
+    }
+
+    int add_win_set(int col, int row, const int(&col_table)[direction_size], const int(&row_table)[direction_size], int win_check_set)
+    {
+        int num_win_check_sets_added = 0;
+        int test_set[win_length - 1];
+
+        for (auto start_dir_ndx = 0u; start_dir_ndx < (direction_size - (win_length - 1)) + 1; start_dir_ndx++)
+        {
+            bool all_valid = true;
+            for (auto test_dir_ndx = 0u; test_dir_ndx < (win_length - 1); test_dir_ndx++)
+            {
+                int test_col = col + col_table[start_dir_ndx + test_dir_ndx];
+                int test_row = row + row_table[start_dir_ndx + test_dir_ndx];
+                bool valid = (test_col >= 0 && test_col < num_cols&& test_row >= 0 && test_row < num_rows);
+                //cout << "(" << test_col << ", " << test_row << ") " << (valid ? "+" : "-");
+                if (!valid)
+                {
+                    all_valid = false;
+                    break;
+                }
+                auto win_ndx = test_col * num_rows + test_row;
+                //cout << win_ndx << " ";
+                test_set[test_dir_ndx] = win_ndx;
+            }
+            if (all_valid)
+            {
+                auto ndx = col * num_rows + row;
+
+                for (auto test_dir_ndx = 0u; test_dir_ndx < (win_length - 1); test_dir_ndx++)
+                {
+                    auto win_check_ndx = ndx * win_check_row_size + (win_check_set + num_win_check_sets_added) * (win_length - 1) + test_dir_ndx;
+                    win_check_table[win_check_ndx] = test_set[test_dir_ndx];
+                }
+                num_win_check_sets_added++;
+                //cout << " VALID ";
+            }
+            //cout << endl;
+        }
+
+
+        return num_win_check_sets_added;
+    }
+    void initialize_win_check_table()
+    {
+        for (auto x = 0u; x < win_check_table_size; x++) win_check_table[x] = -1;
+
+        for (auto col = 0; col < (int)num_cols; col++)
+        {
+            for (auto row = 0; row < (int)num_rows; row++)
+            {
+                auto ndx = col * num_rows + row;
+                auto win_check_set = 0;
+                win_check_set += add_win_set(col, row, vert_co, vert_row, win_check_set);
+                win_check_set += add_win_set(col, row, horiz_co, horiz_row, win_check_set);
+                win_check_set += add_win_set(col, row, diag1_co, diag1_row, win_check_set);
+                win_check_set += add_win_set(col, row, diag2_co, diag2_row, win_check_set);
+            }
+        }
+
+        dump_win_check_table();
+    }
 
     void get_array_pos_from_binary(char(&array_pos)[num_cols * num_rows], unsigned long long position, unsigned long long player)
     {
@@ -139,8 +276,14 @@ namespace C4
 
     float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts)
     {
-
         Squirrel3 rng(42);
+        if (!win_check_table_filled)
+        {
+            initialize_win_check_table();
+        }
+        win_check_table_filled = true;
+
+        return 0.0f;
 
         float result = 0.0f;
 

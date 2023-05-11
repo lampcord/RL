@@ -19,9 +19,10 @@ game = c4_game.C4Game()
 turn = GameTurn.PLAYER1
 
 positions = [game.get_initial_position(), game.get_initial_position(), game.get_initial_position(), game.get_initial_position(), game.get_initial_position()]
-for position in positions:
+for position in positions[:1]:
     print('-' * 80)
     start = time.time_ns()
+    result = my_functions.C4_rollout(position, GameTurn.PLAYER1.value, 1000000)
     result = my_functions.C4_rollout(position, GameTurn.PLAYER1.value, 1000000)
     elapsed = time.time_ns() - start
     print(f"Result {result} Elapsed {elapsed / 1000000000.0}")

@@ -13,20 +13,18 @@ my_functions.C4_rollout.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_u
 my_functions.C4_rollout.restype = ctypes.c_float
 
 my_functions.C4_render.argtypes = [ctypes.c_uint64, ctypes.c_uint64]
-my_functions.C4_rollout.restype = None
+my_functions.C4_render.restype = None
 
 game = c4_game.C4Game()
 turn = GameTurn.PLAYER1
 
-positions = [game.get_initial_position(), 1283531189544341544]
+positions = [game.get_initial_position(), game.get_initial_position(), game.get_initial_position(), game.get_initial_position(), game.get_initial_position()]
 for position in positions:
     print('-' * 80)
-    # my_functions.C4_rollout(position, GameTurn.PLAYER1.value, 0)
-    my_functions.C4_render(position, GameTurn.PLAYER1.value)
-    game.render(position, GameTurn.PLAYER1)
-    # my_functions.C4_rollout(position, GameTurn.PLAYER2.value, 0)
-    my_functions.C4_render(position, GameTurn.PLAYER2.value)
-    game.render(position, GameTurn.PLAYER2)
+    start = time.time_ns()
+    result = my_functions.C4_rollout(position, GameTurn.PLAYER1.value, 1000000)
+    elapsed = time.time_ns() - start
+    print(f"Result {result} Elapsed {elapsed / 1000000000.0}")
     # bits = game.int_to_bits(position, bits=c4_game.GAME_COLS * c4_game.GAME_ROWS + c4_game.GAME_COLS * c4_game.BITS_IN_LEN)
     # for bit in bits:
     #     print(str(bit) + " ", end="")

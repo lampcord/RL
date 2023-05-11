@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "C4.h"
+#include "squirrel3.h"
 #include <iostream>
+#include <random>
 
 using namespace std;
 
@@ -12,6 +14,14 @@ namespace C4
     const char player_1_symbol = 'X';
     const char player_2_symbol = 'O';
     const char blank_symbol = '.';
+
+    enum class GameResult
+    {
+        player_1_wins = 0,
+        player_2_wins = 1,
+        draw = 2,
+        not_completed = 3
+    };
 
     void get_array_pos_from_binary(char(&array_pos)[num_cols * num_rows], unsigned long long position, unsigned long long player)
     {
@@ -109,19 +119,60 @@ namespace C4
         render(array_pos);
     }
 
+    GameResult move(char(&array_pos)[num_cols * num_rows], unsigned long long player, unsigned int move)
+    {
+        GameResult result = GameResult::not_completed;
+
+        auto ndx = move * num_rows;
+        for (auto row = 0u; row < num_rows; row++)
+        {
+            if (array_pos[ndx] == blank_symbol)
+            {
+                array_pos[ndx] = player == 0 ? player_1_symbol : player_2_symbol;
+                break;
+            }
+            ndx++;
+        }
+
+        return result;
+    }
+
     float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts)
     {
+
+        Squirrel3 rng(42);
+
+        float result = 0.0f;
+
         char array_pos[num_cols * num_rows];
+        char rollout_board[num_cols * num_rows];
 
         get_array_pos_from_binary(array_pos, position, player);
-        //for (auto ndx = 0; ndx < num_cols * num_rows; ndx++)
-        //{
-        //    cout << array_pos[ndx] << " ";
-        //}
-        //cout << endl;
-        render(array_pos);
 
-        return 0.0f;
+        for (auto x = 0u; x < num_rollouts; x++)
+        {
+            auto rollout_player = player;
+            memcpy(rollout_board, array_pos, sizeof(rollout_board));
+            while (true)
+            {
+                unsigned int legal_moves[num_cols];
+                auto num_moves = get_legal_moves(rollout_board, legal_moves);
+            
+                if (num_moves <= 0)
+                {
+                    break;
+                }
+
+                move(rollout_board, rollout_player, legal_moves[rng() % num_moves]);
+                //render(rollout_board);
+                rollout_player = 1 - rollout_player;
+            }
+            result += 1.0f;
+
+            //render(rollout_board);
+        }
+
+        return result;
     }
 
 }

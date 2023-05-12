@@ -54,7 +54,7 @@ import random
 import time
 
 import numpy as np
-import game
+import game_rules
 import pygame
 from Connect4 import c4_board
 from Connect4.c4_board import C4Board

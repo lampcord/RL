@@ -1,6 +1,6 @@
 import time
 
-import game
+import game_rules
 import random
 import tic_tac_toe.ttt_board
 """

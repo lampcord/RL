@@ -2,7 +2,7 @@ import time
 
 import pygame
 
-import game
+import game_rules
 from tic_tac_toe import ttt_game
 
 background_color = (255, 255, 255)

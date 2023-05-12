@@ -1,0 +1,91 @@
+The goal is to create a program that can play a variety of games using different algorithms.
+
+The following categories are implied:
+
+.------------------------------------------------------------------------------------------------------------------------------
+
+Agent - The agent is responsible for making moves from a given position in a game. Types of Agents have a decision making mechanism.
+
+Examples:
+RandomAgent: an agent that makes random moves.
+NNAgent: a Neural Network based agent
+MCTSAgent: a Monte Carlo Tree Search based agent
+ABAgent: an Alpha Beta MinMax based agent
+GUIAgent: a graphical human interface agent
+CommandLineAgent: a command line based agent
+
+Interface:
+Init(GameRules) - The Agent will only need the GameRules.
+MaxTimePerMove
+MaxIterationsPerMove
+TrainedData - Path to Trained NN, opening book, etc.
+Policies - Different policies to use (UCB, rollout policy, etc.)
+
+Move(GameState, TurnIndex) =>GameState, TurnIndex, GameResult, Info
+Returns:
+GameState - the new GameState after completing the move.
+TurnIndex - the index of the next player to move (some games allow multiple moves by same player).
+GameResult: Win, Loss, Tie, Continue. This is always from the point of view of the turn played by the call to Move.
+Info - any other information in the form of a dict. Can be used for diagnostic info.
+
+In addition, agents that can learn will have other yet to be determined interfaces that will be used in training.
+
+.------------------------------------------------------------------------------------------------------------------------------
+
+GameRules - Instead of having an ambiguous game class, we will instead use a stateless GameRules class. This class will encapsulate all of the rules of a given game.
+
+Examples:
+TTTGameRules - tic tac toe
+C4GameRules - Connect 4
+MancalaGameRules - Mancala
+OthelloGameRules - Othello
+BackgammonGameRules - Backgammon
+
+The turn will always be represented by an index from 0 to N-1 where N is the number of players in the game.
+
+Interface:
+Init(NumberOfPlayers) - umber of players which is needed to determine the next player to move in order to perform all of its tasks. However, additional optional parameters may be available to specify things like:
+
+GetPlayerBounds()
+Returns:
+A tuple (Min, Max) of the number of players that can legally play.
+
+GetInitialState()
+Returns:
+GameState - The starting state for the game.
+
+GetLegalMoves(GameState, TurnIndex)
+Returns:
+LegalMoves - a list of legal moves. Can be empty if no legal moves are available for that player (ie Backgammon).
+
+Move(GameState, TurnIndex, Move)
+Move indicates a move selected from the list returned by GetLegalMoves. It can be None if skipping is allowed.
+
+Returns:
+GameState - the new GameState after completing the move.
+TurnIndex - the index of the next player to move (some games allow multiple moves by same player).
+GameResult: Win, Loss, Tie, Continue. This is always from the point of view of the turn played by the call to Move.
+Info - any other information in the form of a dict. Can be used for diagnostic info.
+
+
+
+.------------------------------------------------------------------------------------------------------------------------------
+
+GameState - The state of a game will be independent of the GameRules which are stateless.
+This will encapsulate all of the information needed by the GameRules to enforce rules of play. This should be represented as an integer so it can be passed around without having to be cloned. The GameState should be turn dependent. In other words, the exact same position with player 1 to move should NOT have the same GameState as when player 2 moves. This is important to eliminate needing to know which players turn it is to display a game.
+
+.------------------------------------------------------------------------------------------------------------------------------
+
+TournamentDirector - The TournamentDirectory is in charge of managing games between agents. This includes prompting for moves, recording results and any other control or monitoring tasks that are outside of the domain of the game or agent.
+
+Interface:
+Init(GameRules, AgentList, NumberOfGames, <TimeLimit>)
+AgentList is a list of previously instantiated players
+NumberOfGames is the number of games between each player pairing.
+
+Run()
+Returns:
+A list of all of the matchups and results including the total thinking time of each of the players.
+
+
+

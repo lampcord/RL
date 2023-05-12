@@ -19,9 +19,9 @@ my_functions.C4_render.restype = None
 game = c4_game.C4Game()
 turn = GameTurn.PLAYER1
 
-rollouts = 200000
-positions = [game.get_initial_position(), game.get_initial_position(), game.get_initial_position(), game.get_initial_position(), game.get_initial_position()]
-for position in positions:
+rollouts = 2000
+positions = [17592187841462, game.get_initial_position(), game.get_initial_position(), game.get_initial_position(), game.get_initial_position()]
+for position in positions[:1]:
     print('-' * 80)
     start = time.time_ns()
     result = my_functions.C4_rollout(position, GameTurn.PLAYER1.value, rollouts)

@@ -329,7 +329,7 @@ namespace C4
         char array_pos[num_cols * num_rows];
         char rollout_board[num_cols * num_rows];
 
-        get_array_pos_from_binary(array_pos, position, player);
+        get_array_pos_from_binary(array_pos, position, 1 - player);
 
         for (auto x = 0u; x < num_rollouts; x++)
         {

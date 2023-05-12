@@ -1,5 +1,7 @@
 import random
 from enum import Enum
+import ctypes
+import os
 
 from tic_tac_toe.ttt_game import TicTacToeGame
 # from tic_tac_toe.ttt_board import TicTacToeBoard
@@ -18,7 +20,7 @@ class UCB_Type(Enum):
     UCB1_TUNED = 2
 
 class MCTSNode:
-    def __init__(self, game, binary_state, turn, parent=None, move=None, result=GameResult.NOT_COMPLETED):
+    def __init__(self, game, binary_state, turn, parent=None, move=None, result=GameResult.NOT_COMPLETED, fast_rollout=None):
         """
         :param game:
         :param binary_state:
@@ -38,6 +40,7 @@ class MCTSNode:
         self.reward_history = {}
         self.num_visits = 0.0
         self.num_wins = 0.0
+        self.fast_rollout = fast_rollout
 
     def select(self, c=1.41, ucb_type=UCB_Type.UCB1):
         if len(self.unexplored_children) > 0:
@@ -60,31 +63,38 @@ class MCTSNode:
         new_binary_state, result, switch_turns, info = game.move(self.binary_state, move, self.turn)
         if switch_turns:
             new_binary_state, turn = game.switch_players(new_binary_state, turn)
-        child = MCTSNode(game, new_binary_state, turn, self, move, result)
+        child = MCTSNode(game, new_binary_state, turn, self, move, result, fast_rollout=self.fast_rollout)
         self.children.append(child)
         return child
 
     def rollout(self):
-        binary_state = self.binary_state
-        turn = self.turn
-        result = self.result
-        while result == GameResult.NOT_COMPLETED:
-            moves = game.get_legal_moves(binary_state, turn)
-            move = random.choice(moves)
-            binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
-            if switch_turns:
-                binary_state, turn = game.switch_players(binary_state, turn)
-        return result
+        if self.fast_rollout:
+            # self.game.render(self.binary_state, self.turn)
+            reward = self.fast_rollout(self.binary_state, self.turn.value, 2000) / 2000
+        else:
+            binary_state = self.binary_state
+            turn = self.turn
+            result = self.result
+            while result == GameResult.NOT_COMPLETED:
+                moves = game.get_legal_moves(binary_state, turn)
+                move = random.choice(moves)
+                binary_state, result, switch_turns, info = game.move(binary_state, move, turn)
+                if switch_turns:
+                    binary_state, turn = game.switch_players(binary_state, turn)
+            reward = self.game.get_score_for_result(result, self.turn)
+        return reward, self.turn
 
-    def back_propagate(self, rollout_result):
+    def back_propagate(self, reward, player_turn):
         self.num_visits += 1
-        reward = 0
+        local_reward = 0
         if self.parent:
-            reward = self.game.get_score_for_result(rollout_result, self.parent.turn)
-        self.num_wins += reward
-        self.reward_history[reward] = self.reward_history.get(reward, 0) + 1
+            local_reward = reward
+        if self.parent and self.parent.turn != player_turn:
+            local_reward = 1.0 - reward
+        self.num_wins += local_reward
+        self.reward_history[local_reward] = self.reward_history.get(local_reward, 0) + 1
         if self.parent:
-            self.parent.back_propagate(rollout_result)
+            self.parent.back_propagate(reward, player_turn)
 
     def ucb(self, c, ucb_type=UCB_Type.UCB1):
         ucb = 0.0
@@ -162,7 +172,7 @@ def update_memory(game, memory, node, root_turn):
 
 
 def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memory=None, c=1.41,
-                board=None, most_visits=False, ucb_type=UCB_Type.UCB1):
+                board=None, most_visits=False, ucb_type=UCB_Type.UCB1, fast_rollout=None):
     """
     Monte Carlo Tree Search - perform a MCTS from a given game, state and player turn and return the best move.
     :param game: game class
@@ -185,7 +195,7 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memo
             return move, info
         info["CondensedMemory"] = False
 
-    root = MCTSNode(game, binary_state, turn)
+    root = MCTSNode(game, binary_state, turn, fast_rollout=fast_rollout)
 
     if board:
         painter = node_painter.NodePainter(root, board)
@@ -206,12 +216,12 @@ def mcts_search(game, binary_state, turn, loops=500, memory=None, condensed_memo
         if board and not final_only:
             painter.paint('Expand', node)
 
-        rollout_result = node.rollout()
+        reward, player_turn = node.rollout()
 
         if board and not final_only:
             painter.paint('Rollout', node)
 
-        node.back_propagate(rollout_result)
+        node.back_propagate(reward, player_turn)
 
     if board:
         painter.paint('Final', node)
@@ -241,6 +251,14 @@ class PLAYMODE(Enum):
 
 
 if __name__ == "__main__":
+    # Load the DLL
+    dll_path = os.path.join("FastRollout.dll")
+    my_functions = ctypes.CDLL(dll_path)
+
+    # Declare the argument types and return types of the C++ functions
+    my_functions.C4_rollout.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
+    my_functions.C4_rollout.restype = ctypes.c_float
+
     game = C4Game()
     num_games = 10
     # board = C4Board(1900, 1000, game)
@@ -304,9 +322,9 @@ if __name__ == "__main__":
                 if player1_mode == PLAYMODE.TRAIN:
                     move, mcts_info = mcts_search(game, binary_state, turn, loops=1000, memory=memory1, c=1.41)
                 elif player1_mode == PLAYMODE.TEST:
-                    move, mcts_info = mcts_search(game, binary_state, turn, loops=10000,
+                    move, mcts_info = mcts_search(game, binary_state, turn, loops=1000,
                                                   condensed_memory=condensed_memory1, c=1.41, board=None,
-                                                  ucb_type=player1_ucb, most_visits=True)
+                                                  ucb_type=player1_ucb, most_visits=True, fast_rollout=my_functions.C4_rollout)
                 elif player1_mode == PLAYMODE.RANDOM:
                     legal_moves = game.get_legal_moves(binary_state, turn)
                     move = random.choice(legal_moves)

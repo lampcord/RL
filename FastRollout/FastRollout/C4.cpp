@@ -24,6 +24,7 @@ namespace C4
 
     static int win_check_table[win_check_table_size];
     static bool win_check_table_filled = false;
+    static uint32_t last_seed = 0;
 
     const int direction_size = (win_length - 1) * 2;
 
@@ -35,6 +36,7 @@ namespace C4
     const int diag1_row[direction_size] = { -3, -2, -1, 1, 2, 3 };
     const int diag2_co[direction_size] = { 3, 2, 1, -1, -2, -3 };
     const int diag2_row[direction_size] = { -3, -2, -1, 1, 2, 3 };
+
 
     enum class GameResult
     {
@@ -157,7 +159,7 @@ namespace C4
             }
         }
 
-        dump_win_check_table();
+        //dump_win_check_table();
     }
 
     void get_array_pos_from_binary(char(&array_pos)[num_cols * num_rows], unsigned long long position, unsigned long long player)
@@ -256,6 +258,35 @@ namespace C4
         render(array_pos);
     }
 
+    bool check_for_win(int test_ndx, char(&array_pos)[num_cols * num_rows])
+    {
+        bool result = false;
+
+        auto test_symbol = array_pos[test_ndx];
+
+        for (auto win_check_set = 0u; win_check_set < max_win_sets; win_check_set++)
+        {
+            bool valid = true;
+            for (auto win_check_item = 0; win_check_item < (win_length - 1); win_check_item++)
+            {
+                auto win_check_ndx = test_ndx * win_check_row_size + win_check_set * (win_length - 1) + win_check_item;
+                auto target_ndx = win_check_table[win_check_ndx];
+                if (target_ndx < 0 || array_pos[target_ndx] != test_symbol)
+                {
+                    valid = false;
+                    break;
+                }
+            }
+
+            if (valid)
+            {
+                result = true;
+                break;
+            }
+        }
+        
+        return result;
+    }
     GameResult move(char(&array_pos)[num_cols * num_rows], unsigned long long player, unsigned int move)
     {
         GameResult result = GameResult::not_completed;
@@ -266,6 +297,10 @@ namespace C4
             if (array_pos[ndx] == blank_symbol)
             {
                 array_pos[ndx] = player == 0 ? player_1_symbol : player_2_symbol;
+                if (check_for_win(ndx, array_pos))
+                {
+                    result = player == 0 ? GameResult::player_1_wins : GameResult::player_2_wins;
+                }
                 break;
             }
             ndx++;
@@ -276,14 +311,18 @@ namespace C4
 
     float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts)
     {
-        Squirrel3 rng(42);
+        if (last_seed == 0)
+        {
+            cout << "New Seed" << endl;
+            last_seed = time(NULL);
+        }
+        Squirrel3 rng(last_seed);
+
         if (!win_check_table_filled)
         {
             initialize_win_check_table();
         }
         win_check_table_filled = true;
-
-        return 0.0f;
 
         float result = 0.0f;
 
@@ -303,17 +342,29 @@ namespace C4
             
                 if (num_moves <= 0)
                 {
+                    result += 0.5f;
                     break;
                 }
-
-                move(rollout_board, rollout_player, legal_moves[rng() % num_moves]);
+                auto game_result = move(rollout_board, rollout_player, legal_moves[rng() % num_moves]);
+ 
                 //render(rollout_board);
+
+                if (game_result != GameResult::not_completed)
+                {
+                    //cout << "Player " << (int)game_result << " WINS!!" << endl;
+                    if ((player == 0 && game_result == GameResult::player_1_wins) ||
+                        (player == 1 && game_result == GameResult::player_2_wins))
+                    {
+                        result += 1.0f;
+                    }
+                    break;
+                }
                 rollout_player = 1 - rollout_player;
             }
-            result += 1.0f;
 
             //render(rollout_board);
         }
+        last_seed = rng();
 
         return result;
     }

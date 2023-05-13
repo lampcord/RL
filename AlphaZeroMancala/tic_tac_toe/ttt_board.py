@@ -14,7 +14,7 @@ red_color = (255, 0, 0)
 
 class TicTacToeBoard:
     def __init__(self):
-        self.game = ttt_game.TicTacToeGame()
+        self.game = ttt_game_rules.TicTacToeGameRules()
         self.window = None
         self.window_size = 300  # The size of the PyGame window
 

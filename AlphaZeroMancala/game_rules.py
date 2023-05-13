@@ -58,10 +58,10 @@ class GameRules(ABC):
         raise NotImplementedError("get_initial_position")
 
     @abstractmethod
-    def move(self, binary_state, move, turn):
+    def move(self, state, move, turn):
         raise NotImplementedError("move")
 
     @abstractmethod
-    def get_legal_moves(self, binary_state, turn):
+    def get_legal_moves(self, state, turn):
         raise NotImplementedError("get_legal_moves")
 

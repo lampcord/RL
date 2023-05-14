@@ -1,5 +1,5 @@
 from tic_tac_toe.ttt_game_rules import TicTacToeGameRules
-
+from renderer import Renderer
 player_char = {
     0: 'X',
     1: 'O'
@@ -11,11 +11,13 @@ display_char = {
 }
 
 
-class TicTacToeConsoleRenderer:
+class TicTacToeConsoleRenderer(Renderer):
     def __init__(self):
+        super().__init__()
         self.game_rules = TicTacToeGameRules(2)
 
-    def render(self, state, turn, moves, info={}):
+    def render(self, state, turn, info):
+        moves = self.game_rules.get_legal_moves(state, turn)
         winning_set = info.get('winning_set', [])
         list_state = self.game_rules.get_decoded_list(state, turn)
         for ndx, cell in enumerate(list_state):
@@ -30,8 +32,6 @@ class TicTacToeConsoleRenderer:
             print(label + '|', end='')
         print('')
         print('+---+---+---+')
-        if winning_set:
-            print(f"Player {player_char[1 - turn]} wins!!!")
         print(f"Moves: {moves} for Player {player_char[turn]}")
 
 if __name__ == "__main__":

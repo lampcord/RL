@@ -14,7 +14,6 @@ CommandLineAgent: a command line based agent
 Interface:
 Init(GameRules) - The Agent will only need the GameRules.
 Optional initializers include:
-Renderer for human interface agents
 MaxTimePerMove
 MaxIterationsPerMove
 TrainedData - Path to Trained NN, opening book, etc.
@@ -32,14 +31,10 @@ In addition, agents that can learn will have other yet to be determined interfac
 
 
 class Agent(ABC):
-    def __init__(self, game_rules, renderer=None):
+    def __init__(self, game_rules):
         self.game_rules = game_rules
-        self.renderer = renderer
 
     @abstractmethod
     def move(self, state, turn):
         raise NotImplementedError("move")
 
-    def render(self, state, turn, moves, info):
-        if self.renderer:
-            self.renderer.render(state, turn, moves, info)

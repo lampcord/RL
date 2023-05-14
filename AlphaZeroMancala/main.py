@@ -1,18 +1,19 @@
 from game_rules import GameResult
+
 from agents.console_agent import ConsoleAgent
+from agents.random_agent import RandomAgent
 
 from tic_tac_toe.ttt_game_rules import TicTacToeGameRules
 from tic_tac_toe.ttt_console_renderer import TicTacToeConsoleRenderer
 
+from tournament_director import TournamentDirector
+
 game_rules = TicTacToeGameRules(2)
 renderer = TicTacToeConsoleRenderer()
-agent = ConsoleAgent(game_rules, renderer)
+agent_list = [RandomAgent(game_rules), RandomAgent(game_rules)]
 
-state = game_rules.get_initial_position()
-turn = 0
-result = GameResult.CONTINUE
-info = {}
-while result == GameResult.CONTINUE:
-    state, turn, result, info = agent.move(state, turn)
+director = TournamentDirector(game_rules, agent_list, 1000, None)
+director.run()
+
 
 

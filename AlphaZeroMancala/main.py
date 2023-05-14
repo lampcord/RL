@@ -21,9 +21,9 @@ play_against_random_gui = [game_rules, [GuiAgent(game_rules, gui_renderer), Rand
 play_against_MCTS_gui = [game_rules, [GuiAgent(game_rules, gui_renderer), MCTSAgent(game_rules)], 10, gui_renderer]
 play_1000_random = [game_rules, [RandomAgent(game_rules), RandomAgent(game_rules)], 1000, None]
 play_1000_random_mcts = [game_rules, [RandomAgent(game_rules), MCTSAgent(game_rules, loops=1000, most_visits=True)], 1000, None]
-play_1000_mcts_mcts = [game_rules, [MCTSAgent(game_rules, most_visits=True), MCTSAgent(game_rules, c=0.8, most_visits=True)], 1000, None]
+play_1000_mcts_mcts = [game_rules, [MCTSAgent(game_rules, most_visits=True), MCTSAgent(game_rules, most_visits=True)], 1000, None]
 
-director = TournamentDirector(*play_1000_mcts_mcts)
+director = TournamentDirector(*play_against_MCTS_gui)
 tournament_set = director.run()
 director.print_tournament_set(tournament_set, detail=False)
 

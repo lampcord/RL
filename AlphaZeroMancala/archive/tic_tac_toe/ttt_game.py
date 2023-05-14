@@ -2,7 +2,7 @@ import time
 
 import game_rules
 import random
-import tic_tac_toe.ttt_board
+import tic_tac_toe.ttt_gui_renderer
 """
 TicTacToe
 Position is represented as a list of 9 cells. Each cell is either:

@@ -2,7 +2,7 @@ import time
 
 import game_rules
 import random
-import tic_tac_toe.ttt_board
+import tic_tac_toe.ttt_gui_renderer
 import stackprinter
 stackprinter.set_excepthook(style='darkbg2')
 """

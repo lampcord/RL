@@ -15,6 +15,9 @@ A list of all of the matchups and results including the total thinking time of e
 import game_rules
 from lib.utils import rotate
 import time
+from rich.console import Console
+from rich.table import Table
+from rich.progress import Progress
 
 
 class TournamentDirector:
@@ -45,23 +48,15 @@ class TournamentDirector:
             tournament_set.append(tournament_set_entry)
         return tournament_set
 
-    def print_tournament_set(self, tournament_set):
-        sep = '---- '
+    def print_tournament_set(self, tournament_set, detail=False):
+        console = Console()
+        detail_table = Table(title="Tournament Details")
+        detail_table.add_column('Game', justify="right", style="cyan")
         for player_number in range(len(self.agent_list)):
-            sep += '------- '
-        sep += '------ '
+            detail_table.add_column(f'Turn {player_number}', justify="right", style="green3")
+        detail_table.add_column('Winner', justify="right", style="bright_magenta")
         for player_number in range(len(self.agent_list)):
-            sep += '------- '
-        print(sep)
-
-        print('Game ', end='')
-        for player_number in range(len(self.agent_list)):
-            print(f'Turn {player_number:2} ', end='')
-        print('Winner ', end='')
-        for player_number in range(len(self.agent_list)):
-            print(f'Time {player_number:2} ', end='')
-        print()
-        print(sep)
+            detail_table.add_column(f'Time {player_number}', justify="right", style="red")
 
         wins_by_player = {}
         wins_by_turn = {}
@@ -72,11 +67,14 @@ class TournamentDirector:
             time_by_player[player_number] = 0.0
 
         for entry in tournament_set:
+            row = []
+
             game_number = entry['game_number']
-            print(f'{game_number:4} ', end='')
+            row.append(str(game_number))
+
             tournament_set_pairing = entry['tournament_set_pairing']
             for player_number in range(len(self.agent_list)):
-                print(f'{tournament_set_pairing[player_number]:7} ', end='')
+                row.append(f'{tournament_set_pairing[player_number]:7}')
 
             result = entry['result']
             if result is not None:
@@ -89,73 +87,69 @@ class TournamentDirector:
                 for player_number in range(len(self.agent_list)):
                     wins_by_player[player_number] += 0.5
                     wins_by_turn[player_number] += 0.5
-            print(f'{str(result):>6} ', end='')
+            row.append(f'{str(result):>6}')
 
             times = entry['times']
             for player_number in range(len(self.agent_list)):
                 time_by_player[player_number] += times[player_number]
-                print(f'{times[player_number]:>7.2f} ', end='')
-            print()
+                row.append(f'{times[player_number]:>7.4f}')
 
-        print(sep)
+            detail_table.add_row(*row)
+        if detail:
+            console.print(detail_table)
 
-        print(wins_by_player)
-        print(wins_by_turn)
-        print(time_by_player)
-
-        print()
-        print('------ ------- ----------')
-        print('Player  Score  Total Time')
-        print('------ ------- ----------')
+        player_summary_table = Table(title='Player Summary')
+        player_summary_table.add_column('Player', justify="right", style="cyan")
+        player_summary_table.add_column('Score', justify="right", style="bright_magenta")
+        player_summary_table.add_column('Time', justify="right", style="red")
         for player_number in range(len(self.agent_list)):
-            print(f'{player_number:6} ', end='')
-            print(f'{wins_by_player[player_number]:>7.1f} ', end='')
-            print(f'{time_by_player[player_number]:>10.4f} ')
-        print('------ ------- ----------')
+            player_summary_table.add_row(f'{player_number:6}', f'{wins_by_player[player_number]:>7.1f}', f'{time_by_player[player_number]:>10.4f}')
 
-        print()
-        print('------ -------')
-        print(' Turn   Score')
-        print('------ -------')
+        turn_summary_table = Table(title='Turn Summary')
+        turn_summary_table.add_column('Turn', justify="right", style="cyan")
+        turn_summary_table.add_column('Score', justify="right", style="bright_magenta")
         for turn_number in range(len(self.agent_list)):
-            print(f'{turn_number:6} ', end='')
-            print(f'{wins_by_turn[turn_number]:>7.1f} ')
-        print('------ -------')
+            turn_summary_table.add_row(f'{turn_number:6}', f'{wins_by_turn[turn_number]:>7.1f}')
+        console.print(player_summary_table)
+        console.print(turn_summary_table)
 
     def run(self):
         tournament_set = self.build_tournament_set()
 
-        for ndx in range(len(tournament_set)):
-            tournament_set_entry = tournament_set[ndx]
-            game_number = tournament_set_entry['game_number']
-            tournament_set_pairing = tournament_set_entry['tournament_set_pairing']
+        with Progress() as progress:
+            task = progress.add_task("[green]Processing...", total=self.number_of_games)
 
-            state = self.game_rules.get_initial_position()
-            result = game_rules.GameResult.CONTINUE
-            info = {}
-            turn = tournament_set_pairing[0]
-            last_move_turn = turn
+            for ndx in range(len(tournament_set)):
+                tournament_set_entry = tournament_set[ndx]
+                game_number = tournament_set_entry['game_number']
+                tournament_set_pairing = tournament_set_entry['tournament_set_pairing']
 
-            if self.renderer:
-                print('-' * 60)
-                print(f'Starting game: {game_number}')
-                print('-' * 60)
-            while result == game_rules.GameResult.CONTINUE:
-                agent = self.agent_list[turn]
+                state = self.game_rules.get_initial_position()
+                result = game_rules.GameResult.CONTINUE
+                info = {}
+                turn = tournament_set_pairing[0]
+                last_move_turn = turn
+
+                if self.renderer:
+                    print('-' * 60)
+                    print(f'Starting game: {game_number}')
+                    print('-' * 60)
+                while result == game_rules.GameResult.CONTINUE:
+                    agent = self.agent_list[turn]
+                    if self.renderer:
+                        self.renderer.render(state, turn, info)
+                    last_move_turn = turn
+                    start_time = time.time_ns()
+                    state, turn, result, info = agent.move(state, turn)
+                    elapsed_time = time.time_ns() - start_time
+                    tournament_set_entry['times'][last_move_turn] += elapsed_time / 1000000000.0
+
                 if self.renderer:
                     self.renderer.render(state, turn, info)
-                last_move_turn = turn
-                start_time = time.time_ns()
-                state, turn, result, info = agent.move(state, turn)
-                elapsed_time = time.time_ns() - start_time
-                tournament_set_entry['times'][last_move_turn] += elapsed_time / 1000000000.0
 
-            if self.renderer:
-                self.renderer.render(state, turn, info)
+                if result == game_rules.GameResult.WIN:
+                    tournament_set_entry['result'] = last_move_turn
 
-            if result == game_rules.GameResult.WIN:
-                tournament_set_entry['result'] = last_move_turn
-
-            tournament_set[ndx] = tournament_set_entry
-
-        self.print_tournament_set(tournament_set)
+                tournament_set[ndx] = tournament_set_entry
+                progress.update(task, advance=1)
+        return tournament_set

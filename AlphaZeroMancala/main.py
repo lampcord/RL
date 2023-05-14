@@ -12,8 +12,9 @@ game_rules = TicTacToeGameRules(2)
 renderer = TicTacToeConsoleRenderer()
 agent_list = [RandomAgent(game_rules), RandomAgent(game_rules)]
 
-director = TournamentDirector(game_rules, agent_list, 1000, None)
-director.run()
+director = TournamentDirector(game_rules, agent_list, 100000, None)
+tournament_set = director.run()
+director.print_tournament_set(tournament_set, detail=False)
 
 
 

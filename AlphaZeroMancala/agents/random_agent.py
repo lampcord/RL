@@ -1,6 +1,6 @@
 from agent import Agent
 import random
-
+import time
 class RandomAgent(Agent):
     def __init__(self, game_rules):
         super().__init__(game_rules)
@@ -11,4 +11,6 @@ class RandomAgent(Agent):
         move = None
         if moves:
             move = random.choice(moves)
+        if random.random() < .00:
+            time.sleep(0.1)
         return self.game_rules.move(state, move, turn)

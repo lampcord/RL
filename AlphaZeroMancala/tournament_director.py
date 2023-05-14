@@ -90,10 +90,10 @@ class TournamentDirector:
                     if player_turn == result:
                         wins_by_turn[turn] += 1.
                 result = self.get_agent_id(result)
-            else:
-                for player_number in range(len(self.agent_list)):
-                    wins_by_player[player_number] += 0.5
-                    wins_by_turn[player_number] += 0.5
+            # else:
+            #     for player_number in range(len(self.agent_list)):
+            #         wins_by_player[player_number] += 0.5
+            #         wins_by_turn[player_number] += 0.5
             row.append(f'{str(result):>6}')
 
             times = entry['times']

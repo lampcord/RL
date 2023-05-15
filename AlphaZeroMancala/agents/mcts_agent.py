@@ -1,3 +1,5 @@
+import ctypes
+import os
 from agent import Agent
 import random
 
@@ -56,6 +58,17 @@ class MCTSNode:
             reward = 0.5
         return reward, last_turn
 
+    def external_rollout_policy(self, rollout_policy, rollouts):
+        last_turn = self.parent.turn
+        reward = 0
+        if self.result == GameResult.WIN:
+            reward = 1
+        elif self.result == GameResult.TIE:
+            reward = 0.5
+        else:
+            reward = rollout_policy(self.state, self.turn, rollouts) / rollouts
+            last_turn = self.turn
+        return reward, last_turn
     def back_propagate(self, reward, player_turn):
         self.num_visits += 1
         local_reward = 0
@@ -94,7 +107,7 @@ class MCTSNode:
             child.dump(level + 1, max_level)
 
 
-def mcts_search(game_rules, state, turn, loops, c, most_visits):
+def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=None):
     """
     Monte Carlo Tree Search - perform a MCTS from a given game_rules, state and player turn and return the best move.
     """
@@ -104,7 +117,10 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits):
         node = root
         node = node.select(c)
         node = node.expand()
-        reward, player_turn = node.rollout()
+        if rollout_policy:
+            reward, player_turn = node.external_rollout_policy(rollout_policy, 1200)
+        else:
+            reward, player_turn = node.rollout()
         node.back_propagate(reward, player_turn)
 
     if most_visits:
@@ -115,12 +131,23 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits):
     return best_child.move
 
 class MCTSAgent(Agent):
-    def __init__(self, game_rules, loops=500, c=1.14, most_visits=False):
+    def __init__(self, game_rules, loops=500, c=1.14, most_visits=False, fast_rollout=False):
         super().__init__(game_rules)
         self.most_visits = most_visits
         self.loops = loops
         self.c = c
+        if fast_rollout:
+            # Load the DLL
+            dll_path = os.path.join("FastRollout.dll")
+            my_functions = ctypes.CDLL(dll_path)
+
+            # Declare the argument types and return types of the C++ functions
+            my_functions.C4_rollout.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
+            my_functions.C4_rollout.restype = ctypes.c_float
+            self.rollout_policy = my_functions.C4_rollout
+        else:
+            self.rollout_policy = None
 
     def move(self, state, turn):
-        move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits)
+        move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy)
         return self.game_rules.move(state, move, turn)

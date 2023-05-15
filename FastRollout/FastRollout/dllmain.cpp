@@ -45,9 +45,9 @@ extern "C" {
         return C4::calc_rollout(position, player, num_rollouts);
     }
 
-    __declspec(dllexport) void C4_render(unsigned long long position, unsigned long long player)
+    __declspec(dllexport) void C4_render(unsigned long long position)
     {
-        return C4::render_binary_position(position, player);
+        return C4::render_binary_position(position);
     }
 }
 

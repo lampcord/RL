@@ -9,8 +9,8 @@ using namespace std;
 
 namespace C4
 {
-    const char player_1_symbol = 'X';
-    const char player_2_symbol = 'O';
+    const char player_1_symbol = 'O';
+    const char player_2_symbol = 'X';
     const char blank_symbol = '.';
 
     const int num_cols = 7;
@@ -162,7 +162,7 @@ namespace C4
         //dump_win_check_table();
     }
 
-    void get_array_pos_from_binary(char(&array_pos)[num_cols * num_rows], unsigned long long position, unsigned long long player)
+    void get_array_pos_from_binary(char(&array_pos)[num_cols * num_rows], unsigned long long position)
     {
         const int num_bits = num_cols * num_rows + num_cols * bits_in_length;
         char bits[num_bits];
@@ -194,8 +194,6 @@ namespace C4
             //cout << blanks << endl;
         }
 
-        auto active_symbol = player == 0 ? player_1_symbol : player_2_symbol;
-        auto passive_symbol = player == 0 ? player_2_symbol : player_1_symbol;
         for (auto ndx = 0u; ndx < num_cols * num_rows; ndx++)
         {
             auto col = ndx / num_rows;
@@ -205,7 +203,7 @@ namespace C4
                 array_pos[ndx] = blank_symbol;
                 continue;
             }
-            array_pos[ndx] = bits[ndx] == 1 ? active_symbol : passive_symbol;
+            array_pos[ndx] = bits[ndx] == 1 ? player_2_symbol : player_1_symbol;
         }
     }
 
@@ -250,11 +248,11 @@ namespace C4
         cout << endl;
     }
 
-    void render_binary_position(unsigned long long position, unsigned long long player)
+    void render_binary_position(unsigned long long position)
     {
         char array_pos[num_cols * num_rows];
 
-        get_array_pos_from_binary(array_pos, position, player);
+        get_array_pos_from_binary(array_pos, position);
         render(array_pos);
     }
 
@@ -329,7 +327,7 @@ namespace C4
         char array_pos[num_cols * num_rows];
         char rollout_board[num_cols * num_rows];
 
-        get_array_pos_from_binary(array_pos, position, 1 - player);
+        get_array_pos_from_binary(array_pos, position);
 
         for (auto x = 0u; x < num_rollouts; x++)
         {

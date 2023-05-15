@@ -72,7 +72,7 @@ class TicTacToeGUIRenderer:
         screen.blit(text, text_rect)
 
     def render_board(self, state_int, turn, winning_set, pos, screen, size, font_size=36, show_available_actions=True, line_thickness=5):
-        state_list = self.game.get_decoded_list(state_int, turn)
+        state_list = self.game.get_decoded_list(state_int)
         cell_size = size / 3
         left_edge = pos[0] - size / 2
         right_edge = left_edge + size

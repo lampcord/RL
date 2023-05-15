@@ -19,7 +19,7 @@ class TicTacToeConsoleRenderer(Renderer):
     def render(self, state, turn, info):
         moves = self.game_rules.get_legal_moves(state, turn)
         winning_set = info.get('winning_set', [])
-        list_state = self.game_rules.get_decoded_list(state, turn)
+        list_state = self.game_rules.get_decoded_list(state)
         for ndx, cell in enumerate(list_state):
             if ndx % 3 == 0:
                 print('')

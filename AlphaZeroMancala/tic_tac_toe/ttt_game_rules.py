@@ -35,7 +35,7 @@ class TicTacToeGameRules(game_rules.GameRules):
         super().__init__(number_of_players)
 
     def get_initial_position(self):
-        return self.get_encoded_binary([0] * 9, 0)
+        return self.get_encoded_binary([0] * 9)
 
     def get_player_bounds(self):
         return 2, 2
@@ -45,14 +45,14 @@ class TicTacToeGameRules(game_rules.GameRules):
 
         assert move in legal_moves
 
-        list_state = self.get_decoded_list(state, turn)
+        list_state = self.get_decoded_list(state)
         assert list_state[move] == 0
 
         assert turn in [0, 1]
 
         list_state[move] = symbol_for_player[turn]
 
-        new_state = self.get_encoded_binary(list_state, turn)
+        new_state = self.get_encoded_binary(list_state)
         new_turn = 1 - turn
         result = game_rules.GameResult.CONTINUE
         info = {}
@@ -74,14 +74,14 @@ class TicTacToeGameRules(game_rules.GameRules):
         return new_state, new_turn, result, info
 
     def get_legal_moves(self, state, turn):
-        list_state = self.get_decoded_list(state, turn)
+        list_state = self.get_decoded_list(state)
         legal_moves = []
         for ndx, cell in enumerate(list_state):
             if cell == 0:
                 legal_moves.append(ndx)
         return legal_moves
 
-    def get_encoded_binary(self, list_state, turn):
+    def get_encoded_binary(self, list_state):
         encoded_state = 0
         player_1_symbol = symbol_for_player[0]
         player_2_symbol = symbol_for_player[1]
@@ -92,7 +92,7 @@ class TicTacToeGameRules(game_rules.GameRules):
                     encoded_state += 1
         return encoded_state
 
-    def get_decoded_list(self, state, turn):
+    def get_decoded_list(self, state):
         list_state = []
         player_1_symbol = symbol_for_player[0]
         player_2_symbol = symbol_for_player[1]
@@ -143,9 +143,9 @@ def test_1():
         list_state = []
         for _ in range(9):
             list_state.append(random.randint(0, 2))
-        state = ttt.get_encoded_binary(list_state, turn)
-        new_list_state = ttt.get_decoded_list(state, turn)
-        new_state = ttt.get_encoded_binary(new_list_state, turn)
+        state = ttt.get_encoded_binary(list_state)
+        new_list_state = ttt.get_decoded_list(state)
+        new_state = ttt.get_encoded_binary(new_list_state)
         turn = 1 - turn
         assert state == new_state
         assert list_state == new_list_state
@@ -157,5 +157,5 @@ if __name__ == "__main__":
     # ttt = TicTacToeGameRules(2)
     # state = ttt.get_initial_position()
     # print(ttt.get_legal_moves(state, 0))
-    # test_1()
-    play_random_games(10)
+    test_1()
+    # play_random_games(10)

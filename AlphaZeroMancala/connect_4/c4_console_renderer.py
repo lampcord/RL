@@ -26,6 +26,11 @@ class C4ConsoleRenderer(Renderer):
         print('  0   1   2   3   4   5   6')
         print(state, turn)
 
+    def get_move(self, legal_moves):
+        print(f"Legal Moves: {legal_moves}")
+        move = int(input(f"Choose move: "))
+        return move
+
 
 if __name__ == "__main__":
     pass

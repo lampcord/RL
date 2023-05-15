@@ -35,7 +35,6 @@ class C4GuiRenderer(Renderer):
         self.width = width
         self.height = height
         self.game_rules = C4GameRules()
-        self.possible_moves = []
         pygame.display.set_caption("Connect 4")
 
     def render(self, state, turn, info=None):
@@ -48,8 +47,7 @@ class C4GuiRenderer(Renderer):
             pause = 3.0
 
         list_state = self.game_rules.get_decoded_list(state)
-        possible_moves = self.game_rules.get_legal_moves(state, turn)
-        self.possible_moves = possible_moves
+        legal_moves = self.game_rules.get_legal_moves(state, turn)
 
         if self.screen is None:
             pygame.init()
@@ -62,7 +60,7 @@ class C4GuiRenderer(Renderer):
         text = self.font.render(message, True, BLACK)
         text_rect = text.get_rect(center=(self.width / 2, self.height - 20))
         self.screen.blit(text, text_rect)
-        self.draw_node(CELL_SIZE, (xoffset, yoffset), list_state, turn, possible_moves, win_set=winning_set)
+        self.draw_node(CELL_SIZE, (xoffset, yoffset), list_state, turn, legal_moves, win_set=winning_set)
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -88,7 +86,7 @@ class C4GuiRenderer(Renderer):
         self.draw_node(9, target_offset, list_state, turn, [], cell_padding=0)
         pygame.draw.circle(self.screen, cell_colors[turn], turn_offset, 5)
 
-    def draw_node(self, cell_size, offset, list_state, turn, possible_moves, cell_padding=5, win_set=None):
+    def draw_node(self, cell_size, offset, list_state, turn, legal_moves, cell_padding=5, win_set=None):
         for row in range(BOARD_ROWS):
             for col in range(BOARD_COLS):
                 xpos = col * cell_size + offset[0]
@@ -106,12 +104,11 @@ class C4GuiRenderer(Renderer):
                 if row == 0:
                     if len(click_positions) <= col:
                         click_positions.append((xpos + cell_size // 2, ypos + cell_size // 2 - cell_size))
-                    if col not in possible_moves:
+                    if col not in legal_moves:
                         continue
                     pygame.draw.circle(self.screen, cell_colors[turn], click_positions[col], cell_size // 2 - cell_padding)
 
-    def get_move(self):
-        possible_moves = self.possible_moves
+    def get_move(self, legal_moves):
         best_pos = None
         while True:
             for event in pygame.event.get():
@@ -123,7 +120,7 @@ class C4GuiRenderer(Renderer):
                     print(f"Mouse clicked at {click_coordinates}")
                     best_pos = None
                     for test_click in range(len(click_positions)):
-                        if test_click not in possible_moves:
+                        if test_click not in legal_moves:
                             continue
                         distance = (click_positions[test_click][0] - click_coordinates[0]) * (click_positions[test_click][0] - click_coordinates[0])
                         distance += (click_positions[test_click][1] - click_coordinates[1]) * (click_positions[test_click][1] - click_coordinates[1])

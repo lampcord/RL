@@ -32,7 +32,11 @@ class TicTacToeConsoleRenderer(Renderer):
             print(label + '|', end='')
         print('')
         print('+---+---+---+')
-        print(f"Moves: {moves} for Player {player_char[turn]}")
+
+    def get_move(self, legal_moves):
+        print(f"Legal Moves: {legal_moves}")
+        move = int(input(f"Choose move: "))
+        return move
 
 if __name__ == "__main__":
     print("ttt_console_renderer")

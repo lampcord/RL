@@ -43,7 +43,7 @@ class TicTacToeGUIRenderer:
             time.sleep(pause_time)
             return
 
-    def get_move(self):
+    def get_move(self, legal_moves):
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

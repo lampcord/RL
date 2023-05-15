@@ -16,3 +16,7 @@ class Renderer(ABC):
     @abstractmethod
     def render(self, state, turn, info):
         raise NotImplementedError("render")
+
+    @abstractmethod
+    def get_move(self, legal_moves):
+        raise NotImplementedError("get_move")

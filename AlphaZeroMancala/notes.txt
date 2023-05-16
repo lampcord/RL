@@ -28,7 +28,7 @@ Trying again with loops set to 1m. See if that gives edge back to FR * 1
 ----------------------------------------------------------------------------------------
 
 TODO:
-[ ] Create a configuration class for MCTS with defaults, command line is getting out of hand!
+[X] Create a configuration class for MCTS with defaults, command line is getting out of hand!
 [ ] AB enhancements
 [ ] Time management enhancements (total time instead of per turn)
 

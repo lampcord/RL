@@ -23,8 +23,14 @@ Turn 0  242
 Turn 1  755
 
 Trying again with loops set to 1m. See if that gives edge back to FR * 1
-1000     True          1000        10000  1.0   640  12517.9875
-1000     True          1           10000  1.0   357   4881.0365
+----------------------------------------------------------------------------------------
+MCTSAgent 0
+loops:1000000 c:1.14 most_visits:True rollout_policy:True rollout_count:1000 max_time:1.0
+MCTSAgent 1
+loops:1000000 c:1.14 most_visits:True rollout_policy:True rollout_count:1 max_time:1.0
+----------------------------------------------------------------------------------------
+1000     True          1000        1000000  1.0
+1000     True          1           1000000  1.0
 ----------------------------------------------------------------------------------------
 
 TODO:

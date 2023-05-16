@@ -1,14 +1,30 @@
 MCTS Results:
 Rounds   FastRollout   NumRollout  Loops  Time  Wins Duration
+Fast rollout * 1000 vs standard rollout. Definite edge to FR.
 1000     True          1000        10000  1.0   563  12804.7408
 1000     False         1           10000  1.0   422  12730.2601
+Surprising that going second plays better. And suspicious.
+Turn 0  391
+Turn 1  594
 
+Fast rollout * 1 vs standard rollout. Even bigger edge. In far less time
 1000     True          1           10000  1.0   622   4580.8118
 1000     False         1           10000  1.0   349  12420.9238
+Closer, but still, why does going second win more. Should be 60/40 is other way.
+Turn 0  474
+Turn 1  497
 
-1000     True          1000        10000  1.0
-1000     True          1           10000  1.0
+Surprisingly, FR * 1000 dominates FR * 1 (Rock / Paper / Scissors)?
+Looks like the FR * 1 run was able to easily saturate the 10k limit.
+1000     True          1000        10000  1.0   640  12517.9875
+1000     True          1           10000  1.0   357   4881.0365
+Even bigger discrepancy.
+Turn 0  242
+Turn 1  755
 
+Trying again with loops set to 1m. See if that gives edge back to FR * 1
+1000     True          1000        10000  1.0   640  12517.9875
+1000     True          1           10000  1.0   357   4881.0365
 ----------------------------------------------------------------------------------------
 
 TODO:

@@ -39,13 +39,14 @@ play_against_MTCS_console = [game_rules, [UserAgent(game_rules, console_renderer
 play_against_random_gui = [game_rules, [UserAgent(game_rules, gui_renderer), RandomAgent(game_rules)], 10, gui_renderer]
 play_against_MCTS_gui = [game_rules, [UserAgent(game_rules, gui_renderer), MCTSAgent(game_rules, loops=10000, most_visits=True, rollout_policy=rollout_policy, max_time=3.2)], 10, gui_renderer]
 play_random = [game_rules, [RandomAgent(game_rules), RandomAgent(game_rules)], 10000, None]
-play_random_mcts = [game_rules, [RandomAgent(game_rules), MCTSAgent(game_rules, most_visits=True)], 100, None]
-play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, most_visits=True), MCTSAgent(game_rules, loops=2000, most_visits=True, rollout_policy=rollout_policy)], 10, None]
+play_random_mcts = [game_rules, [RandomAgent(game_rules), MCTSAgent(game_rules, most_visits=True)], 1000, None]
+play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, loops=10000, most_visits=True, rollout_policy=rollout_policy, rollout_count=1000, max_time=1.0),
+                               MCTSAgent(game_rules, loops=10000, most_visits=True, rollout_policy=rollout_policy, rollout_count=1, max_time=1.0)], 1000, None]
 play_console_console = [game_rules, [UserAgent(game_rules, console_renderer), UserAgent(game_rules, console_renderer)], 10, console_renderer]
 
-director = TournamentDirector(*play_against_MCTS_gui)
+director = TournamentDirector(*play_mcts_mcts)
 tournament_set = director.run()
-director.print_tournament_set(tournament_set, detail=True)
+director.print_tournament_set(tournament_set, detail=False)
 
 
 

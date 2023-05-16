@@ -1,0 +1,19 @@
+MCTS Results:
+Rounds   FastRollout   NumRollout  Loops  Time  Wins Duration
+1000     True          1000        10000  1.0   563  12804.7408
+1000     False         1           10000  1.0   422  12730.2601
+
+1000     True          1           10000  1.0   622   4580.8118
+1000     False         1           10000  1.0   349  12420.9238
+
+1000     True          1000        10000  1.0
+1000     True          1           10000  1.0
+
+----------------------------------------------------------------------------------------
+
+TODO:
+[ ] Create a configuration class for MCTS with defaults, command line is getting out of hand!
+[ ] AB enhancements
+[ ] Time management enhancements (total time instead of per turn)
+
+

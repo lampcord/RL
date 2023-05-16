@@ -106,7 +106,7 @@ class MCTSNode:
             child.dump(level + 1, max_level)
 
 
-def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=None, max_time=None):
+def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=None, rollout_count=1, max_time=None):
     """
     Monte Carlo Tree Search - perform a MCTS from a given game_rules, state and player turn and return the best move.
     """
@@ -119,7 +119,7 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=N
         node = node.select(c)
         node = node.expand()
         if rollout_policy:
-            reward, player_turn = node.external_rollout_policy(rollout_policy, 1000)
+            reward, player_turn = node.external_rollout_policy(rollout_policy, rollout_count)
         else:
             reward, player_turn = node.rollout()
         node.back_propagate(reward, player_turn)
@@ -135,21 +135,15 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=N
     return best_child.move
 
 class MCTSAgent(Agent):
-    def __init__(self, game_rules, loops=500, c=1.14, most_visits=False, rollout_policy=None, max_time=None):
+    def __init__(self, game_rules, loops=500, c=1.14, most_visits=False, rollout_policy=None, rollout_count=1, max_time=None):
         super().__init__(game_rules)
         self.most_visits = most_visits
         self.loops = loops
         self.c = c
         self.rollout_policy = rollout_policy
-        self.turns = 0
-        self.total_elapsed = 0
         self.max_time = max_time
+        self.rollout_count = rollout_count
 
     def move(self, state, turn):
-        start_time = time.time_ns()
-        move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy, max_time=self.max_time)
-        elapsed = (time.time_ns() - start_time) / 1000000000.0
-        self.total_elapsed += elapsed
-        self.turns += 1
-        print(f"Elapsed: {elapsed} Average: {self.total_elapsed / self.turns}")
+        move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy, rollout_count=self.rollout_count, max_time=self.max_time)
         return self.game_rules.move(state, move, turn)

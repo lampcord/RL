@@ -12,7 +12,7 @@ Rounds   FastRollout   NumRollout  Loops  Time  Wins Duration
 ----------------------------------------------------------------------------------------
 
 TODO:
-[ ] Create a configuration class for MCTS with defaults, command line is getting out of hand!
+[X] Create a configuration class for MCTS with defaults, command line is getting out of hand!
 [ ] AB enhancements
 [ ] Time management enhancements (total time instead of per turn)
 

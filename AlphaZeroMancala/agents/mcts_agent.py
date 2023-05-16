@@ -5,6 +5,15 @@ from game_rules import GameResult
 import math
 import time
 
+class MCTSAgentConfig:
+    def __init__(self):
+        self.loops = 1000
+        self.c = 1.14
+        self.most_visits = True
+        self.rollout_policy = None
+        self.rollout_count = 1
+        self.max_time = None
+
 class MCTSNode:
     def __init__(self, game_rules, state, turn, parent=None, move=None, result=GameResult.CONTINUE):
         self.state = state
@@ -134,15 +143,23 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=N
 
     return best_child.move
 
+'''
+        self.loops = 500
+        self.c = 1.14
+        self.most_visits = False
+        self.rollout_policy = None
+        self.rollout_count = 1
+        self.max_time = None
+'''
 class MCTSAgent(Agent):
-    def __init__(self, game_rules, loops=500, c=1.14, most_visits=False, rollout_policy=None, rollout_count=1, max_time=None):
+    def __init__(self, game_rules, config):
         super().__init__(game_rules)
-        self.most_visits = most_visits
-        self.loops = loops
-        self.c = c
-        self.rollout_policy = rollout_policy
-        self.max_time = max_time
-        self.rollout_count = rollout_count
+        self.loops = config.loops
+        self.c = config.c
+        self.most_visits = config.most_visits
+        self.rollout_policy = config.rollout_policy
+        self.rollout_count = config.rollout_count
+        self.max_time = config.max_time
 
     def move(self, state, turn):
         move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy, rollout_count=self.rollout_count, max_time=self.max_time)

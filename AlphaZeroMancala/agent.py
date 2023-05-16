@@ -38,3 +38,7 @@ class Agent(ABC):
     def move(self, state, turn):
         raise NotImplementedError("move")
 
+    @abstractmethod
+    def get_description(self):
+        raise NotImplementedError("get_description")
+

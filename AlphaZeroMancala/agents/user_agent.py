@@ -12,6 +12,10 @@ class UserAgent(Agent):
         move = self.renderer.get_move(legal_moves)
         return self.game_rules.move(state, move, turn)
 
+    def get_description(self):
+        return "User Agent"
+
+
 
 
 

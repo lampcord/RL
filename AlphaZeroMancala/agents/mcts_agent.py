@@ -151,6 +151,8 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=N
         self.rollout_count = 1
         self.max_time = None
 '''
+
+
 class MCTSAgent(Agent):
     def __init__(self, game_rules, config):
         super().__init__(game_rules)
@@ -164,3 +166,12 @@ class MCTSAgent(Agent):
     def move(self, state, turn):
         move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy, rollout_count=self.rollout_count, max_time=self.max_time)
         return self.game_rules.move(state, move, turn)
+
+    def get_description(self):
+        description = f"loops:{self.loops} "
+        description += f"c:{self.c} "
+        description += f"most_visits:{self.most_visits} "
+        description += f"rollout_policy:{self.rollout_policy is not None} "
+        description += f"rollout_count:{self.rollout_count} "
+        description += f"max_time:{self.max_time} "
+        return description

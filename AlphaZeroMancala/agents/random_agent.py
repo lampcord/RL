@@ -14,3 +14,6 @@ class RandomAgent(Agent):
         if random.random() < .00:
             time.sleep(0.1)
         return self.game_rules.move(state, move, turn)
+
+    def get_description(self):
+        return "Random Agent"

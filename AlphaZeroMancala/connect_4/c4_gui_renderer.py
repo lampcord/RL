@@ -117,7 +117,6 @@ class C4GuiRenderer(Renderer):
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     click_coordinates = event.pos
-                    print(f"Mouse clicked at {click_coordinates}")
                     best_pos = None
                     for test_click in range(len(click_positions)):
                         if test_click not in legal_moves:

@@ -110,6 +110,8 @@ def play_against_human(human_is_current, session):
     game_over = False
     value_label = ""
     label = ""
+    turns = 0
+    total_elapsed = 0
     while not game_over:
         current_player = 0 if human_is_current else 1
         print(session.render())
@@ -123,7 +125,12 @@ def play_against_human(human_is_current, session):
             won = session.move_player(int(move))
         else:
             session.gui_render(screen, current_player, [], "Bot is thinking... " + value_label)
+            start_time = time.time_ns()
             won = session.move_bot()
+            elapsed = (time.time_ns() - start_time) / 1000000000.0
+            total_elapsed += elapsed
+            turns += 1
+            print(f"Elapsed: {elapsed} Average: {total_elapsed / turns}")
             # won = session.move_bot_mm()
         if won:
             label = f"{session.player_id if human_is_current else 'Bot'} won!"

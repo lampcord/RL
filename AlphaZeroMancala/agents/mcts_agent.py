@@ -1,10 +1,9 @@
-import ctypes
-import os
 from agent import Agent
 import random
 
 from game_rules import GameResult
 import math
+import time
 
 class MCTSNode:
     def __init__(self, game_rules, state, turn, parent=None, move=None, result=GameResult.CONTINUE):
@@ -107,21 +106,26 @@ class MCTSNode:
             child.dump(level + 1, max_level)
 
 
-def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=None):
+def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=None, max_time=None):
     """
     Monte Carlo Tree Search - perform a MCTS from a given game_rules, state and player turn and return the best move.
     """
     root = MCTSNode(game_rules, state, turn)
+    if max_time:
+        start_time = time.time_ns()
 
     for _ in range(loops):
         node = root
         node = node.select(c)
         node = node.expand()
         if rollout_policy:
-            reward, player_turn = node.external_rollout_policy(rollout_policy, 1200)
+            reward, player_turn = node.external_rollout_policy(rollout_policy, 1000)
         else:
             reward, player_turn = node.rollout()
         node.back_propagate(reward, player_turn)
+        if max_time:
+            if start_time + max_time * 1000000000.0 < time.time_ns():
+                break
 
     if most_visits:
         best_child = root.get_most_visited()
@@ -131,23 +135,21 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=N
     return best_child.move
 
 class MCTSAgent(Agent):
-    def __init__(self, game_rules, loops=500, c=1.14, most_visits=False, fast_rollout=False):
+    def __init__(self, game_rules, loops=500, c=1.14, most_visits=False, rollout_policy=None, max_time=None):
         super().__init__(game_rules)
         self.most_visits = most_visits
         self.loops = loops
         self.c = c
-        if fast_rollout:
-            # Load the DLL
-            dll_path = os.path.join("FastRollout.dll")
-            my_functions = ctypes.CDLL(dll_path)
-
-            # Declare the argument types and return types of the C++ functions
-            my_functions.C4_rollout.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
-            my_functions.C4_rollout.restype = ctypes.c_float
-            self.rollout_policy = my_functions.C4_rollout
-        else:
-            self.rollout_policy = None
+        self.rollout_policy = rollout_policy
+        self.turns = 0
+        self.total_elapsed = 0
+        self.max_time = max_time
 
     def move(self, state, turn):
-        move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy)
+        start_time = time.time_ns()
+        move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy, max_time=self.max_time)
+        elapsed = (time.time_ns() - start_time) / 1000000000.0
+        self.total_elapsed += elapsed
+        self.turns += 1
+        print(f"Elapsed: {elapsed} Average: {self.total_elapsed / self.turns}")
         return self.game_rules.move(state, move, turn)

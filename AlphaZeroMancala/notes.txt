@@ -40,9 +40,48 @@ dominates the increased accuracy of the 1000 simulations.
 
 TODO:
 [X] Create a configuration class for MCTS with defaults, command line is getting out of hand!
-[/] Agent descriptions
-[ ] Memory
+[X] Agent descriptions
+[/] Memory
 [ ] AB enhancements
 [ ] Time management enhancements (total time instead of per turn)
 
 
+Thoughts on training and using trained memory.
+
+Analyze: Since we are going to fix the table to a specific size, would it make more sense to do the following:
+    1) Expand the memory as before in (A).
+    2) Once we hit the leaf cap, simply cycle through all of the leafs and saturate them to the visit cap.
+    3) Also, should we make the original tree much larger than the target cap (10x?) and then trow away the least visited since those are likely not used much in a competitive game?
+    4) What about tracking unexpected moves that lead to an oponent's victory?
+
+A) Learn mode.
+    We start with blank memory and then we play 2 agents against each other using a relatively large rollout (100-1000)
+    We save after each session. Loading at the start of new sessions.
+    We apply the following constraints:
+        1) We put a cap on the total number of leafs (1m?)
+        2) We put a cap on the max visits for a leaf (1m?)
+
+B) Once we have it saturated we go to play mode.
+    We run in the 1 rollout mode since we have seen this to be the best.
+    In this mode, we no longer update or save the memory. Instead, we check for the existence of a leaf in memory.
+    If it is there, we use it. Otherwise, we do a traditional rollout.
+
+This gives us the advantages of more accurate rollout evaluation in the early game without losing the advantage of tree
+expansion from using the 1 rollout policy.
+
+Enhancements:
+    1) Many positions will be mirrored from player A to player B. We can check for mirrors by reversing the position and then choosing the one with the smaller binary number.
+    This will have a small tradeoff of initial lookup speed with doubling the amount of positions in the same number of leafs.
+
+    2) Similarly, we can mirror positions vertically, cutting space in half again.
+
+    3) Once we have failed a lookup in a single game, we no longer have to perform any more lookups because any new position in memory would have to have had a parent previously.
+
+What we need:
+    A way to specify the filename.
+    A way to specify max leaf count.
+    A way to specify max visits
+    A flag to indicate that we are playing in learn mode.
+    A flag to indicate player mirroring (so we can validate against previous version).
+    A flag to indicate vertical mirroring.
+    To track that we have already missed a leaf for a given player, we need to indicate that we are starting a game to clear these flags.

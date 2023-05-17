@@ -13,6 +13,7 @@ class MCTSAgentConfig:
         self.rollout_policy = None
         self.rollout_count = 1
         self.max_time = None
+        self.restart_function = None
 
 class MCTSNode:
     def __init__(self, game_rules, state, turn, parent=None, move=None, result=GameResult.CONTINUE):
@@ -156,14 +157,18 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=N
 class MCTSAgent(Agent):
     def __init__(self, game_rules, config):
         super().__init__(game_rules)
+        self.starting_state = game_rules.get_initial_position()
         self.loops = config.loops
         self.c = config.c
         self.most_visits = config.most_visits
         self.rollout_policy = config.rollout_policy
         self.rollout_count = config.rollout_count
         self.max_time = config.max_time
+        self.restart_function = config.restart_function
 
     def move(self, state, turn):
+        if self.restart_function and state == self.starting_state:
+            self.restart_function()
         move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy, rollout_count=self.rollout_count, max_time=self.max_time)
         return self.game_rules.move(state, move, turn)
 

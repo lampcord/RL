@@ -30,6 +30,10 @@ my_functions.C4_rollout.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_u
 my_functions.C4_rollout.restype = ctypes.c_float
 rollout_policy = my_functions.C4_rollout
 
+my_functions.C4_start_new_game.argtypes = []
+my_functions.C4_start_new_game.restype = None
+restart_function = my_functions.C4_start_new_game
+
 # game_rules = TicTacToeGameRules()
 # console_renderer = TicTacToeConsoleRenderer()
 # gui_renderer = TicTacToeGUIRenderer()
@@ -49,8 +53,9 @@ mcts_config_rollout_1000_1sec.max_time = 1.0
 mcts_config_rollout_1_1sec = MCTSAgentConfig()
 mcts_config_rollout_1_1sec.loops = 1000000
 mcts_config_rollout_1_1sec.rollout_policy = rollout_policy
-mcts_config_rollout_1_1sec.rollout_count = 1
-mcts_config_rollout_1_1sec.max_time = 1.0
+mcts_config_rollout_1_1sec.rollout_count = 1000
+mcts_config_rollout_1_1sec.max_time = 0.1
+mcts_config_rollout_1_1sec.restart_function = restart_function
 
 mcts_config_rollout_vs_A0 = MCTSAgentConfig()
 mcts_config_rollout_vs_A0.loops = 10000
@@ -66,8 +71,9 @@ play_random = [game_rules, [RandomAgent(game_rules), RandomAgent(game_rules)], 1
 play_random_mcts = [game_rules, [RandomAgent(game_rules), MCTSAgent(game_rules, mcts_config_default)], 1000, None]
 play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_1000_1sec), MCTSAgent(game_rules, mcts_config_rollout_1_1sec)], 1000, None]
 play_console_console = [game_rules, [UserAgent(game_rules, console_renderer), UserAgent(game_rules, console_renderer)], 10, console_renderer]
+train_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_1_1sec), MCTSAgent(game_rules, mcts_config_rollout_1_1sec)], 10, None]
 
-director = TournamentDirector(*play_against_MCTS_gui)
+director = TournamentDirector(*train_mcts_mcts)
 tournament_set = director.run()
 director.print_tournament_set(tournament_set, detail=False)
 

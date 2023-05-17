@@ -389,4 +389,9 @@ namespace C4
         return wins / visits;
     }
 
+    void start_new_game()
+    {
+        cout << "Recall Memory has " << recall_memory.size() << " keys " << endl;
+    }
+
 }

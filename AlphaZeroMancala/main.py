@@ -67,7 +67,7 @@ play_random_mcts = [game_rules, [RandomAgent(game_rules), MCTSAgent(game_rules, 
 play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_1000_1sec), MCTSAgent(game_rules, mcts_config_rollout_1_1sec)], 1000, None]
 play_console_console = [game_rules, [UserAgent(game_rules, console_renderer), UserAgent(game_rules, console_renderer)], 10, console_renderer]
 
-director = TournamentDirector(*play_mcts_mcts)
+director = TournamentDirector(*play_against_MCTS_gui)
 tournament_set = director.run()
 director.print_tournament_set(tournament_set, detail=False)
 

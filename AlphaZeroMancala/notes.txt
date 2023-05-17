@@ -29,9 +29,14 @@ loops:1000000 c:1.14 most_visits:True rollout_policy:True rollout_count:1000 max
 MCTSAgent 1
 loops:1000000 c:1.14 most_visits:True rollout_policy:True rollout_count:1 max_time:1.0
 ----------------------------------------------------------------------------------------
-1000     True          1000        1000000  1.0
-1000     True          1           1000000  1.0
+1000     True          1000        1000000  1.0   119  12697.8602
+1000     True          1           1000000  1.0   850  13049.7806
 ----------------------------------------------------------------------------------------
+Turn 0  444
+Turn 1  525
+Now that's more like it! Now that the time is more or less equalized by using more loops than
+can be saturated by the 1 second time limit, the extra tree expansion allowed by doing only 1 simulation
+dominates the increased accuracy of the 1000 simulations.
 
 TODO:
 [X] Create a configuration class for MCTS with defaults, command line is getting out of hand!

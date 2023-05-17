@@ -7,7 +7,7 @@ from game_rules import GameResult
 import random
 
 # Load the DLL
-dll_path = os.path.join("FastRollout.dll")
+dll_path = os.path.join("./connect_4/FastRollout.dll")
 my_functions = ctypes.CDLL(dll_path)
 
 # Declare the argument types and return types of the C++ functions
@@ -40,30 +40,30 @@ rollouts = 1200
 # state, turn, result, info = game_rules.move(17592187841462, 3, turn)
 # renderer.render(state, 0)
 #
-positions = [17592187841462, game_rules.get_initial_position(), game_rules.get_initial_position(), game_rules.get_initial_position(), game_rules.get_initial_position()]
+positions = [game_rules.get_initial_position()] * 100
 for position in positions:
     print('-' * 80)
     start = time.time_ns()
     result = my_functions.C4_rollout(position, 0, rollouts)
     elapsed = time.time_ns() - start
-    print(f"Result {result / rollouts} Elapsed {elapsed / 1000000000.0}")
+    print(f"Result {result} Elapsed {elapsed / 1000000000.0}")
 
-    start = time.time_ns()
-    score = 0.0
-    for _ in range(100):
-        binary_state = position
-        result = GameResult.CONTINUE
-        turn = 0
-        while result == GameResult.CONTINUE:
-            moves = game_rules.get_legal_moves(binary_state, turn)
-            move = random.choice(moves)
-            binary_state, turn, result, info = game_rules.move(binary_state, move, turn)
-            if result == GameResult.WIN and turn == 1:
-                score += 1.0
-            elif result == GameResult.TIE:
-                score += 0.5
-    elapsed = time.time_ns() - start
-    print(f"Result {score / 100} Elapsed {elapsed / 1000000000.0}")
+    # start = time.time_ns()
+    # score = 0.0
+    # for _ in range(100):
+    #     binary_state = position
+    #     result = GameResult.CONTINUE
+    #     turn = 0
+    #     while result == GameResult.CONTINUE:
+    #         moves = game_rules.get_legal_moves(binary_state, turn)
+    #         move = random.choice(moves)
+    #         binary_state, turn, result, info = game_rules.move(binary_state, move, turn)
+    #         if result == GameResult.WIN and turn == 1:
+    #             score += 1.0
+    #         elif result == GameResult.TIE:
+    #             score += 0.5
+    # elapsed = time.time_ns() - start
+    # print(f"Result {score / 100} Elapsed {elapsed / 1000000000.0}")
 #
 #     bits = game.int_to_bits(position, bits=c4_game.GAME_COLS * c4_game.GAME_ROWS + c4_game.GAME_COLS * c4_game.BITS_IN_LEN)
 #     for bit in bits:

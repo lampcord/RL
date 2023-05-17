@@ -125,7 +125,7 @@ class TournamentDirector:
         for agent_number, agent in enumerate(self.agent_list):
             print(self.get_agent_id(agent_number))
             print(agent.get_description())
-        print('=' * 60)
+            print('=' * 60)
         for ndx in range(len(tournament_set)):
             tournament_set_entry = tournament_set[ndx]
             game_number = tournament_set_entry['game_number']

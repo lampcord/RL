@@ -4,11 +4,18 @@
 #include <iostream>
 #include <random>
 #include <iomanip>
+#include <map>
 
 using namespace std;
 
 namespace C4
 {
+    struct record_tuple {
+        float visits;
+        float wins;
+    };
+    static map<unsigned long long, record_tuple> recall_memory;
+
     const char player_1_symbol = 'O';
     const char player_2_symbol = 'X';
     const char blank_symbol = '.';
@@ -322,7 +329,15 @@ namespace C4
         }
         win_check_table_filled = true;
 
-        float result = 0.0f;
+        float wins = 0.0f;
+        float visits = 0.0f;
+        if (recall_memory.count(position) > 0)
+        {
+            auto record = recall_memory[position];
+            wins = record.wins;
+            visits = record.visits;
+        }
+        //cout << "Result: " << wins << " Rollouts: " << visits << endl;
 
         char array_pos[num_cols * num_rows];
         char rollout_board[num_cols * num_rows];
@@ -340,7 +355,8 @@ namespace C4
             
                 if (num_moves <= 0)
                 {
-                    result += 0.5f;
+                    wins += 0.5f;
+                    visits++;
                     break;
                 }
                 auto game_result = move(rollout_board, rollout_player, legal_moves[rng() % num_moves]);
@@ -353,8 +369,9 @@ namespace C4
                     if ((player == 0 && game_result == GameResult::player_1_wins) ||
                         (player == 1 && game_result == GameResult::player_2_wins))
                     {
-                        result += 1.0f;
+                        wins += 1.0f;
                     }
+                    visits++;
                     break;
                 }
                 rollout_player = 1 - rollout_player;
@@ -364,7 +381,12 @@ namespace C4
         }
         last_seed = rng();
 
-        return result;
+        record_tuple record;
+        record.wins = wins;
+        record.visits = visits;
+        recall_memory[position] = record;
+
+        return wins / visits;
     }
 
 }

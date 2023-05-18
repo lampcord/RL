@@ -5,7 +5,42 @@
 #include <random>
 #include <iomanip>
 #include <map>
+#include <fstream>
 
+/*
+#include <fstream>
+#include <map>
+
+// Function to save the map to a file
+void saveMap(const std::map<unsigned int, unsigned int>& m, const std::string& filename) {
+    std::ofstream outputFile(filename);
+    for (const auto& pair : m) {
+        outputFile << pair.first << ' ' << pair.second << '\n';
+    }
+    outputFile.close();
+}
+
+// Function to load the map from a file
+void loadMap(std::map<unsigned int, unsigned int>& m, const std::string& filename) {
+    std::ifstream inputFile(filename);
+    unsigned int key, value;
+    while (inputFile >> key >> value) {
+        m[key] = value;
+    }
+    inputFile.close();
+}
+
+int main() {
+    std::map<unsigned int, unsigned int> m = {{1, 100}, {2, 200}, {3, 300}};
+    saveMap(m, "map.txt");
+
+    std::map<unsigned int, unsigned int> loadedMap;
+    loadMap(loadedMap, "map.txt");
+
+    // Now loadedMap should contain the same key-value pairs as m
+}
+
+*/
 using namespace std;
 
 namespace C4
@@ -15,6 +50,9 @@ namespace C4
         float wins;
     };
     static map<unsigned long long, record_tuple> recall_memory;
+    static unsigned int max_leafs;
+    static unsigned int max_rollouts;
+    static string recall_filename = "recallmemory.bin";
 
     const char player_1_symbol = 'O';
     const char player_2_symbol = 'X';
@@ -55,6 +93,13 @@ namespace C4
 
     void render(char(&array_pos)[num_cols * num_rows]);
 
+    void set_parameters(char* filename, unsigned int leafs, unsigned int rollouts)
+    {
+        recall_filename = filename;
+        max_leafs = leafs;
+        max_rollouts = rollouts;
+    }
+    
     void dump_win_check_table()
     {
         for (auto col = 0; col < (int)num_cols; col++)
@@ -331,11 +376,13 @@ namespace C4
 
         float wins = 0.0f;
         float visits = 0.0f;
+        bool leaf_exists = false;
         if (recall_memory.count(position) > 0)
         {
             auto record = recall_memory[position];
             wins = record.wins;
             visits = record.visits;
+            leaf_exists = true;
         }
         //cout << "Result: " << wins << " Rollouts: " << visits << endl;
 
@@ -381,17 +428,60 @@ namespace C4
         }
         last_seed = rng();
 
-        record_tuple record;
-        record.wins = wins;
-        record.visits = visits;
-        recall_memory[position] = record;
+        if (visits <= max_rollouts && (recall_memory.size() < max_leafs || leaf_exists))
+        {
+            record_tuple record;
+            record.wins = wins;
+            record.visits = visits;
+            recall_memory[position] = record;
+        }
 
         return wins / visits;
     }
 
     void start_new_game()
     {
-        cout << "Recall Memory has " << recall_memory.size() << " keys " << endl;
+        cout << " Mem " << recall_memory.size() << " filename " << recall_filename << " leafs " << max_leafs << " rollouts " << max_rollouts << endl;
+    }
+
+    void save()
+    {
+        std::ofstream outputFile(recall_filename);
+        for (const auto& pair : recall_memory) {
+            outputFile << pair.first << ' ' << pair.second.visits << ' ' << pair.second.wins << '\n';
+        }
+        outputFile.close();
+
+        map<unsigned long long, record_tuple> test_map;
+        std::ifstream inputFile(recall_filename);
+        unsigned long long key;
+        float visits;
+        float wins;
+        while (inputFile >> key >> visits >> wins) {
+            record_tuple rc;
+            rc.visits = visits;
+            rc.wins = wins;
+            test_map[key] = rc;
+        }
+        inputFile.close();
+
+        bool passed = true;
+        for (const auto& pair : recall_memory) {
+            if (test_map.count(pair.first) == 0)
+            {
+                cout << "Missing key " << pair.first << endl;
+                passed = false;
+                break;
+            }
+            auto test_rec = test_map[pair.first];
+            if (test_rec.visits != pair.second.visits || test_rec.wins != pair.second.wins)
+            {
+                cout << "value mismatch " << endl;
+                passed = false;
+                break;
+            }
+        }
+        cout << " Result: " << passed << endl;
     }
 
 }

@@ -35,5 +35,14 @@ extern "C" {
     {
         C4::start_new_game();
     }
+    __declspec(dllexport) void C4_save()
+    {
+        C4::save();
+    }
+    __declspec(dllexport) void C4_set_parameters(char* filename, unsigned int leafs, unsigned int rollouts)
+    {
+        C4::set_parameters(filename, leafs, rollouts);
+    }
+
 }
 

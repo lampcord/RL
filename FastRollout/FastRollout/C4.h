@@ -5,5 +5,7 @@ namespace C4
     float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts);
     void start_new_game();
     void set_parameters(char* filename, unsigned int leafs, unsigned int rollouts);
-    void save();
+    void save_learn();
+    void load_learn();
+    void finalize();
 }

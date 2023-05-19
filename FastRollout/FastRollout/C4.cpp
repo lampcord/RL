@@ -4,52 +4,28 @@
 #include <iostream>
 #include <random>
 #include <iomanip>
-#include <map>
+//#include <map>
+#include <unordered_map>
 #include <fstream>
+#include <filesystem>
 
-/*
-#include <fstream>
-#include <map>
-
-// Function to save the map to a file
-void saveMap(const std::map<unsigned int, unsigned int>& m, const std::string& filename) {
-    std::ofstream outputFile(filename);
-    for (const auto& pair : m) {
-        outputFile << pair.first << ' ' << pair.second << '\n';
-    }
-    outputFile.close();
-}
-
-// Function to load the map from a file
-void loadMap(std::map<unsigned int, unsigned int>& m, const std::string& filename) {
-    std::ifstream inputFile(filename);
-    unsigned int key, value;
-    while (inputFile >> key >> value) {
-        m[key] = value;
-    }
-    inputFile.close();
-}
-
-int main() {
-    std::map<unsigned int, unsigned int> m = {{1, 100}, {2, 200}, {3, 300}};
-    saveMap(m, "map.txt");
-
-    std::map<unsigned int, unsigned int> loadedMap;
-    loadMap(loadedMap, "map.txt");
-
-    // Now loadedMap should contain the same key-value pairs as m
-}
-
-*/
 using namespace std;
 
 namespace C4
 {
-    struct record_tuple {
+    struct record_tuple_learn {
+        unsigned int turn;
         float visits;
         float wins;
     };
-    static map<unsigned long long, record_tuple> recall_memory;
+    struct record_tuple_saturated {
+        float visits;
+        float wins;
+    };
+
+    static unordered_map<unsigned long long, record_tuple_learn> recall_memory_learn;
+    static unordered_map<unsigned long long, record_tuple_saturated> recall_memory_saturated;
+    static unordered_map<unsigned long long, float> recall_memory_score;
     static unsigned int max_leafs;
     static unsigned int max_rollouts;
     static string recall_filename = "recallmemory.bin";
@@ -93,11 +69,118 @@ namespace C4
 
     void render(char(&array_pos)[num_cols * num_rows]);
 
+    string get_filename(string extension)
+    {
+        auto filename = recall_filename;
+        string to_replace = ".bin";
+        size_t pos = filename.find(to_replace);
+        if (pos != string::npos)
+        {
+            filename.replace(pos, to_replace.length(), extension);
+        }
+        return filename;
+    }
+
+    void load_learn()
+    {
+        auto filename_learn = get_filename("_learn.bin");
+
+        filesystem::path filePath(filename_learn);
+
+        if (filesystem::exists(filePath)) {
+            cout << "Loading " << filename_learn << endl;
+        }
+        else {
+            cout << "Unable to find " << filename_learn << " aborting load." << endl;
+            return;
+        }
+
+        ifstream inputfile(filename_learn);
+        unsigned long long key;
+        unsigned int turn;
+        float visits;
+        float wins;
+        while (inputfile >> key >> turn >> visits >> wins) {
+            record_tuple_learn rc;
+            rc.turn = turn;
+            rc.visits = visits;
+            rc.wins = wins;
+            recall_memory_learn[key] = rc;
+        }
+        inputfile.close();
+
+    }
+
+    void save_saturated()
+    {
+        auto filename_learn = get_filename("_saturated.bin");
+        ofstream outputFile(filename_learn);
+        for (const auto& pair : recall_memory_saturated) {
+            outputFile << pair.first << ' ' << pair.second.visits << ' ' << pair.second.wins << '\n';
+        }
+        outputFile.close();
+    }
+
+    void save_score()
+    {
+        auto filename_learn = get_filename("_score.bin");
+        ofstream outputFile(filename_learn);
+        for (const auto& pair : recall_memory_score) {
+            outputFile << pair.first << ' ' << pair.second << '\n';
+        }
+        outputFile.close();
+    }
+
+    void save_learn()
+    {
+        auto filename_learn = get_filename("_learn.bin");
+        ofstream outputFile(filename_learn);
+        for (const auto& pair : recall_memory_learn) {
+            outputFile << pair.first << ' ' << pair.second.turn << ' ' << pair.second.visits << ' ' << pair.second.wins << '\n';
+        }
+        outputFile.close();
+
+        unordered_map<unsigned long long, record_tuple_learn> test_map;
+        ifstream inputfile(filename_learn);
+        unsigned long long key;
+        unsigned int turn;
+        float visits;
+        float wins;
+        while (inputfile >> key >> turn >> visits >> wins) {
+            record_tuple_learn rc;
+            rc.turn = turn;
+            rc.visits = visits;
+            rc.wins = wins;
+            test_map[key] = rc;
+        }
+        inputfile.close();
+
+        bool passed = true;
+        for (const auto& pair : recall_memory_learn) {
+            if (test_map.count(pair.first) == 0)
+            {
+                cout << "Missing key " << pair.first << endl;
+                passed = false;
+                break;
+            }
+            auto test_rec = test_map[pair.first];
+            if (test_rec.turn != pair.second.turn || test_rec.visits != pair.second.visits || test_rec.wins != pair.second.wins)
+            {
+                cout << "value mismatch " << endl;
+                passed = false;
+                break;
+            }
+        }
+        cout << " Result: " << passed << endl;
+
+    }
+
     void set_parameters(char* filename, unsigned int leafs, unsigned int rollouts)
     {
         recall_filename = filename;
         max_leafs = leafs;
         max_rollouts = rollouts;
+        load_learn();
     }
     
     void dump_win_check_table()
@@ -377,9 +460,9 @@ namespace C4
         float wins = 0.0f;
         float visits = 0.0f;
         bool leaf_exists = false;
-        if (recall_memory.count(position) > 0)
+        if (recall_memory_learn.count(position) > 0)
         {
-            auto record = recall_memory[position];
+            auto record = recall_memory_learn[position];
             wins = record.wins;
             visits = record.visits;
             leaf_exists = true;
@@ -428,12 +511,13 @@ namespace C4
         }
         last_seed = rng();
 
-        if (visits <= max_rollouts && (recall_memory.size() < max_leafs || leaf_exists))
+        if (visits <= max_rollouts && (recall_memory_learn.size() < max_leafs || leaf_exists))
         {
-            record_tuple record;
+            record_tuple_learn record;
+            record.turn = (unsigned int)player;
             record.wins = wins;
             record.visits = visits;
-            recall_memory[position] = record;
+            recall_memory_learn[position] = record;
         }
 
         return wins / visits;
@@ -441,47 +525,38 @@ namespace C4
 
     void start_new_game()
     {
-        cout << " Mem " << recall_memory.size() << " filename " << recall_filename << " leafs " << max_leafs << " rollouts " << max_rollouts << endl;
+        cout << " Mem " << recall_memory_learn.size() << " filename " << recall_filename << " leafs " << max_leafs << " rollouts " << max_rollouts << endl;
     }
 
-    void save()
+    void finalize()
     {
-        std::ofstream outputFile(recall_filename);
-        for (const auto& pair : recall_memory) {
-            outputFile << pair.first << ' ' << pair.second.visits << ' ' << pair.second.wins << '\n';
-        }
-        outputFile.close();
+        cout << "Finalizing recall memory..." << endl;
+        auto count = 0u;
+        auto total = recall_memory_learn.size();
+        for (auto record : recall_memory_learn)
+        {
+            count++;
+            int remaining_turns = (int) max_rollouts - (int)  record.second.visits;
+            if (remaining_turns < 0) continue;
 
-        map<unsigned long long, record_tuple> test_map;
-        std::ifstream inputFile(recall_filename);
-        unsigned long long key;
-        float visits;
-        float wins;
-        while (inputFile >> key >> visits >> wins) {
-            record_tuple rc;
-            rc.visits = visits;
-            rc.wins = wins;
-            test_map[key] = rc;
-        }
-        inputFile.close();
-
-        bool passed = true;
-        for (const auto& pair : recall_memory) {
-            if (test_map.count(pair.first) == 0)
+            calc_rollout(record.first, record.second.turn, remaining_turns);
+            if (count % 1000 == 0)
             {
-                cout << "Missing key " << pair.first << endl;
-                passed = false;
-                break;
-            }
-            auto test_rec = test_map[pair.first];
-            if (test_rec.visits != pair.second.visits || test_rec.wins != pair.second.wins)
-            {
-                cout << "value mismatch " << endl;
-                passed = false;
-                break;
+                cout << count << "/" << total << endl;
             }
         }
-        cout << " Result: " << passed << endl;
+        cout << count << "/" << total << endl;
+        for (auto record : recall_memory_learn)
+        {
+            record_tuple_saturated rts;
+            rts.visits = record.second.visits;
+            rts.wins = record.second.wins;
+            recall_memory_saturated[record.first] = rts;
+            recall_memory_score[record.first] = (float)rts.wins / (float)rts.visits;
+        }
+
+        save_saturated();
+        save_score();
     }
 
 }

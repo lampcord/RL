@@ -13,18 +13,13 @@ using namespace std;
 
 namespace C4
 {
-    struct record_tuple_learn {
-        unsigned int turn;
-        float visits;
-        float wins;
-    };
-    struct record_tuple_saturated {
+    struct record_tuple {
         float visits;
         float wins;
     };
 
-    static unordered_map<unsigned long long, record_tuple_learn> recall_memory_learn;
-    static unordered_map<unsigned long long, record_tuple_saturated> recall_memory_saturated;
+    static unordered_map<unsigned long long, record_tuple> recall_memory_learn;
+    static unordered_map<unsigned long long, record_tuple> recall_memory_saturated;
     static unordered_map<unsigned long long, float> recall_memory_score;
     static unsigned int max_leafs;
     static unsigned int max_rollouts;
@@ -69,6 +64,20 @@ namespace C4
 
     void render(char(&array_pos)[num_cols * num_rows]);
 
+    unsigned long long make_key(unsigned long long position, unsigned long long turn)
+    {
+        unsigned long long key = position;
+        key *= 2;
+        key += turn;
+        return key;
+    }
+
+    void crack_key(unsigned long long& position, unsigned long long& turn, unsigned long long key)
+    {
+        turn = key & 0x1;
+        position = key / 2;
+    }
+
     string get_filename(string extension)
     {
         auto filename = recall_filename;
@@ -96,19 +105,29 @@ namespace C4
         }
 
         ifstream inputfile(filename_learn);
-        unsigned long long key;
-        unsigned int turn;
+        unsigned long long position;
         float visits;
         float wins;
-        while (inputfile >> key >> turn >> visits >> wins) {
-            record_tuple_learn rc;
-            rc.turn = turn;
+        while (inputfile >> position >> visits >> wins) {
+            record_tuple rc;
             rc.visits = visits;
             rc.wins = wins;
-            recall_memory_learn[key] = rc;
+            recall_memory_learn[position] = rc;
         }
         inputfile.close();
 
+        //for (auto pair : recall_memory_learn)
+        //{
+        //    unsigned long long position;
+        //    unsigned long long turn;
+        //    crack_key(position, turn, pair.first);
+        //    unsigned long long op_turn = 1 - turn;
+        //    auto key = make_key(position, op_turn);
+        //    if (recall_memory_learn.count(key) > 0)
+        //    {
+        //        cout << pair.first << ", " << key << " " << pair.second.wins << " " << pair.second.visits << " " << recall_memory_learn[key].wins << " " << recall_memory_learn[key].visits << endl;
+        //    }
+        //}
     }
 
     void save_saturated()
@@ -136,19 +155,17 @@ namespace C4
         auto filename_learn = get_filename("_learn.bin");
         ofstream outputFile(filename_learn);
         for (const auto& pair : recall_memory_learn) {
-            outputFile << pair.first << ' ' << pair.second.turn << ' ' << pair.second.visits << ' ' << pair.second.wins << '\n';
+            outputFile << pair.first << ' ' << pair.second.visits << ' ' << pair.second.wins << '\n';
         }
         outputFile.close();
 
-        unordered_map<unsigned long long, record_tuple_learn> test_map;
+        unordered_map<unsigned long long, record_tuple> test_map;
         ifstream inputfile(filename_learn);
         unsigned long long key;
-        unsigned int turn;
         float visits;
         float wins;
-        while (inputfile >> key >> turn >> visits >> wins) {
-            record_tuple_learn rc;
-            rc.turn = turn;
+        while (inputfile >> key >> visits >> wins) {
+            record_tuple rc;
             rc.visits = visits;
             rc.wins = wins;
             test_map[key] = rc;
@@ -164,7 +181,7 @@ namespace C4
                 break;
             }
             auto test_rec = test_map[pair.first];
-            if (test_rec.turn != pair.second.turn || test_rec.visits != pair.second.visits || test_rec.wins != pair.second.wins)
+            if (test_rec.visits != pair.second.visits || test_rec.wins != pair.second.wins)
             {
                 cout << "value mismatch " << endl;
                 passed = false;
@@ -460,9 +477,10 @@ namespace C4
         float wins = 0.0f;
         float visits = 0.0f;
         bool leaf_exists = false;
-        if (recall_memory_learn.count(position) > 0)
+        auto key = make_key(position, player);
+        if (recall_memory_learn.count(key) > 0)
         {
-            auto record = recall_memory_learn[position];
+            auto record = recall_memory_learn[key];
             wins = record.wins;
             visits = record.visits;
             leaf_exists = true;
@@ -513,11 +531,10 @@ namespace C4
 
         if (visits <= max_rollouts && (recall_memory_learn.size() < max_leafs || leaf_exists))
         {
-            record_tuple_learn record;
-            record.turn = (unsigned int)player;
+            record_tuple record;
             record.wins = wins;
             record.visits = visits;
-            recall_memory_learn[position] = record;
+            recall_memory_learn[key] = record;
         }
 
         return wins / visits;
@@ -539,7 +556,10 @@ namespace C4
             int remaining_turns = (int) max_rollouts - (int)  record.second.visits;
             if (remaining_turns < 0) continue;
 
-            calc_rollout(record.first, record.second.turn, remaining_turns);
+            unsigned long long position;
+            unsigned long long turn;
+            crack_key(position, turn, record.first);
+            calc_rollout(position, turn, remaining_turns);
             if (count % 1000 == 0)
             {
                 cout << count << "/" << total << endl;
@@ -548,7 +568,7 @@ namespace C4
         cout << count << "/" << total << endl;
         for (auto record : recall_memory_learn)
         {
-            record_tuple_saturated rts;
+            record_tuple rts;
             rts.visits = record.second.visits;
             rts.wins = record.second.wins;
             recall_memory_saturated[record.first] = rts;

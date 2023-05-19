@@ -22,8 +22,8 @@ game_rules = C4GameRules()
 console_renderer = C4ConsoleRenderer()
 gui_renderer = C4GuiRenderer()
 
-console_renderer.render(4613106729185850157, 0)
-exit()
+# console_renderer.render(4613106729185850157, 0)
+# exit()
 
 # Load the DLL
 dll_path = os.path.join("./connect_4/FastRollout.dll")

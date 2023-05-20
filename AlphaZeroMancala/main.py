@@ -38,9 +38,9 @@ my_functions.C4_start_new_game.argtypes = []
 my_functions.C4_start_new_game.restype = None
 restart_function = my_functions.C4_start_new_game
 
-my_functions.C4_set_parameters.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_uint32]
+my_functions.C4_set_parameters.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32]
 my_functions.C4_set_parameters.restype = None
-my_functions.C4_set_parameters(b".\\connect_4\\recall_memory.bin", 2000000, 1000)
+my_functions.C4_set_parameters(b".\\connect_4\\recall_memory.bin", 2000000, 1000, 1)
 
 my_functions.C4_save_learn.argtypes = []
 my_functions.C4_save_learn.restype = None
@@ -74,8 +74,9 @@ mcts_config_rollout_vs_A0 = MCTSAgentConfig()
 mcts_config_rollout_vs_A0.loops = 1000000
 mcts_config_rollout_vs_A0.rollout_policy = rollout_policy
 mcts_config_rollout_vs_A0.rollout_count = 1
+mcts_config_rollout_vs_A0.max_time = 3.2
 # mcts_config_rollout_vs_A0.max_time = 1.0
-mcts_config_rollout_vs_A0.max_time = 0.1
+# mcts_config_rollout_vs_A0.max_time = 0.1
 mcts_config_rollout_vs_A0.restart_function = restart_function
 
 play_against_random_console = [game_rules, [UserAgent(game_rules, console_renderer), RandomAgent(game_rules)], 2, console_renderer]
@@ -89,11 +90,11 @@ play_console_console = [game_rules, [UserAgent(game_rules, console_renderer), Us
 # train_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_vs_A0), MCTSAgent(game_rules, mcts_config_rollout_vs_A0)], 320, None]
 train_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_vs_A0), MCTSAgent(game_rules, mcts_config_rollout_vs_A0)], 10, None]
 
-director = TournamentDirector(*train_mcts_mcts)
+director = TournamentDirector(*play_against_MCTS_gui)
 tournament_set = director.run()
 restart_function()
-my_functions.C4_save_learn()
-my_functions.C4_finalize()
+# my_functions.C4_save_learn()
+# my_functions.C4_finalize()
 director.print_tournament_set(tournament_set, detail=False)
 
 

@@ -25,12 +25,10 @@ extern "C" {
     {
         return C4::calc_rollout(position, player, num_rollouts);
     }
-
     __declspec(dllexport) void C4_render(unsigned long long position)
     {
         return C4::render_binary_position(position);
     }
-
     __declspec(dllexport) void C4_start_new_game()
     {
         C4::start_new_game();
@@ -43,10 +41,9 @@ extern "C" {
     {
         C4::finalize();
     }
-    __declspec(dllexport) void C4_set_parameters(char* filename, unsigned int leafs, unsigned int rollouts)
+    __declspec(dllexport) void C4_set_parameters(char* filename, unsigned int leafs, unsigned int rollouts, unsigned int play_mode)
     {
-        C4::set_parameters(filename, leafs, rollouts);
+        C4::set_parameters(filename, leafs, rollouts, play_mode);
     }
-
 }
 

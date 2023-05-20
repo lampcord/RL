@@ -23,7 +23,7 @@ GREY = (190, 190, 190)
 DARK_GREY = (96, 96, 96)
 
 click_positions = []
-cell_colors = [RED, BLUE]
+cell_colors = [BLUE, RED]
 font = pygame.font.Font(None, 24)
 
 

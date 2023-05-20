@@ -235,8 +235,9 @@ if __name__ == "__main__":
     # do_tournament(sessionNames)
     #
     session1Name = 'best_020_01800.dat'
-    session1 = Session('saves/Model128/' + session1Name, True, session1Name, dirichlet_pct=0.0)
-    play_against_human(human_is_current, session1)
-
-    time.sleep(3)
+    for _ in range(10):
+        session1 = Session('saves/Model128/' + session1Name, True, session1Name, dirichlet_pct=0.0)
+        play_against_human(human_is_current, session1)
+        human_is_current = not human_is_current
+        time.sleep(3)
 

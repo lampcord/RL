@@ -26,7 +26,6 @@ DARK_GREY = (96, 96, 96)
 click_positions = []
 cell_colors = [RED, BLUE]
 
-
 class C4GuiRenderer(Renderer):
     def __init__(self, width=WINDOW_WIDTH, height=WINDOW_HEIGHT):
         super().__init__()
@@ -35,13 +34,14 @@ class C4GuiRenderer(Renderer):
         self.width = width
         self.height = height
         self.game_rules = C4GameRules()
+        self.last_click_time = 0
         pygame.display.set_caption("Connect 4")
 
     def render(self, state, turn, info=None):
         if info is None:
             info = {}
         winning_set = self.game_rules.check_for_win(state, turn)
-        message = info.get('message', '')
+        message = f'Score: {info.get("score", 0.0):.3}'
         pause = 0.3
         if winning_set:
             pause = 3.0
@@ -120,6 +120,11 @@ class C4GuiRenderer(Renderer):
                     best_pos = None
                     for test_click in range(len(click_positions)):
                         if test_click not in legal_moves:
+                            continue
+                        current_time = pygame.time.get_ticks()
+                        if current_time - self.last_click_time > 500:
+                            last_click_time = current_time
+                        else:
                             continue
                         distance = (click_positions[test_click][0] - click_coordinates[0]) * (click_positions[test_click][0] - click_coordinates[0])
                         distance += (click_positions[test_click][1] - click_coordinates[1]) * (click_positions[test_click][1] - click_coordinates[1])

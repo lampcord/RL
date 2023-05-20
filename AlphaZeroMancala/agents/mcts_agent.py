@@ -8,7 +8,7 @@ import time
 class MCTSAgentConfig:
     def __init__(self):
         self.loops = 1000
-        self.c = 1.14
+        self.c = math.sqrt(2.0)
         self.most_visits = True
         self.rollout_policy = None
         self.rollout_count = 1

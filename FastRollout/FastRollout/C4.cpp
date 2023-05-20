@@ -18,6 +18,11 @@ namespace C4
         float wins;
     };
 
+    const unsigned int no_memory = 0;
+    const unsigned int score_mode = 1;
+    const unsigned int learn_mode = 2;
+    static unsigned int play_mode = no_memory;
+
     static unordered_map<unsigned long long, record_tuple> recall_memory_learn;
     static unordered_map<unsigned long long, record_tuple> recall_memory_saturated;
     static unordered_map<unsigned long long, float> recall_memory_score;
@@ -88,6 +93,29 @@ namespace C4
             filename.replace(pos, to_replace.length(), extension);
         }
         return filename;
+    }
+
+    void load_score()
+    {
+        auto filename_score = get_filename("_score.bin");
+
+        filesystem::path filePath(filename_score);
+
+        if (filesystem::exists(filePath)) {
+            cout << "Loading " << filename_score << endl;
+        }
+        else {
+            cout << "Unable to find " << filename_score << " aborting load." << endl;
+            return;
+        }
+
+        ifstream inputfile(filename_score);
+        unsigned long long position;
+        float score;
+        while (inputfile >> position >> score) {
+            recall_memory_score[position] = score;
+        }
+        inputfile.close();
     }
 
     void load_learn()
@@ -192,12 +220,21 @@ namespace C4
 
     }
 
-    void set_parameters(char* filename, unsigned int leafs, unsigned int rollouts)
+    void set_parameters(char* filename, unsigned int leafs, unsigned int rollouts, unsigned int play_mode_flag)
     {
         recall_filename = filename;
         max_leafs = leafs;
         max_rollouts = rollouts;
-        load_learn();
+
+        play_mode = play_mode_flag;
+        if (play_mode == score_mode)
+        {
+            load_score();
+        }
+        else if (play_mode == learn_mode)
+        {
+            load_learn();
+        }
     }
     
     void dump_win_check_table()
@@ -461,10 +498,21 @@ namespace C4
 
     float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts)
     {
+        float wins = 0.0f;
+        float visits = 0.0f;
+        auto key = make_key(position, player);
+        if (play_mode == score_mode)
+        {
+            auto it = recall_memory_score.find(key);
+            if (it != recall_memory_score.end()) {
+                return it->second;
+            }
+        }
+
         if (last_seed == 0)
         {
             cout << "New Seed" << endl;
-            last_seed = time(NULL);
+            last_seed = (uint32_t)time(NULL);
         }
         Squirrel3 rng(last_seed);
 
@@ -474,11 +522,8 @@ namespace C4
         }
         win_check_table_filled = true;
 
-        float wins = 0.0f;
-        float visits = 0.0f;
         bool leaf_exists = false;
-        auto key = make_key(position, player);
-        if (recall_memory_learn.count(key) > 0)
+        if (play_mode == learn_mode && recall_memory_learn.count(key) > 0)
         {
             auto record = recall_memory_learn[key];
             wins = record.wins;
@@ -529,7 +574,7 @@ namespace C4
         }
         last_seed = rng();
 
-        if (visits <= max_rollouts && (recall_memory_learn.size() < max_leafs || leaf_exists))
+        if (play_mode == learn_mode && visits <= max_rollouts && (recall_memory_learn.size() < max_leafs || leaf_exists))
         {
             record_tuple record;
             record.wins = wins;
@@ -542,7 +587,7 @@ namespace C4
 
     void start_new_game()
     {
-        cout << " Mem " << recall_memory_learn.size() << " filename " << recall_filename << " leafs " << max_leafs << " rollouts " << max_rollouts << endl;
+        cout << " Mem " << recall_memory_learn.size() << " filename " << recall_filename << " leafs " << max_leafs << " rollouts " << max_rollouts << " play mode " << play_mode << endl;
     }
 
     void finalize()

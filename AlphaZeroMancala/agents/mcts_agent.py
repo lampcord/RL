@@ -142,7 +142,7 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=N
     else:
         best_child = root.best_child(c=0.0)
 
-    return best_child.move
+    return best_child
 
 '''
         self.loops = 500
@@ -169,9 +169,12 @@ class MCTSAgent(Agent):
     def move(self, state, turn):
         if self.restart_function and state == self.starting_state:
             self.restart_function()
-        move = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy, rollout_count=self.rollout_count, max_time=self.max_time)
-        return self.game_rules.move(state, move, turn)
-
+        best_child = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy, rollout_count=self.rollout_count, max_time=self.max_time)
+        move = best_child.move
+        score = best_child.num_wins / best_child.num_visits if best_child.num_visits > 0 else 0
+        state, new_turn, result, info = self.game_rules.move(state, move, turn)
+        info["score"] = score
+        return state, new_turn, result, info
     def get_description(self):
         description = f"loops:{self.loops} "
         description += f"c:{self.c} "

@@ -85,3 +85,13 @@ What we need:
     A flag to indicate player mirroring (so we can validate against previous version).
     A flag to indicate vertical mirroring.
     To track that we have already missed a leaf for a given player, we need to indicate that we are starting a game to clear these flags.
+
+
+-----------------------------------------------------------------
+On the finalize part:
+Clear out any prior info.
+At the start of the rollout, do a N level minmax
+Results are {win, unknown, loss}
+If there is a forced win move, report back a 1 and we are done searching this position.
+else eliminate all loss moves from consideration. If no moves left, report a 0 and we are done searching this position.
+If there are any more moves left, do normal rollouts but only use those moves.

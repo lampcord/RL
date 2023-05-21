@@ -19,6 +19,8 @@ my_functions.C4_render.restype = None
 
 my_functions.C4_start_new_game.argtypes = []
 my_functions.C4_start_new_game.restype = None
+my_functions.C4_start_new_game()
+exit()
 
 my_functions.C4_set_parameters.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32]
 my_functions.C4_set_parameters.restype = None

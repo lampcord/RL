@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <filesystem>
+#include <algorithm>
 
 using namespace std;
 
@@ -17,6 +18,8 @@ namespace C4
         float visits;
         float wins;
     };
+    static unsigned int hits = 0;
+    static unsigned int misses = 0;
 
     const unsigned int no_memory = 0;
     const unsigned int score_mode = 1;
@@ -68,6 +71,7 @@ namespace C4
     };
 
     void render(char(&array_pos)[num_cols * num_rows]);
+    bool is_win(unsigned long long player, C4::GameResult prune_result);
 
     unsigned long long make_key(unsigned long long position, unsigned long long turn)
     {
@@ -236,7 +240,7 @@ namespace C4
             load_learn();
         }
     }
-    
+
     void dump_win_check_table()
     {
         for (auto col = 0; col < (int)num_cols; col++)
@@ -264,7 +268,7 @@ namespace C4
             for (auto row = 0; row < (int)num_rows; row++)
             {
                 auto test_ndx = col * num_rows + row;
-                
+
                 for (auto win_check_set = 0u; win_check_set < max_win_sets; win_check_set++)
                 {
                     for (auto ndx = 0u; ndx < num_cols * num_rows; ndx++) array_pos[ndx] = blank_symbol;
@@ -282,7 +286,7 @@ namespace C4
                         }
                         array_pos[target_ndx] = player_1_symbol;
                     }
-                    
+
                     if (!valid) break;
                     render(array_pos);
                 }
@@ -302,7 +306,7 @@ namespace C4
             {
                 int test_col = col + col_table[start_dir_ndx + test_dir_ndx];
                 int test_row = row + row_table[start_dir_ndx + test_dir_ndx];
-                bool valid = (test_col >= 0 && test_col < num_cols&& test_row >= 0 && test_row < num_rows);
+                bool valid = (test_col >= 0 && test_col < num_cols && test_row >= 0 && test_row < num_rows);
                 //cout << "(" << test_col << ", " << test_row << ") " << (valid ? "+" : "-");
                 if (!valid)
                 {
@@ -471,9 +475,10 @@ namespace C4
                 break;
             }
         }
-        
+
         return result;
     }
+
     GameResult move(char(&array_pos)[num_cols * num_rows], unsigned long long player, unsigned int move)
     {
         GameResult result = GameResult::not_completed;
@@ -496,6 +501,106 @@ namespace C4
         return result;
     }
 
+    float minimax(char(&array_pos)[num_cols * num_rows], int test_move, int player, int maximizing_player, int max_depth) {
+        char rollout_board[num_cols * num_rows];
+        memcpy(rollout_board, array_pos, sizeof(rollout_board));
+        if (test_move >= 0)
+        {
+            auto result = move(rollout_board, player, test_move);
+            if (result == GameResult::player_1_wins || result == GameResult::player_2_wins)
+            {
+                return is_win(maximizing_player, result) ? 1.0f : 0.0f;
+            }
+        }
+
+        unsigned int legal_moves[num_cols];
+        auto num_moves = get_legal_moves(rollout_board, legal_moves);
+        if (max_depth == 0 || num_moves == 0) {
+            return 0.5f;
+        }
+
+        if (player == maximizing_player) {
+
+            float bestValue = -1000000.0;
+            for (auto i = 0u; i < num_moves; ++i) {
+                float value = minimax(rollout_board, legal_moves[i], 1 - player, maximizing_player, max_depth - 1);
+                bestValue = bestValue > value ? bestValue : value;
+            }
+            return bestValue;
+        }
+        else {
+
+            float bestValue = 1000000.0;
+            for (auto i = 0u; i < num_moves; ++i) {
+                float value = minimax(rollout_board, legal_moves[i], 1 - player, maximizing_player, max_depth - 1);
+                bestValue = bestValue < value ? bestValue : value;
+            }
+            return bestValue;
+        }
+    }
+    
+    void test_min_max()
+    {
+
+        if (!win_check_table_filled)
+        {
+            initialize_win_check_table();
+        }
+        win_check_table_filled = true;
+
+        vector<unsigned long long> positions = {
+            1797558,
+            1797046,
+            8796094818742,
+            8796094814646,
+            72066390132709814,
+            72066390132709806,
+            72066665010616686,
+            72066665010616622,
+            72071063057127214,
+            72071063057127213,
+            72073262080382253,
+            72073262080381741,
+            108102059099312941,
+            108102059099312940,
+            126116457608762156,
+            126116457608729388,
+            126679407562146604,
+            126679407562146603,
+            126679407570535210,
+            126679407570534698,
+            126960882547241258,
+            126960882547241257,
+            126960951266717929
+        };
+
+        unsigned int player = 0;
+        unsigned int maximizing_player = 0;
+        for (auto position : positions)
+        {
+            char array_pos[num_cols * num_rows];
+
+            get_array_pos_from_binary(array_pos, position);
+            render(array_pos);
+
+            unsigned int legal_moves[num_cols];
+            auto num_moves = get_legal_moves(array_pos, legal_moves);
+            for (auto x = 0u; x < num_moves; x++)
+            {
+                auto test_move = legal_moves[x];
+                cout << test_move << " " << minimax(array_pos, test_move, player, maximizing_player, 4) << endl;
+            }
+            player = 1 - player;
+        }
+    }
+
+    GameResult min_max_prune(char(&array_pos)[num_cols * num_rows], unsigned long long rollout_player, unsigned int &num_moves, unsigned int(&legal_moves)[num_cols])
+    {
+        GameResult result = GameResult::not_completed;
+
+        return result;
+    }
+
     float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts)
     {
         float wins = 0.0f;
@@ -505,8 +610,10 @@ namespace C4
         {
             auto it = recall_memory_score.find(key);
             if (it != recall_memory_score.end()) {
+                hits++;
                 return it->second;
             }
+            misses++;
         }
 
         if (last_seed == 0)
@@ -545,22 +652,33 @@ namespace C4
             {
                 unsigned int legal_moves[num_cols];
                 auto num_moves = get_legal_moves(rollout_board, legal_moves);
-            
                 if (num_moves <= 0)
                 {
                     wins += 0.5f;
                     visits++;
                     break;
                 }
-                auto game_result = move(rollout_board, rollout_player, legal_moves[rng() % num_moves]);
+            
+                // check for forced wins / losses
+                //auto prune_result = min_max_prune(rollout_board, rollout_player, num_moves, legal_moves);
+                //if (prune_result != GameResult::not_completed)
+                //{
+                //    if (is_win(player, prune_result))
+                //    {
+                //        wins += 1.0f;
+                //    }
+                //    visits++;
+                //    break;
+                //}
+
+                auto move_result = move(rollout_board, rollout_player, legal_moves[rng() % num_moves]);
  
                 //render(rollout_board);
 
-                if (game_result != GameResult::not_completed)
+                if (move_result != GameResult::not_completed)
                 {
                     //cout << "Player " << (int)game_result << " WINS!!" << endl;
-                    if ((player == 0 && game_result == GameResult::player_1_wins) ||
-                        (player == 1 && game_result == GameResult::player_2_wins))
+                    if (is_win(player, move_result))
                     {
                         wins += 1.0f;
                     }
@@ -585,9 +703,19 @@ namespace C4
         return wins / visits;
     }
 
+    bool is_win(unsigned long long player, C4::GameResult result)
+    {
+        return (player == 0 && result == GameResult::player_1_wins) ||
+            (player == 1 && result == GameResult::player_2_wins);
+    }
+
     void start_new_game()
     {
-        cout << " Mem " << recall_memory_learn.size() << " filename " << recall_filename << " leafs " << max_leafs << " rollouts " << max_rollouts << " play mode " << play_mode << endl;
+        cout << " Mem " << recall_memory_learn.size() << " filename " << recall_filename << " leafs ";
+        cout << max_leafs << " rollouts " << max_rollouts << " play mode " << play_mode << " hits " << hits << " misses " << misses << endl;
+        hits = 0;
+        misses = 0;
+        test_min_max();
     }
 
     void finalize()

@@ -41,6 +41,10 @@ extern "C" {
     {
         C4::finalize();
     }
+    __declspec(dllexport) void C4_test_min_max()
+    {
+        C4::test_min_max();
+    }
     __declspec(dllexport) void C4_set_parameters(char* filename, unsigned int leafs, unsigned int rollouts, unsigned int play_mode)
     {
         C4::set_parameters(filename, leafs, rollouts, play_mode);

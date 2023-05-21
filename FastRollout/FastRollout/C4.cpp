@@ -501,15 +501,18 @@ namespace C4
         return result;
     }
 
-    float minimax(char(&array_pos)[num_cols * num_rows], int test_move, int player, int maximizing_player, int max_depth) {
+    float minimax(char(&array_pos)[num_cols * num_rows], int test_move, int player, int maximizing_player, int max_depth, float temporal_discount = 0.0f) {
         char rollout_board[num_cols * num_rows];
         memcpy(rollout_board, array_pos, sizeof(rollout_board));
         if (test_move >= 0)
         {
             auto result = move(rollout_board, player, test_move);
+            //for (auto x = 0; x < 4 - max_depth; x++) cout << "    ";
+            //cout << test_move << " " << (int) result << endl;
             if (result == GameResult::player_1_wins || result == GameResult::player_2_wins)
             {
-                return is_win(maximizing_player, result) ? 1.0f : 0.0f;
+                //render(rollout_board);
+                return is_win(maximizing_player, result) ? 1.0f - temporal_discount: 0.0f + temporal_discount;
             }
         }
 
@@ -519,11 +522,12 @@ namespace C4
             return 0.5f;
         }
 
+        player = 1 - player;
         if (player == maximizing_player) {
 
             float bestValue = -1000000.0;
             for (auto i = 0u; i < num_moves; ++i) {
-                float value = minimax(rollout_board, legal_moves[i], 1 - player, maximizing_player, max_depth - 1);
+                float value = minimax(rollout_board, legal_moves[i], player, maximizing_player, max_depth - 1, temporal_discount + 0.00001f);
                 bestValue = bestValue > value ? bestValue : value;
             }
             return bestValue;
@@ -532,13 +536,113 @@ namespace C4
 
             float bestValue = 1000000.0;
             for (auto i = 0u; i < num_moves; ++i) {
-                float value = minimax(rollout_board, legal_moves[i], 1 - player, maximizing_player, max_depth - 1);
+                float value = minimax(rollout_board, legal_moves[i], player, maximizing_player, max_depth - 1, temporal_discount + 0.00001f);
                 bestValue = bestValue < value ? bestValue : value;
             }
             return bestValue;
         }
     }
     
+
+    GameResult min_max_prune(char(&array_pos)[num_cols * num_rows], unsigned long long rollout_player, unsigned int &num_moves, unsigned int(&legal_moves)[num_cols])
+    {
+        GameResult result = GameResult::not_completed;
+
+
+        unsigned int local_legal_moves[num_cols];
+        float scores[num_cols];
+        
+        memcpy(local_legal_moves, legal_moves, sizeof(local_legal_moves));
+
+        auto num_wins = 0;
+        auto best_win = 0.0f;
+        auto num_losses = 0;
+        auto best_loss = 0.0f;
+        
+        for (auto x = 0u; x < num_moves; x++)
+        {
+            auto test_move = local_legal_moves[x];
+            auto score = minimax(array_pos, test_move, (unsigned int) rollout_player, (unsigned int) rollout_player, 6);
+            if (score > 0.99f)
+            {
+                num_wins++;
+                if (score > best_win)
+                {
+                    best_win = score;
+                }
+            }
+            if (score < 0.01f)
+            {
+                num_losses++;
+                if (score > best_loss)
+                {
+                    best_loss = score;
+                }
+            }
+            scores[x] = score;
+        }
+        //for (auto x = 0u; x < num_moves; x++)
+        //{
+        //    cout << scores[x] << " ";
+        //}
+        //cout << endl;
+        //cout << "wins: " << num_wins << " best_win: " << best_win;
+        //cout << " losses: " << num_losses << " best_loss: " << best_loss << endl;
+
+        if (num_wins > 0)
+        {
+            // if we have any forced wins, only moves to choose from are best forced wins
+            // result is a win for active player
+            auto new_num_moves = 0u;
+            for (auto x = 0u; x < num_moves; x++)
+            {
+                if (scores[x] == best_win)
+                {
+                    legal_moves[new_num_moves] = local_legal_moves[x];
+                    new_num_moves++;
+                }
+            }
+            num_moves = new_num_moves;
+            result = rollout_player == 0 ? GameResult::player_1_wins : GameResult::player_2_wins;
+        }
+        else if (num_losses > 0 && num_losses == num_moves)
+        {
+            // else, if all the moves are losses, only moves to choose from are best losses
+            // result is a win for opposing player
+            auto new_num_moves = 0u;
+            for (auto x = 0u; x < num_moves; x++)
+            {
+                if (scores[x] == best_loss)
+                {
+                    legal_moves[new_num_moves] = local_legal_moves[x];
+                    new_num_moves++;
+                }
+            }
+            num_moves = new_num_moves;
+            result = rollout_player == 0 ? GameResult::player_2_wins : GameResult::player_1_wins;
+        }
+        else if (num_losses > 0)
+        {
+            // else, if we have some losses, only non losses to choose from
+            // result is not completed
+            auto new_num_moves = 0u;
+            for (auto x = 0u; x < num_moves; x++)
+            {
+                if (scores[x] > best_loss)
+                {
+                    legal_moves[new_num_moves] = local_legal_moves[x];
+                    new_num_moves++;
+                }
+            }
+            num_moves = new_num_moves;
+        }
+
+        // else all moves are valid
+        // result is not completed
+
+        return result;
+    }
+
     void test_min_max()
     {
 
@@ -575,31 +679,28 @@ namespace C4
         };
 
         unsigned int player = 0;
-        unsigned int maximizing_player = 0;
+        //unsigned int player = 1;
+        //unsigned int maximizing_player = player;
+
         for (auto position : positions)
         {
+            cout << "------------------------------------------------------------------" << endl;
             char array_pos[num_cols * num_rows];
+            unsigned int legal_moves[num_cols];
 
             get_array_pos_from_binary(array_pos, position);
             render(array_pos);
-
-            unsigned int legal_moves[num_cols];
+            cout << position << " " << player << endl;
             auto num_moves = get_legal_moves(array_pos, legal_moves);
-            for (auto x = 0u; x < num_moves; x++)
-            {
-                auto test_move = legal_moves[x];
-                cout << test_move << " " << minimax(array_pos, test_move, player, maximizing_player, 4) << endl;
-            }
+            
+            min_max_prune(array_pos, player, num_moves, legal_moves);
+            for (auto x = 0u; x < num_moves; x++) cout << legal_moves[x] << " ";
+            cout << endl;
             player = 1 - player;
+            //maximizing_player = player;
         }
     }
 
-    GameResult min_max_prune(char(&array_pos)[num_cols * num_rows], unsigned long long rollout_player, unsigned int &num_moves, unsigned int(&legal_moves)[num_cols])
-    {
-        GameResult result = GameResult::not_completed;
-
-        return result;
-    }
 
     float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts)
     {

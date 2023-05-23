@@ -11,7 +11,7 @@ dll_path = os.path.join("./connect_4/FastRollout.dll")
 my_functions = ctypes.CDLL(dll_path)
 
 # Declare the argument types and return types of the C++ functions
-my_functions.C4_rollout.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
+my_functions.C4_rollout.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint32]
 my_functions.C4_rollout.restype = ctypes.c_float
 
 my_functions.C4_render.argtypes = [ctypes.c_uint64]
@@ -19,12 +19,10 @@ my_functions.C4_render.restype = None
 
 my_functions.C4_start_new_game.argtypes = []
 my_functions.C4_start_new_game.restype = None
-my_functions.C4_start_new_game()
-exit()
 
 my_functions.C4_set_parameters.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32]
 my_functions.C4_set_parameters.restype = None
-my_functions.C4_set_parameters(b".\\connect_4\\recall_memory.bin", 2000000, 1000, 1)
+my_functions.C4_set_parameters(b".\\connect_4\\recall_memory.bin", 2000000, 1000, 0)
 
 game_rules = C4GameRules()
 renderer = C4ConsoleRenderer()
@@ -54,8 +52,8 @@ rollouts = 1
 #
 start = time.time_ns()
 position = game_rules.get_initial_position()
-for _ in range(1000000):
-    my_functions.C4_rollout(position, 0, rollouts)
+for _ in range(100000):
+    my_functions.C4_rollout(position, 0, rollouts, 0)
 elapsed = time.time_ns() - start
 print(f"Elapsed {elapsed / 1000000000.0}")
 

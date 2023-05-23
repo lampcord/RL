@@ -14,6 +14,7 @@ class MCTSAgentConfig:
         self.rollout_count = 1
         self.max_time = None
         self.restart_function = None
+        self.min_max_depth = 0
 
 class MCTSNode:
     def __init__(self, game_rules, state, turn, parent=None, move=None, result=GameResult.CONTINUE):
@@ -67,7 +68,7 @@ class MCTSNode:
             reward = 0.5
         return reward, last_turn
 
-    def external_rollout_policy(self, rollout_policy, rollouts):
+    def external_rollout_policy(self, rollout_policy, rollouts, min_max_depth):
         last_turn = self.parent.turn
         reward = 0
         if self.result == GameResult.WIN:
@@ -75,7 +76,7 @@ class MCTSNode:
         elif self.result == GameResult.TIE:
             reward = 0.5
         else:
-            reward = rollout_policy(self.state, self.turn, rollouts) / rollouts
+            reward = rollout_policy(self.state, self.turn, rollouts, min_max_depth) / rollouts
             last_turn = self.turn
         return reward, last_turn
     def back_propagate(self, reward, player_turn):
@@ -116,7 +117,7 @@ class MCTSNode:
             child.dump(level + 1, max_level)
 
 
-def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=None, rollout_count=1, max_time=None):
+def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=None, rollout_count=1, max_time=None, min_max_depth=0):
     """
     Monte Carlo Tree Search - perform a MCTS from a given game_rules, state and player turn and return the best move.
     """
@@ -129,7 +130,7 @@ def mcts_search(game_rules, state, turn, loops, c, most_visits, rollout_policy=N
         node = node.select(c)
         node = node.expand()
         if rollout_policy:
-            reward, player_turn = node.external_rollout_policy(rollout_policy, rollout_count)
+            reward, player_turn = node.external_rollout_policy(rollout_policy, rollout_count, min_max_depth)
         else:
             reward, player_turn = node.rollout()
         node.back_propagate(reward, player_turn)
@@ -165,12 +166,15 @@ class MCTSAgent(Agent):
         self.rollout_count = config.rollout_count
         self.max_time = config.max_time
         self.restart_function = config.restart_function
+        self.min_max_depth = config.min_max_depth
+
 
     def move(self, state, turn):
         if self.restart_function and not self.game_started:
             self.game_started = True
             self.restart_function()
-        best_child = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits, rollout_policy=self.rollout_policy, rollout_count=self.rollout_count, max_time=self.max_time)
+        best_child = mcts_search(self.game_rules, state, turn, loops=self.loops, c=self.c, most_visits=self.most_visits,
+                                 rollout_policy=self.rollout_policy, rollout_count=self.rollout_count, max_time=self.max_time, min_max_depth=self.min_max_depth)
         move = best_child.move
         score = best_child.num_wins / best_child.num_visits if best_child.num_visits > 0 else 0
         state, new_turn, result, info = self.game_rules.move(state, move, turn)
@@ -185,4 +189,5 @@ class MCTSAgent(Agent):
         description += f"rollout_policy:{self.rollout_policy is not None} "
         description += f"rollout_count:{self.rollout_count} "
         description += f"max_time:{self.max_time} "
+        description += f"min_max_depth:{self.min_max_depth} "
         return description

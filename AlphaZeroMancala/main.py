@@ -30,7 +30,7 @@ dll_path = os.path.join("./connect_4/FastRollout.dll")
 my_functions = ctypes.CDLL(dll_path)
 
 # Declare the argument types and return types of the C++ functions
-my_functions.C4_rollout.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
+my_functions.C4_rollout.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint32]
 my_functions.C4_rollout.restype = ctypes.c_float
 rollout_policy = my_functions.C4_rollout
 
@@ -40,12 +40,12 @@ restart_function = my_functions.C4_start_new_game
 
 my_functions.C4_set_parameters.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32]
 my_functions.C4_set_parameters.restype = None
-my_functions.C4_set_parameters(b".\\connect_4\\recall_memory.bin", 3000000, 100000, 1)
+my_functions.C4_set_parameters(b".\\connect_4\\recall_memory.bin", 3000000, 100000, 0)
 
 my_functions.C4_save_learn.argtypes = []
 my_functions.C4_save_learn.restype = None
 
-my_functions.C4_finalize.argtypes = []
+my_functions.C4_finalize.argtypes = [ctypes.c_uint32]
 my_functions.C4_finalize.restype = None
 
 # game_rules = TicTacToeGameRules()
@@ -67,8 +67,15 @@ mcts_config_rollout_1000_1sec.max_time = 1.0
 mcts_config_rollout_1_1sec = MCTSAgentConfig()
 mcts_config_rollout_1_1sec.loops = 1000000
 mcts_config_rollout_1_1sec.rollout_policy = rollout_policy
-mcts_config_rollout_1_1sec.rollout_count = 1000
+mcts_config_rollout_1_1sec.rollout_count = 1
 mcts_config_rollout_1_1sec.max_time = 1.0
+
+mcts_config_rollout_1__4_1sec = MCTSAgentConfig()
+mcts_config_rollout_1__4_1sec.loops = 1000000
+mcts_config_rollout_1__4_1sec.rollout_policy = rollout_policy
+mcts_config_rollout_1__4_1sec.rollout_count = 1
+mcts_config_rollout_1__4_1sec.max_time = 1.0
+mcts_config_rollout_1__4_1sec.min_max_depth = 2
 
 mcts_config_rollout_vs_A0 = MCTSAgentConfig()
 mcts_config_rollout_vs_A0.loops = 1000000
@@ -88,7 +95,7 @@ play_against_MCTS_gui = [game_rules, [UserAgent(game_rules, gui_renderer), MCTSA
 play_random = [game_rules, [RandomAgent(game_rules), RandomAgent(game_rules)], 10000, None]
 play_random_mcts = [game_rules, [RandomAgent(game_rules), MCTSAgent(game_rules, mcts_config_default)], 1000, None]
 # play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_1000_1sec), MCTSAgent(game_rules, mcts_config_rollout_1_1sec)], 1000, None]
-play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_1000_1sec), MCTSAgent(game_rules, mcts_config_rollout_1_1sec)], 1, console_renderer]
+play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_1_1sec), MCTSAgent(game_rules, mcts_config_rollout_1__4_1sec)], 100, None]
 play_console_console = [game_rules, [UserAgent(game_rules, console_renderer), UserAgent(game_rules, console_renderer)], 10, console_renderer]
 train_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_vs_A0), MCTSAgent(game_rules, mcts_config_rollout_vs_A0)], 320, None]
 # train_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_vs_A0), MCTSAgent(game_rules, mcts_config_rollout_vs_A0)], 10, None]
@@ -97,7 +104,7 @@ director = TournamentDirector(*play_mcts_mcts)
 tournament_set = director.run()
 restart_function()
 # my_functions.C4_save_learn()
-# my_functions.C4_finalize()
+# my_functions.C4_finalize(6)
 director.print_tournament_set(tournament_set, detail=False)
 
 

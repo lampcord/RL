@@ -4,7 +4,7 @@
 #include <iostream>
 #include <random>
 #include <iomanip>
-//#include <map>
+#include <map>
 #include <unordered_map>
 #include <fstream>
 #include <filesystem>
@@ -544,10 +544,13 @@ namespace C4
     }
     
 
-    GameResult min_max_prune(char(&array_pos)[num_cols * num_rows], unsigned long long rollout_player, unsigned int &num_moves, unsigned int(&legal_moves)[num_cols])
+    GameResult min_max_prune(char(&array_pos)[num_cols * num_rows], unsigned long long rollout_player, unsigned int &num_moves, unsigned int(&legal_moves)[num_cols], unsigned int min_max_depth)
     {
         GameResult result = GameResult::not_completed;
 
+        cout << "min_max_prune:" << endl;
+        render(array_pos);
+        cout << rollout_player << endl;
 
         unsigned int local_legal_moves[num_cols];
         float scores[num_cols];
@@ -562,7 +565,7 @@ namespace C4
         for (auto x = 0u; x < num_moves; x++)
         {
             auto test_move = local_legal_moves[x];
-            auto score = minimax(array_pos, test_move, (unsigned int) rollout_player, (unsigned int) rollout_player, 6);
+            auto score = minimax(array_pos, test_move, (unsigned int) rollout_player, (unsigned int) rollout_player, min_max_depth);
             if (score > 0.99f)
             {
                 num_wins++;
@@ -653,29 +656,30 @@ namespace C4
         win_check_table_filled = true;
 
         vector<unsigned long long> positions = {
-            1797558,
-            1797046,
-            8796094818742,
-            8796094814646,
-            72066390132709814,
-            72066390132709806,
-            72066665010616686,
-            72066665010616622,
-            72071063057127214,
-            72071063057127213,
-            72073262080382253,
-            72073262080381741,
-            108102059099312941,
-            108102059099312940,
-            126116457608762156,
-            126116457608729388,
-            126679407562146604,
-            126679407562146603,
-            126679407570535210,
-            126679407570534698,
-            126960882547241258,
-            126960882547241257,
-            126960951266717929
+            657956829561507
+            //1797558,
+            //1797046,
+            //8796094818742,
+            //8796094814646,
+            //72066390132709814,
+            //72066390132709806,
+            //72066665010616686,
+            //72066665010616622,
+            //72071063057127214,
+            //72071063057127213,
+            //72073262080382253,
+            //72073262080381741,
+            //108102059099312941,
+            //108102059099312940,
+            //126116457608762156,
+            //126116457608729388,
+            //126679407562146604,
+            //126679407562146603,
+            //126679407570535210,
+            //126679407570534698,
+            //126960882547241258,
+            //126960882547241257,
+            //126960951266717929
         };
 
         unsigned int player = 0;
@@ -693,7 +697,7 @@ namespace C4
             cout << position << " " << player << endl;
             auto num_moves = get_legal_moves(array_pos, legal_moves);
             
-            min_max_prune(array_pos, player, num_moves, legal_moves);
+            min_max_prune(array_pos, player, num_moves, legal_moves, 6);
             for (auto x = 0u; x < num_moves; x++) cout << legal_moves[x] << " ";
             cout << endl;
             player = 1 - player;
@@ -702,7 +706,7 @@ namespace C4
     }
 
 
-    float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts)
+    float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts, unsigned int min_max_depth)
     {
         float wins = 0.0f;
         float visits = 0.0f;
@@ -748,6 +752,7 @@ namespace C4
         for (auto x = 0u; x < num_rollouts; x++)
         {
             auto rollout_player = player;
+            bool first_move = true;
             memcpy(rollout_board, array_pos, sizeof(rollout_board));
             while (true)
             {
@@ -761,16 +766,20 @@ namespace C4
                 }
             
                 // check for forced wins / losses
-                //auto prune_result = min_max_prune(rollout_board, rollout_player, num_moves, legal_moves);
-                //if (prune_result != GameResult::not_completed)
-                //{
-                //    if (is_win(player, prune_result))
-                //    {
-                //        wins += 1.0f;
-                //    }
-                //    visits++;
-                //    break;
-                //}
+                if (first_move && min_max_depth > 0)
+                {
+                    first_move = false;
+                    auto prune_result = min_max_prune(rollout_board, rollout_player, num_moves, legal_moves, min_max_depth);
+                    if (prune_result != GameResult::not_completed)
+                    {
+                        if (is_win(player, prune_result))
+                        {
+                            wins += 1.0f;
+                        }
+                        visits++;
+                        break;
+                    }
+                }
 
                 auto move_result = move(rollout_board, rollout_player, legal_moves[rng() % num_moves]);
  
@@ -816,12 +825,96 @@ namespace C4
         cout << max_leafs << " rollouts " << max_rollouts << " play mode " << play_mode << " hits " << hits << " misses " << misses << endl;
         hits = 0;
         misses = 0;
-        test_min_max();
     }
 
-    void finalize()
+    void finalize(unsigned int min_max_depth)
     {
         cout << "Finalizing recall memory..." << endl;
+
+        set_parameters((char*)"C:\\GitHub\\RL\\AlphaZeroMancala\\connect_4\\recall_memory.bin", 10000000, 100000, 0);
+        load_learn();
+        load_score();
+        auto num_keys = recall_memory_learn.size();
+
+        Squirrel3 rng(42);
+
+        // choose 10000 random keys
+        auto num_tests = 100000u;
+        vector<unsigned long long> key_list;
+        vector<unsigned long long> random_list;
+        for (auto pair : recall_memory_learn) key_list.push_back(pair.first);
+        for (auto x = 0u; x < num_tests; x++)
+        {
+            auto key = key_list[rng() % num_keys];
+            random_list.push_back(key);
+        }
+
+        struct record
+        {
+            unsigned int count;
+            unsigned int reduction;
+            unsigned int red_count;
+        };
+        unsigned long long position;
+        unsigned long long player;
+        map<unsigned int,record> stats;
+        //for (auto key : random_list)
+        //{
+        //    auto score = recall_memory_score[key];
+        //    auto bucket = (unsigned int)(score * 100);
+
+        //    record rec;
+        //    rec.count = 0;
+        //    rec.reduction = 0;
+        //    rec.red_count = 0;
+        //    if (stats.count(bucket) > 0)
+        //    {
+        //        rec = stats[bucket];
+        //    }
+        //    rec.count++;
+
+        //    crack_key(position, player, key);
+        position = 657956829561507;
+        player = 0;
+            char array_pos[num_cols * num_rows];
+            unsigned int legal_moves[num_cols];
+
+            get_array_pos_from_binary(array_pos, position);
+            
+            auto num_moves = get_legal_moves(array_pos, legal_moves);
+            auto orig_num_moves = num_moves;
+            min_max_prune(array_pos, player, num_moves, legal_moves, 0);
+            if (num_moves < orig_num_moves)
+            {
+                render(array_pos);
+                cout << position << " " << player << endl;
+                for (auto x = 0u; x < num_moves; x++) cout << legal_moves[x] << " ";
+                cout << endl;
+                //rec.reduction++;
+                //rec.red_count += (orig_num_moves - num_moves);
+            }
+
+        //    stats[bucket] = rec;
+        //}
+
+        auto total_visits = 0u;
+        auto total_reductions = 0u;
+        auto total_reed_count = 0u;
+        for (auto pair : stats)
+        {
+            total_visits += pair.second.count;
+            total_reductions += pair.second.reduction;
+            total_reed_count += pair.second.red_count;
+            cout << pair.first << " " << pair.second.count << " " << pair.second.reduction << " " << pair.second.red_count << endl;
+        }
+        cout << total_visits << " " << total_reductions << " " << total_reed_count << " " << (float)total_reductions / (float)total_visits << endl;
+        return;
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
         auto count = 0u;
         auto total = recall_memory_learn.size();
         for (auto record : recall_memory_learn)
@@ -833,7 +926,7 @@ namespace C4
             unsigned long long position;
             unsigned long long turn;
             crack_key(position, turn, record.first);
-            calc_rollout(position, turn, remaining_turns);
+            calc_rollout(position, turn, remaining_turns, min_max_depth);
             if (count % 1000 == 0)
             {
                 cout << count << "/" << total << endl;

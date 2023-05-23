@@ -6,11 +6,14 @@
 
 extern "C" {
     __declspec (dllimport) void C4_test_min_max();
+    __declspec(dllexport) void C4_finalize(unsigned int min_max_depth);
 }
 
 int main()
 {
-    C4_test_min_max();
+    //C4_test_min_max();
+    C4_finalize(6);
+
     std::cout << "Hello World!\n";
 }
 

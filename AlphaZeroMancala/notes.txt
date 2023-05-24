@@ -42,7 +42,7 @@ TODO:
 [X] Create a configuration class for MCTS with defaults, command line is getting out of hand!
 [X] Agent descriptions
 [/] Memory
-[ ] AB enhancements
+[/] AB enhancements
 [ ] Time management enhancements (total time instead of per turn)
 
 
@@ -95,3 +95,22 @@ Results are {win, unknown, loss}
 If there is a forced win move, report back a 1 and we are done searching this position.
 else eliminate all loss moves from consideration. If no moves left, report a 0 and we are done searching this position.
 If there are any more moves left, do normal rollouts but only use those moves.
+-----------------------------------------------------------------
+
+Adding beam search
+While adding min_max to the rollout process directly does not increase the performance, there are other ways to use this by adding a new file, the beam file.
+There are four outcomes from a mm search:
+1) Forced Win
+2) Forced Loss
+3) Some moves lead to a loss.
+4) No changes.
+
+The beam table needs 2 pieces of information:
+1) What is the outcome of the position (player 0 win, player 1 win, tie, not completed)
+2) What is the list of legal moves. These could be either the original legal moves or the pruned legal moves.
+
+We first create the beam table.
+
+Then we go through all of the positions and use the beam table to prune moves and truncate searches.
+If the initial position is 1,2 we simply record the score and move on.
+If the initial position is 3 we use the beam searches move list and rollout as normal.

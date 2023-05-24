@@ -21,9 +21,9 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 
 
 extern "C" {
-    __declspec(dllexport) float C4_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts, unsigned int min_max_depth)
+    __declspec(dllexport) float C4_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts)
     {
-        return C4::calc_rollout(position, player, num_rollouts, min_max_depth);
+        return C4::calc_rollout(position, player, num_rollouts);
     }
     __declspec(dllexport) void C4_render(unsigned long long position)
     {

@@ -11,9 +11,9 @@
 #include <algorithm>
 #include <chrono>
 
-using namespace std;
 using std::chrono::nanoseconds;
 using std::chrono::duration_cast;
+using namespace std;
 
 namespace C4
 {
@@ -46,8 +46,7 @@ namespace C4
 
     struct beam_record {
         GameResult result;
-        unsigned int num_moves;
-        unsigned int legal_moves[num_cols];
+        unsigned char move_mask;
     };
 
     static unsigned int hits = 0;
@@ -866,94 +865,44 @@ namespace C4
 
         set_parameters((char*)"C:\\GitHub\\RL\\AlphaZeroMancala\\connect_4\\recall_memory.bin", 10000000, 100000, 0);
         load_learn();
-        load_score();
-        auto num_keys = recall_memory_learn.size();
 
-        Squirrel3 rng(42);
-
-        // choose 10000 random keys
-        auto num_tests = 1000000u;
-        vector<unsigned long long> key_list;
-        vector<unsigned long long> random_list;
-        for (auto pair : recall_memory_learn) key_list.push_back(pair.first);
-        for (auto x = 0u; x < num_tests; x++)
-        {
-            auto key = key_list[rng() % num_keys];
-            random_list.push_back(key);
-        }
-
-        struct record
-        {
-            unsigned int count;
-            unsigned int reduction;
-            unsigned int red_count;
-        };
         unsigned long long position;
         unsigned long long player;
-        map<unsigned int,record> stats;
-        unordered_map<unsigned long long, unsigned char> bit_map;
+        
         char array_pos[num_cols * num_rows];
         unsigned int legal_moves[num_cols];
 
-        for (auto key : random_list)
+        for (auto pair : recall_memory_learn)
         {
-            auto score = recall_memory_score[key];
-            auto bucket = (unsigned int)(score * 100);
-
-            record rec;
-            rec.count = 0;
-            rec.reduction = 0;
-            rec.red_count = 0;
-            if (stats.count(bucket) > 0)
-            {
-                rec = stats[bucket];
-            }
-            rec.count++;
+            auto key = pair.first;
 
             crack_key(position, player, key);
-            //position = 657956829561507;
-            //player = 0;
-
             get_array_pos_from_binary(array_pos, position);
             
             auto num_moves = get_legal_moves(array_pos, legal_moves);
             auto orig_num_moves = num_moves;
             auto prune_result = min_max_prune(array_pos, player, num_moves, legal_moves, 3);
+            
             if (num_moves < orig_num_moves)
             {
-                //cout << "-------------------------------------------------------" << endl;
-                //cout << (int)prune_result << " " << score << endl;
-                //render(array_pos);
-                //cout << position << " " << player << endl;
-                //for (auto x = 0u; x < num_moves; x++) cout << legal_moves[x] << " ";
-                //cout << endl;
                 auto mask = make_move_list_mask(num_moves, legal_moves);
-                //cout << (unsigned int) mask << endl;
-
 
                 unsigned int test_legal_moves[num_cols];
                 unsigned int test_num_moves;
                 crack_move_list_mask(test_num_moves, test_legal_moves, mask);
-                //for (auto x = 0u; x < test_num_moves; x++) cout << test_legal_moves[x] << " ";
-                //cout << endl;
-
-
-                rec.reduction++;
-                rec.red_count += (orig_num_moves - num_moves);
             }
+            
+            auto mask = make_move_list_mask(num_moves, legal_moves);
             beam_record beam_rec;
             beam_rec.result = prune_result;
-            beam_rec.num_moves = num_moves;
-            memcpy(beam_rec.legal_moves, legal_moves, sizeof(legal_moves));
+            beam_rec.move_mask = mask;
             recall_memory_beam[key] = beam_rec;
-            auto mask = make_move_list_mask(num_moves, legal_moves);
-            bit_map[key] = mask;
-
-            stats[bucket] = rec;
         }
+
         auto t0 = std::chrono::high_resolution_clock::now();
-        for (auto key : random_list)
+        for (auto pair : recall_memory_learn)
         {
+            auto key = pair.first;
             crack_key(position, player, key);
             get_array_pos_from_binary(array_pos, position);
             auto num_moves = get_legal_moves(array_pos, legal_moves);
@@ -962,43 +911,22 @@ namespace C4
         nanoseconds ns = duration_cast<nanoseconds>(t1 - t0);
         cout << "get_legal_moves: " << ns.count() << endl;
 
-        t0 = std::chrono::high_resolution_clock::now();
-        for (auto key : random_list)
-        {
-            crack_key(position, player, key);
-            get_array_pos_from_binary(array_pos, position);
-            auto rec = recall_memory_beam[key];
-            auto num_moves = rec.num_moves;
-            memcpy(legal_moves, rec.legal_moves, sizeof(legal_moves));
-        }
-        t1 = std::chrono::high_resolution_clock::now();
-        ns = duration_cast<nanoseconds>(t1 - t0);
-        cout << "memcpy:          " << ns.count() << endl;
-
         unsigned int num_moves;
+        cout << "recall_memory_beam size: " << recall_memory_beam.size() << endl;
         t0 = std::chrono::high_resolution_clock::now();
-        for (auto key : random_list)
+        for (auto pair : recall_memory_learn)
         {
+            auto key = pair.first;
             crack_key(position, player, key);
             get_array_pos_from_binary(array_pos, position);
-            auto mask = bit_map[key];
+
+            auto mask = recall_memory_beam[key].move_mask;
             crack_move_list_mask(num_moves, legal_moves, mask);
         }
         t1 = std::chrono::high_resolution_clock::now();
         ns = duration_cast<nanoseconds>(t1 - t0);
         cout << "mask:            " << ns.count() << endl;
 
-        //auto total_visits = 0u;
-        //auto total_reductions = 0u;
-        //auto total_reed_count = 0u;
-        //for (auto pair : stats)
-        //{
-        //    total_visits += pair.second.count;
-        //    total_reductions += pair.second.reduction;
-        //    total_reed_count += pair.second.red_count;
-        //    cout << pair.first << " " << pair.second.count << " " << pair.second.reduction << " " << pair.second.red_count << endl;
-        //}
-        //cout << total_visits << " " << total_reductions << " " << total_reed_count << " " << (float)total_reductions / (float)total_visits << endl;
         return;
 
 

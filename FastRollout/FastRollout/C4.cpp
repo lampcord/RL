@@ -162,6 +162,47 @@ namespace C4
         inputfile.close();
     }
 
+    void load_beam()
+    {
+        auto filename_beam = get_filename("_beam.bin");
+
+        filesystem::path filePath(filename_beam);
+
+        if (filesystem::exists(filePath)) {
+            cout << "Loading " << filename_beam << endl;
+        }
+        else {
+            cout << "Unable to find " << filename_beam << " aborting load." << endl;
+            return;
+        }
+
+        ifstream inputfile(filename_beam);
+        beam_record record;
+        unsigned long long position;
+        int result_int;
+        int mask_int;
+        while (inputfile >> position >> result_int >> mask_int) {
+            switch (result_int)
+            {
+            case 0:
+                record.result = GameResult::player_1_wins;
+                break;
+            case 1:
+                record.result = GameResult::player_2_wins;
+                break;
+            case 2:
+                record.result = GameResult::draw;
+                break;
+            case 3:
+                record.result = GameResult::not_completed;
+                break;
+            }
+            record.move_mask = (unsigned char)mask_int;
+            recall_memory_beam[position] = record;
+        }
+        inputfile.close();
+    }
+
     void load_learn()
     {
         auto filename_learn = get_filename("_learn.bin");
@@ -218,6 +259,16 @@ namespace C4
         ofstream outputFile(filename_learn);
         for (const auto& pair : recall_memory_score) {
             outputFile << pair.first << ' ' << pair.second << '\n';
+        }
+        outputFile.close();
+    }
+
+    void save_beam()
+    {
+        auto filename_beam = get_filename("_beam.bin");
+        ofstream outputFile(filename_beam);
+        for (const auto& pair : recall_memory_beam) {
+            outputFile << pair.first << ' ' << (int)pair.second.result << ' ' << (int)pair.second.move_mask << '\n';
         }
         outputFile.close();
     }
@@ -399,6 +450,13 @@ namespace C4
         }
 
         //dump_win_check_table();
+    }
+
+    unsigned long long get_binary_from_array_pos(char(&array_pos)[num_cols * num_rows])
+    {
+        unsigned long long position = 0;
+
+        return position;
     }
 
     void get_array_pos_from_binary(char(&array_pos)[num_cols * num_rows], unsigned long long position)
@@ -752,7 +810,7 @@ namespace C4
     }
 
 
-    float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts)
+    float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts, bool use_beam_search)
     {
         float wins = 0.0f;
         float visits = 0.0f;
@@ -882,51 +940,17 @@ namespace C4
             auto num_moves = get_legal_moves(array_pos, legal_moves);
             auto orig_num_moves = num_moves;
             auto prune_result = min_max_prune(array_pos, player, num_moves, legal_moves, 3);
-            
-            if (num_moves < orig_num_moves)
-            {
-                auto mask = make_move_list_mask(num_moves, legal_moves);
-
-                unsigned int test_legal_moves[num_cols];
-                unsigned int test_num_moves;
-                crack_move_list_mask(test_num_moves, test_legal_moves, mask);
-            }
-            
             auto mask = make_move_list_mask(num_moves, legal_moves);
+
             beam_record beam_rec;
             beam_rec.result = prune_result;
             beam_rec.move_mask = mask;
+            
             recall_memory_beam[key] = beam_rec;
         }
 
-        auto t0 = std::chrono::high_resolution_clock::now();
-        for (auto pair : recall_memory_learn)
-        {
-            auto key = pair.first;
-            crack_key(position, player, key);
-            get_array_pos_from_binary(array_pos, position);
-            auto num_moves = get_legal_moves(array_pos, legal_moves);
-        }
-        auto t1 = std::chrono::high_resolution_clock::now();
-        nanoseconds ns = duration_cast<nanoseconds>(t1 - t0);
-        cout << "get_legal_moves: " << ns.count() << endl;
-
-        unsigned int num_moves;
-        cout << "recall_memory_beam size: " << recall_memory_beam.size() << endl;
-        t0 = std::chrono::high_resolution_clock::now();
-        for (auto pair : recall_memory_learn)
-        {
-            auto key = pair.first;
-            crack_key(position, player, key);
-            get_array_pos_from_binary(array_pos, position);
-
-            auto mask = recall_memory_beam[key].move_mask;
-            crack_move_list_mask(num_moves, legal_moves, mask);
-        }
-        t1 = std::chrono::high_resolution_clock::now();
-        ns = duration_cast<nanoseconds>(t1 - t0);
-        cout << "mask:            " << ns.count() << endl;
-
+        save_beam();
+        
         return;
 
 
@@ -945,7 +969,7 @@ namespace C4
             unsigned long long position;
             unsigned long long turn;
             crack_key(position, turn, record.first);
-            calc_rollout(position, turn, remaining_turns);
+            calc_rollout(position, turn, remaining_turns, true);
             if (count % 1000 == 0)
             {
                 cout << count << "/" << total << endl;

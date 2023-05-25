@@ -117,3 +117,4 @@ If the initial position is 3 we use the beam searches move list and rollout as n
 
 -----------------------------------------------------------------
 Would it be faster to cache key -> array_pos, player for all keys in score map?
+Also, can we use the beam search in the expansion phase?

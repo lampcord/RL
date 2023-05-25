@@ -885,19 +885,42 @@ namespace C4
             memcpy(rollout_board, array_pos, sizeof(rollout_board));
             while (true)
             {
+                bool moves_found = false;
+
                 unsigned int legal_moves[num_cols];
-                auto num_moves = get_legal_moves(rollout_board, legal_moves);
+                unsigned int num_moves = 0;
+                GameResult move_result = GameResult::not_completed;
+
+                // check for forced wins / losses
+                auto beam_position = get_binary_from_array_pos(rollout_board);
+                auto beam_key = make_key(beam_position, rollout_player);
+
+                if (use_beam_search)
+                {
+                    auto it = recall_memory_beam.find(key);
+                    if (it != recall_memory_beam.end())
+                    {
+                        crack_move_list_mask(num_moves, legal_moves, it->second.move_mask);
+                        move_result = it->second.result;
+                    }
+                }
+
+                if (!moves_found)
+                {
+                    num_moves = get_legal_moves(rollout_board, legal_moves);
+                }
+
                 if (num_moves <= 0)
                 {
                     wins += 0.5f;
                     visits++;
                     break;
                 }
-            
-                // check for forced wins / losses
 
-                auto move_result = move(rollout_board, rollout_player, legal_moves[rng() % num_moves]);
- 
+                if (move_result == GameResult::not_completed)
+                {
+                    move_result = move(rollout_board, rollout_player, legal_moves[rng() % num_moves]);
+                }
                 //render(rollout_board);
 
                 if (move_result != GameResult::not_completed)
@@ -944,11 +967,12 @@ namespace C4
 
     void finalize(unsigned int min_max_depth)
     {
+        auto count = 0u;
+        auto total = recall_memory_learn.size();
+
         cout << "Finalizing recall memory..." << endl;
 
-        set_parameters((char*)"C:\\GitHub\\RL\\AlphaZeroMancala\\connect_4\\recall_memory.bin", 10000000, 100000, 0);
-        load_learn();
-
+        cout << "Recall memory beam..." << endl;
         unsigned long long position;
         unsigned long long player;
         
@@ -957,55 +981,64 @@ namespace C4
 
         for (auto pair : recall_memory_learn)
         {
+            count++;
+            cout << ".";
+            if (count % 100 == 0)
+            {
+                cout << " " << count << "/" << total << endl;
+            }
             auto key = pair.first;
 
             crack_key(position, player, key);
             get_array_pos_from_binary(array_pos, position);
-            auto test_pos = get_binary_from_array_pos(array_pos);
-            if (test_pos != position)
-            {
-                cout << "FAIL: " << test_pos << " " << position << endl;
-            }
 
             auto num_moves = get_legal_moves(array_pos, legal_moves);
-            auto orig_num_moves = num_moves;
-            auto prune_result = min_max_prune(array_pos, player, num_moves, legal_moves, 3);
+            auto prune_result = min_max_prune(array_pos, player, num_moves, legal_moves, 5);
             auto mask = make_move_list_mask(num_moves, legal_moves);
 
-            beam_record beam_rec;
-            beam_rec.result = prune_result;
-            beam_rec.move_mask = mask;
-            
-            recall_memory_beam[key] = beam_rec;
+            recall_memory_beam.emplace(key, beam_record{ prune_result, mask });
         }
+        cout << count << "/" << total << endl;
 
         save_beam();
-        
-        return;
 
-
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-        auto count = 0u;
-        auto total = recall_memory_learn.size();
+        cout << "Recall memory saturated..." << endl;
         for (auto record : recall_memory_learn)
         {
             count++;
+            cout << ".";
+            if (count % 100 == 0)
+            {
+                cout << " " << count << "/" << total << endl;
+            }
             int remaining_turns = (int) max_rollouts - (int)  record.second.visits;
             if (remaining_turns < 0) continue;
 
             unsigned long long position;
             unsigned long long turn;
             crack_key(position, turn, record.first);
-            calc_rollout(position, turn, remaining_turns, true);
-            if (count % 1000 == 0)
+
+            auto it = recall_memory_beam.find(record.first);
+            if (it != recall_memory_beam.end())
             {
-                cout << count << "/" << total << endl;
+                if (it->second.result != GameResult::not_completed)
+                {
+                    if (is_win(turn, it->second.result))
+                    {
+                        recall_memory_learn[record.first] = history_record{(float) max_rollouts, (float) max_rollouts};
+                    }
+                    else
+                    {
+                        recall_memory_learn[record.first] = history_record{ (float)max_rollouts, 0.0f };
+                    }
+                    continue;
+                }
             }
+            calc_rollout(position, turn, remaining_turns, true);
         }
         cout << count << "/" << total << endl;
+
+        cout << "Recall memory score..." << endl;
         for (auto record : recall_memory_learn)
         {
             history_record rts;

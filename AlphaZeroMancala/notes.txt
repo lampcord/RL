@@ -114,3 +114,6 @@ We first create the beam table.
 Then we go through all of the positions and use the beam table to prune moves and truncate searches.
 If the initial position is 1,2 we simply record the score and move on.
 If the initial position is 3 we use the beam searches move list and rollout as normal.
+
+-----------------------------------------------------------------
+Would it be faster to cache key -> array_pos, player for all keys in score map?

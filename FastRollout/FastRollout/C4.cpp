@@ -455,6 +455,31 @@ namespace C4
     unsigned long long get_binary_from_array_pos(char(&array_pos)[num_cols * num_rows])
     {
         unsigned long long position = 0;
+        unsigned int blankcounts[num_cols];
+        for (auto col = 0u; col < num_cols; col++)
+        {
+            auto blanks = 6;
+            for (auto row = 0u; row < num_rows; row++)
+            {
+                position *= 2;
+                auto ndx = col * num_rows + row;
+                if (array_pos[ndx] == player_2_symbol)
+                {
+                    position += 0x1;
+                    blanks--;
+                }
+                else if (array_pos[ndx] == player_1_symbol)
+                {
+                    blanks--;
+                }
+            }
+            blankcounts[col] = blanks;
+        }
+        for (auto blank : blankcounts)
+        {
+            position *= 8;
+            position = position | blank;
+        }
 
         return position;
     }
@@ -936,7 +961,12 @@ namespace C4
 
             crack_key(position, player, key);
             get_array_pos_from_binary(array_pos, position);
-            
+            auto test_pos = get_binary_from_array_pos(array_pos);
+            if (test_pos != position)
+            {
+                cout << "FAIL: " << test_pos << " " << position << endl;
+            }
+
             auto num_moves = get_legal_moves(array_pos, legal_moves);
             auto orig_num_moves = num_moves;
             auto prune_result = min_max_prune(array_pos, player, num_moves, legal_moves, 3);

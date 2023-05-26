@@ -993,7 +993,7 @@ namespace C4
             get_array_pos_from_binary(array_pos, position);
 
             auto num_moves = get_legal_moves(array_pos, legal_moves);
-            auto prune_result = min_max_prune(array_pos, player, num_moves, legal_moves, 5);
+            auto prune_result = min_max_prune(array_pos, player, num_moves, legal_moves, min_max_depth);
             auto mask = make_move_list_mask(num_moves, legal_moves);
 
             recall_memory_beam.emplace(key, beam_record{ prune_result, mask });

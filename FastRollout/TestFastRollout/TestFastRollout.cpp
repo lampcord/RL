@@ -11,7 +11,7 @@ extern "C" {
 
 int main()
 {
-    //C4_test_min_max();
-    C4_finalize(6);
+    C4_test_min_max();
+    //C4_finalize(6);
 }
 

@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <chrono>
+#include <thread>
 
 using std::chrono::nanoseconds;
 using std::chrono::duration_cast;
@@ -48,6 +49,8 @@ namespace C4
         GameResult result;
         unsigned char move_mask;
     };
+
+    static float thread_results[num_cols];
 
     static unsigned int hits = 0;
     static unsigned int misses = 0;
@@ -630,12 +633,13 @@ namespace C4
         return result;
     }
 
-    float minimax(char(&array_pos)[num_cols * num_rows], int test_move, int player, int maximizing_player, int max_depth, float temporal_discount = 0.0f) {
+    float minimax(const char(&array_pos)[num_cols * num_rows], const int test_move, const int player, const int maximizing_player, const int max_depth, const float temporal_discount = 0.0f) {
         char rollout_board[num_cols * num_rows];
         memcpy(rollout_board, array_pos, sizeof(rollout_board));
+        auto min_max_player = player;
         if (test_move >= 0)
         {
-            auto result = move(rollout_board, player, test_move);
+            auto result = move(rollout_board, min_max_player, test_move);
             //for (auto x = 0; x < 4 - max_depth; x++) cout << "    ";
             //cout << test_move << " " << (int) result << endl;
             if (result == GameResult::player_1_wins || result == GameResult::player_2_wins)
@@ -651,12 +655,12 @@ namespace C4
             return 0.5f;
         }
 
-        player = 1 - player;
-        if (player == maximizing_player) {
+        min_max_player = 1 - min_max_player;
+        if (min_max_player == maximizing_player) {
 
             float bestValue = -1000000.0;
             for (auto i = 0u; i < num_moves; ++i) {
-                float value = minimax(rollout_board, legal_moves[i], player, maximizing_player, max_depth - 1, temporal_discount + 0.00001f);
+                float value = minimax(rollout_board, legal_moves[i], min_max_player, maximizing_player, max_depth - 1, temporal_discount + 0.00001f);
                 bestValue = bestValue > value ? bestValue : value;
             }
             return bestValue;
@@ -665,25 +669,23 @@ namespace C4
 
             float bestValue = 1000000.0;
             for (auto i = 0u; i < num_moves; ++i) {
-                float value = minimax(rollout_board, legal_moves[i], player, maximizing_player, max_depth - 1, temporal_discount + 0.00001f);
+                float value = minimax(rollout_board, legal_moves[i], min_max_player, maximizing_player, max_depth - 1, temporal_discount + 0.00001f);
                 bestValue = bestValue < value ? bestValue : value;
             }
             return bestValue;
         }
     }
     
+    void minimax_thread(unsigned int thread_ndx, const char(&array_pos)[num_cols * num_rows], const int test_move, const int player, const int maximizing_player, const int max_depth, const float temporal_discount = 0.0f)
+    {
+        thread_results[thread_ndx] = minimax(array_pos, test_move, player, maximizing_player, max_depth, temporal_discount);
+    }
 
-    GameResult min_max_prune(char(&array_pos)[num_cols * num_rows], unsigned long long rollout_player, unsigned int &num_moves, unsigned int(&legal_moves)[num_cols], unsigned int min_max_depth)
+    GameResult min_max_prune(const char(&array_pos)[num_cols * num_rows], unsigned long long rollout_player, unsigned int &num_moves, unsigned int(&legal_moves)[num_cols], unsigned int min_max_depth)
     {
         GameResult result = GameResult::not_completed;
 
-        //cout << "min_max_prune:" << endl;
-        //render(array_pos);
-        //cout << rollout_player << endl;
-
         unsigned int local_legal_moves[num_cols];
-        float scores[num_cols];
-        
         memcpy(local_legal_moves, legal_moves, sizeof(local_legal_moves));
 
         auto num_wins = 0;
@@ -691,10 +693,21 @@ namespace C4
         auto num_losses = 0;
         auto best_loss = 0.0f;
         
+        vector<thread> threads;
         for (auto x = 0u; x < num_moves; x++)
         {
             auto test_move = local_legal_moves[x];
-            auto score = minimax(array_pos, test_move, (unsigned int) rollout_player, (unsigned int) rollout_player, min_max_depth);
+            threads.push_back(thread(&minimax_thread, x, std::cref(array_pos), test_move, (unsigned int)rollout_player, (unsigned int)rollout_player, min_max_depth, 0.0f));
+        }
+
+        for (auto x = 0u; x < num_moves; x++)
+        {
+            threads[x].join();
+        }
+
+        for (auto x = 0u; x < num_moves; x++)
+        {
+            auto score = thread_results[x];
             if (score > 0.99f)
             {
                 num_wins++;
@@ -711,15 +724,7 @@ namespace C4
                     best_loss = score;
                 }
             }
-            scores[x] = score;
         }
-        //for (auto x = 0u; x < num_moves; x++)
-        //{
-        //    cout << scores[x] << " ";
-        //}
-        //cout << endl;
-        //cout << "wins: " << num_wins << " best_win: " << best_win;
-        //cout << " losses: " << num_losses << " best_loss: " << best_loss << endl;
 
         if (num_wins > 0)
         {
@@ -728,7 +733,7 @@ namespace C4
             auto new_num_moves = 0u;
             for (auto x = 0u; x < num_moves; x++)
             {
-                if (scores[x] == best_win)
+                if (thread_results[x] == best_win)
                 {
                     legal_moves[new_num_moves] = local_legal_moves[x];
                     new_num_moves++;
@@ -744,7 +749,7 @@ namespace C4
             auto new_num_moves = 0u;
             for (auto x = 0u; x < num_moves; x++)
             {
-                if (scores[x] == best_loss)
+                if (thread_results[x] == best_loss)
                 {
                     legal_moves[new_num_moves] = local_legal_moves[x];
                     new_num_moves++;
@@ -760,7 +765,7 @@ namespace C4
             auto new_num_moves = 0u;
             for (auto x = 0u; x < num_moves; x++)
             {
-                if (scores[x] > best_loss)
+                if (thread_results[x] > best_loss)
                 {
                     legal_moves[new_num_moves] = local_legal_moves[x];
                     new_num_moves++;
@@ -769,20 +774,56 @@ namespace C4
             num_moves = new_num_moves;
         }
 
-        // else all moves are valid
-        // result is not completed
-
         return result;
     }
 
     void test_min_max()
     {
-
+        set_parameters((char *)"C:\\GitHub\\RL\\AlphaZeroMancala\\connect_4\\recall_memory.bin", 0, 0, 0);
         if (!win_check_table_filled)
         {
             initialize_win_check_table();
         }
         win_check_table_filled = true;
+
+        load_beam();
+        auto count = 0;
+        nanoseconds ns(0);
+
+        for (auto pair : recall_memory_beam)
+        {
+            unsigned long long player;
+            unsigned long long position;
+            crack_key(position, player, pair.first);
+            
+
+            char array_pos[num_cols * num_rows];
+            unsigned int legal_moves[num_cols];
+            get_array_pos_from_binary(array_pos, position);
+            //render(array_pos);
+
+            unsigned int num_moves = get_legal_moves(array_pos, legal_moves);
+
+            auto t0 = std::chrono::high_resolution_clock::now();
+            auto result = min_max_prune(array_pos, player, num_moves, legal_moves, 5);
+            auto t1 = std::chrono::high_resolution_clock::now();
+            ns += duration_cast<nanoseconds>(t1 - t0);
+
+            auto mask = make_move_list_mask(num_moves, legal_moves);
+
+            if (result != pair.second.result || mask != pair.second.move_mask)
+            {
+                cout << pair.first << " " << position << " " << player << " " << endl;
+                cout << (int)pair.second.move_mask << " " << (int)pair.second.result << endl;
+                cout << (int)mask << " " << (int)result << endl;
+            }
+
+            count++;
+            if (count >= 1000) break;
+        }
+        cout << count << endl;
+        cout << "Total Time: " << ns.count() << endl;
+        return;
 
         vector<unsigned long long> positions = {
             657956829561507

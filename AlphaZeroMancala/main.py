@@ -40,7 +40,8 @@ restart_function = my_functions.C4_start_new_game
 
 my_functions.C4_set_parameters.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32]
 my_functions.C4_set_parameters.restype = None
-my_functions.C4_set_parameters(b".\\connect_4\\recall_memory.bin", 3000000, 100000, 0)
+my_functions.C4_set_parameters(b".\\connect_4\\run_4_1.414\\recall_memory.bin", 3000000, 100000, 1)
+# my_functions.C4_set_parameters(b".\\connect_4\\run_5_1.414_beam\\recall_memory.bin", 3000000, 100000, 1)
 
 my_functions.C4_save_learn.argtypes = []
 my_functions.C4_save_learn.restype = None
@@ -70,6 +71,11 @@ mcts_config_rollout_1_1sec.rollout_policy = rollout_policy
 mcts_config_rollout_1_1sec.rollout_count = 1
 mcts_config_rollout_1_1sec.max_time = 1.0
 
+mcts_config_rollout_1_1NRsec = MCTSAgentConfig()
+mcts_config_rollout_1_1NRsec.loops = 1000000
+mcts_config_rollout_1_1NRsec.rollout_count = 1
+mcts_config_rollout_1_1NRsec.max_time = 1.0
+
 mcts_config_rollout_1__4_1sec = MCTSAgentConfig()
 mcts_config_rollout_1__4_1sec.loops = 1000000
 mcts_config_rollout_1__4_1sec.rollout_policy = rollout_policy
@@ -86,7 +92,7 @@ mcts_config_rollout_vs_A0.max_time = 3.2
 # mcts_config_rollout_vs_A0.max_time = 0.1
 mcts_config_rollout_vs_A0.restart_function = restart_function
 # mcts_config_rollout_vs_A0.c = 3.0
-mcts_config_rollout_vs_A0.c = 10.0
+# mcts_config_rollout_vs_A0.c = 10.0
 
 play_against_random_console = [game_rules, [UserAgent(game_rules, console_renderer), RandomAgent(game_rules)], 2, console_renderer]
 play_against_MTCS_console = [game_rules, [UserAgent(game_rules, console_renderer), MCTSAgent(game_rules, mcts_config_rollout_1000)], 2, console_renderer]
@@ -95,7 +101,7 @@ play_against_MCTS_gui = [game_rules, [UserAgent(game_rules, gui_renderer), MCTSA
 play_random = [game_rules, [RandomAgent(game_rules), RandomAgent(game_rules)], 10000, None]
 play_random_mcts = [game_rules, [RandomAgent(game_rules), MCTSAgent(game_rules, mcts_config_default)], 1000, None]
 # play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_1000_1sec), MCTSAgent(game_rules, mcts_config_rollout_1_1sec)], 1000, None]
-play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_1_1sec), MCTSAgent(game_rules, mcts_config_rollout_1__4_1sec)], 100, None]
+play_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_1_1sec), MCTSAgent(game_rules, mcts_config_rollout_1_1NRsec)], 100, None]
 play_console_console = [game_rules, [UserAgent(game_rules, console_renderer), UserAgent(game_rules, console_renderer)], 10, console_renderer]
 train_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_vs_A0), MCTSAgent(game_rules, mcts_config_rollout_vs_A0)], 320, None]
 # train_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_vs_A0), MCTSAgent(game_rules, mcts_config_rollout_vs_A0)], 10, None]

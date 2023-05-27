@@ -779,7 +779,7 @@ namespace C4
 
     void test_min_max()
     {
-        set_parameters((char *)"C:\\GitHub\\RL\\AlphaZeroMancala\\connect_4\\recall_memory.bin", 0, 0, 0);
+        set_parameters((char *)"C:\\GitHub\\RL\\AlphaZeroMancala\\connect_4\\run_5_1.414_beam\\recall_memory.bin", 0, 0, 0);
         if (!win_check_table_filled)
         {
             initialize_win_check_table();

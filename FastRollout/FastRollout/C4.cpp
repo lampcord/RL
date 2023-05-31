@@ -819,7 +819,7 @@ namespace C4
             }
 
             count++;
-            if (count >= 1000) break;
+            if (count >= 10000) break;
         }
         cout << count << endl;
         cout << "Total Time: " << ns.count() << endl;
@@ -878,6 +878,16 @@ namespace C4
 
     float calc_rollout(unsigned long long position, unsigned long long player, unsigned long long num_rollouts, bool use_beam_search)
     {
+        if (!win_check_table_filled)
+        {
+            initialize_win_check_table();
+        }
+        win_check_table_filled = true;
+
+        char array_pos[num_cols * num_rows];
+        char rollout_board[num_cols * num_rows];
+        unsigned int legal_moves[num_cols];
+
         float wins = 0.0f;
         float visits = 0.0f;
         auto key = make_key(position, player);
@@ -889,6 +899,23 @@ namespace C4
                 return it->second;
             }
             misses++;
+
+            get_array_pos_from_binary(rollout_board, position);
+            auto rollout_player = player;
+            auto num_moves = get_legal_moves(rollout_board, legal_moves);
+
+            auto result = min_max_prune(rollout_board, rollout_player, num_moves, legal_moves, 1);
+            if (result == GameResult::player_1_wins || result == GameResult::player_2_wins)
+            {
+                if (is_win(player, result))
+                {
+                    return 1.0f;
+                }
+                else
+                {
+                    return 0.0f;
+                }
+            }
         }
 
         if (last_seed == 0)
@@ -897,12 +924,6 @@ namespace C4
             last_seed = (uint32_t)time(NULL);
         }
         Squirrel3 rng(last_seed);
-
-        if (!win_check_table_filled)
-        {
-            initialize_win_check_table();
-        }
-        win_check_table_filled = true;
 
         bool leaf_exists = false;
         if (play_mode == learn_mode && recall_memory_learn.count(key) > 0)
@@ -913,9 +934,6 @@ namespace C4
             leaf_exists = true;
         }
         //cout << "Result: " << wins << " Rollouts: " << visits << endl;
-
-        char array_pos[num_cols * num_rows];
-        char rollout_board[num_cols * num_rows];
 
         get_array_pos_from_binary(array_pos, position);
 
@@ -928,7 +946,6 @@ namespace C4
             {
                 bool moves_found = false;
 
-                unsigned int legal_moves[num_cols];
                 unsigned int num_moves = 0;
                 GameResult move_result = GameResult::not_completed;
 

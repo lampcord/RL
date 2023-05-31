@@ -26,3 +26,9 @@ FastRollout/FastRollout/x64/
 FastRollout/x64/
 FastRollout/TestFastRollout/x64/
 *.7z
+FastRollout/GPUCache/
+FastRollout/TestFastRollout/Intel® VTune™ Profiler Results/
+*.vsidx
+MCTS/.vs/
+MCTS/MCTS/x64/
+MCTS/x64/

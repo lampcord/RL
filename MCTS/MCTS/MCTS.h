@@ -1,5 +1,7 @@
 #pragma once
 #include <utility>
+#include <concepts>
+#include "game_rules.h"
 
 using namespace std;
 /*
@@ -11,21 +13,21 @@ get_initial_position() -> position
 
 */
 
+//template <typename T, typename TPosition>
+//concept CGameRules = requires(T c, TPosition position, int turn, int move)
+//{
+//	{ c.move(position, turn, move) } -> same_as<void>;
+//};
 
 template <typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition>
 class MCTS
 {
 public:
-	MCTS(TGameRules game_rules, TNodeStorage node_storage) 
-	{
-		this->game_rules = game_rules;
-		this->node_storage = node_storage;
-	};
+	MCTS() {};
 	~MCTS() {};
 	int find_move(TPosition position, unsigned int turn);
 
 private:
-	TGameRules game_rules;
 	TNodeStorage node_storage;
 
 	TNodeID select(TNodeID node);
@@ -38,14 +40,23 @@ template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename 
 inline int MCTS<TGameRules, TNodeStorage, TNodeID, TPosition>::find_move(TPosition position, unsigned int turn)
 {
 	auto root_node = node_storage.initialize(position, turn);
+	MoveResult<TPosition> move_result;
+
+	TGameRules::move(0, 0, 0, move_result);
 
 	auto node = select(root_node);
 
-	node = expand(node);
+	//node = expand(node);
 
-	auto rollout_result = rollout(node);
+	//auto rollout_result = rollout(node);
 
-	back_propogate(node, rollout_result.firstValue, rollout_result);
+	//back_propogate(node, rollout_result.firstValue, rollout_result);
 
 	return 0;
+}
+
+template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition>
+inline TNodeID MCTS<TGameRules, TNodeStorage, TNodeID, TPosition>::select(TNodeID node)
+{
+	return TNodeID();
 }

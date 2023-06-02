@@ -32,3 +32,6 @@ FastRollout/TestFastRollout/Intel® VTune™ Profiler Results/
 MCTS/.vs/
 MCTS/MCTS/x64/
 MCTS/x64/
+MCTS/GPUCache/
+MCTS/MCTS/Intel® VTune™ Profiler Results/
+MCTS/debug.log

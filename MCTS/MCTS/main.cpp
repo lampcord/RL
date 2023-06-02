@@ -16,11 +16,13 @@ int main()
 	MCTS<TestGame, node_container, int, unsigned char>mcts;
 
 	unsigned char position;
+	unsigned char legal_moves;
 	unsigned int turn = 0;
+
 	TestGame::get_initial_position(position);
+	TestGame::get_legal_moves(position, turn, legal_moves);
+	auto num_moves = get_num_moves<unsigned char>(legal_moves);
 
 	mcts.find_move(position, turn);
-
-
 }
 

@@ -32,10 +32,13 @@ void TestGame::move(const unsigned char& position, unsigned int turn, int move, 
 
 void TestGame::get_initial_position(unsigned char& position)
 {
-	position = 0x0;
+	position = 0b00000000;
 }
 
 void TestGame::get_legal_moves(const unsigned char& position, const unsigned int turn, unsigned char& legal_moves)
 {
-
+	unsigned int player1_pos = position >> 4;
+	unsigned int player2_pos = position & 0b00001111;
+	unsigned int blocked = player1_pos | player2_pos;
+	legal_moves = ~blocked & 0b00001111;
 }

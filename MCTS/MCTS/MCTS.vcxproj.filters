@@ -33,6 +33,9 @@
     <ClCompile Include="test_game.cpp">
       <Filter>Source Files\test_game</Filter>
     </ClCompile>
+    <ClCompile Include="game_rules.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MCTS.h">

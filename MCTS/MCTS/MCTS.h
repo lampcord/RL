@@ -6,17 +6,17 @@
 using namespace std;
 /*
 TGameRules: static class that provides all functionality needed to simulate game
-move(position, turn, move) -> position, turn, result
-get_legal_moves(position, turn) -> [move]
+move(position, player, move) -> position, player, result
+get_legal_moves(position, player) -> [move]
 get_initial_position() -> position
 
 
 */
 
 //template <typename T, typename TPosition>
-//concept CGameRules = requires(T c, TPosition position, int turn, int move)
+//concept CGameRules = requires(T c, TPosition position, int player, int move)
 //{
-//	{ c.move(position, turn, move) } -> same_as<void>;
+//	{ c.move(position, player, move) } -> same_as<void>;
 //};
 
 template <typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition>
@@ -25,7 +25,7 @@ class MCTS
 public:
 	MCTS() {};
 	~MCTS() {};
-	int find_move(TPosition position, unsigned int turn);
+	int find_move(TPosition position, unsigned int player);
 
 private:
 	TNodeStorage node_storage;
@@ -37,9 +37,9 @@ private:
 };
 
 template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition>
-inline int MCTS<TGameRules, TNodeStorage, TNodeID, TPosition>::find_move(TPosition position, unsigned int turn)
+inline int MCTS<TGameRules, TNodeStorage, TNodeID, TPosition>::find_move(TPosition position, unsigned int player)
 {
-	auto root_node = node_storage.initialize(position, turn);
+	auto root_node = node_storage.initialize(position, player);
 	MoveResult<TPosition> move_result;
 
 	TGameRules::move(0, 0, 0, move_result);

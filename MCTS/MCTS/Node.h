@@ -9,7 +9,7 @@ TNodeID: type of node id used to access nodes
 
 TNodeStorage: container that creates and manages nodes
 get_root_id() -> root_node_id
-create_child_node(node_id, position, turn) -> child_node
+create_child_node(node_id, position, player) -> child_node
 get_node(node_id) -> node
 is_null(node_id) -> bool
 

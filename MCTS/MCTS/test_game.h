@@ -1,14 +1,23 @@
 #pragma once
 #include "game_rules.h"
 
-class TestGame
+namespace TestGameNS
 {
-public:
-	TestGame() {};
-	~TestGame() {};
 
-	static void move(const unsigned char &position, unsigned int turn, int move, MoveResult<unsigned char> & move_result);
-	static void get_initial_position(unsigned char& position);
-	static void get_legal_moves(const unsigned char& position, const unsigned int turn, unsigned char& legal_moves);
-};
+	typedef unsigned char PositionType;
+	typedef unsigned char MoveType;
 
+	class TestGame
+	{
+	public:
+		TestGame() {};
+		~TestGame() {};
+
+		static void move(const PositionType& position, unsigned int player, unsigned int move, MoveResult<PositionType>& move_result);
+		static void get_initial_position(PositionType& position);
+		static void get_legal_moves(const PositionType& position, const unsigned int player, MoveType& legal_moves);
+
+		static void render(const PositionType& position);
+	};
+
+}

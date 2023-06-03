@@ -23,15 +23,15 @@ private:
 	bool use_thread;
 
 	ULONGLONG GetSystemTime();
-	ULONGLONG system_time_start;
-	ULONGLONG system_time_elapsed;
+	ULONGLONG system_time_start = 0u;
+	ULONGLONG system_time_elapsed = 0u;
 
 	ULONGLONG GetProcessTime();
-	ULONGLONG process_time_start;
-	ULONGLONG process_time_elapsed;
+	ULONGLONG process_time_start = 0u;
+	ULONGLONG process_time_elapsed = 0u;
 
 	ULONGLONG GetThreadTime();
-	ULONGLONG thread_time_start;
-	ULONGLONG thread_time_elapsed;
+	ULONGLONG thread_time_start = 0u;
+	ULONGLONG thread_time_elapsed = 0u;
 };
 

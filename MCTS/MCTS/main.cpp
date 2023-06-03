@@ -1,28 +1,28 @@
 #include <iostream>
 #include <time.h>
-#include "PerfTimer.h"
-#include "Node.h"
-#include "test_game.h"
-#include "MCTS.h"
 #include <chrono>
 #include <thread>
 #include <array>
-#include "squirrel3.h"
+#include "PerfTimer.h"
+#include "Node.h"
+#include "test_game.h"
+#include "MCTSAgent.h"
+#include "RandomAgent.h"
 
 using namespace TestGameNS;
+using namespace RandomAgentNS;
 
 int main()
 {
-	Squirrel3 rng(42);
-
-	//typedef  NodeContainerArray<PositionType, 100, 4> node_container;
-	//MCTS<TestGame, node_container, int, MoveType>mcts;
-	//mcts.find_move(position, player);
-
 	PositionType position;
-	MoveType legal_moves;
 	unsigned int player = 0;
 	MoveResult<PositionType> move_result;
+
+	//typedef  NodeContainerArray<PositionType, 100, 4> node_container;
+	//MCTS<TestGame, node_container, int, MoveType>Agent;
+	//Agent.find_move(position, player);
+
+	RandomAgent<TestGame, PositionType, MoveType>Agent;
 
 	for (auto x = 0u; x < 10; x++)
 	{
@@ -30,11 +30,14 @@ int main()
 		TestGame::get_initial_position(position);
 		TestGame::render(position);
 
-		TestGame::get_legal_moves(position, player, legal_moves);
-		auto num_moves = get_num_moves<MoveType>(legal_moves);
-		while (num_moves > 0)
+		while (true)
 		{
-			auto move = get_nth_move<MoveType>(legal_moves, rng() % num_moves);
+			MoveType move;
+			if (!Agent.choose_move(position, player, move))
+			{
+				cout << "Tie." << endl;
+				break;
+			}
 			TestGame::move(position, player, move, move_result);
 
 			position = move_result.position;
@@ -46,9 +49,6 @@ int main()
 				cout << (move_result.result == GameResult::player_0_win ? "Player 0" : "Player 1") << " wins!" << endl;
 				break;
 			}
-
-			TestGame::get_legal_moves(position, player, legal_moves);
-			num_moves = get_num_moves<MoveType>(legal_moves);
 		}
 	}
 	

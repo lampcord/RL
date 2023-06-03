@@ -16,15 +16,12 @@
     <Filter Include="Source Files\test_game">
       <UniqueIdentifier>{59f996fe-d0ac-4f5c-832b-862e430edb98}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Agents">
+      <UniqueIdentifier>{902f3451-8639-4006-a21a-765649ba294d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MCTS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PerfTimer.cpp">
@@ -33,27 +30,27 @@
     <ClCompile Include="test_game.cpp">
       <Filter>Source Files\test_game</Filter>
     </ClCompile>
-    <ClCompile Include="game_rules.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MCTS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PerfTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_rules.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="test_game.h">
       <Filter>Source Files\test_game</Filter>
     </ClInclude>
     <ClInclude Include="squirrel3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomAgent.h">
+      <Filter>Header Files\Agents</Filter>
+    </ClInclude>
+    <ClInclude Include="MCTSAgent.h">
+      <Filter>Header Files\Agents</Filter>
+    </ClInclude>
+    <ClInclude Include="game_rules.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -73,15 +73,15 @@ namespace TestGameNS
 	{
 		char display[] = "....\0";
 
-		unsigned int move_mask = 0x1;
+		unsigned int move_mask = 0b10000000;
 		for (auto x = 0u; x < 8u; x++)
 		{
 			if ((move_mask & position) == move_mask)
 			{
-				auto ndx = 3 - (x % 4);
-				display[ndx] = x >= 4 ? 'X' : 'O';
+				auto ndx = (x % 4);
+				display[ndx] = x < 4 ? 'X' : 'O';
 			}
-			move_mask <<= 1;
+			move_mask >>= 1;
 		}
 		cout << display << endl;
 	}

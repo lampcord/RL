@@ -137,16 +137,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="game_rules.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MCTS.cpp" />
-    <ClCompile Include="Node.cpp" />
     <ClCompile Include="PerfTimer.cpp" />
     <ClCompile Include="test_game.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="RandomAgent.h" />
     <ClInclude Include="game_rules.h" />
-    <ClInclude Include="MCTS.h" />
+    <ClInclude Include="MCTSAgent.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="PerfTimer.h" />
     <ClInclude Include="squirrel3.h" />

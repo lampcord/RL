@@ -1,6 +1,8 @@
 #pragma once
 #include "game_rules.h"
 
+using namespace GameRulesNS;
+
 namespace TestGameNS
 {
 

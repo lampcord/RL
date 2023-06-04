@@ -59,6 +59,7 @@ namespace MCTSAgentNS
 
 			//back_propogate(node, rollout_result.firstValue, rollout_result);
 
+			cout << "---------------------------" << endl;
 			node_storage.dump();
 		}
 
@@ -71,6 +72,7 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return node_id;
 		if (node->next_child_index == 0) return node_id;
+		if (node->remaining_moves_mask != 0) return node_id;
 
 		auto best_child_id = best_child(node_id);
 		return select(best_child_id);

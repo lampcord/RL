@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
-
+#include <bitset>
 /*
 TNodeID: type of node id used to access nodes
 
@@ -124,6 +124,7 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::dump()
 {
 	cout << setw(3) << parent << " [ ";
 	for (auto x = 0; x < next_child_index; x++) cout << children[x] << " ";
-	cout << "]";
+	cout << "] ";
+	cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask);
 }
 

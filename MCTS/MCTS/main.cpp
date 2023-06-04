@@ -10,7 +10,8 @@
 #include "RandomAgent.h"
 
 using namespace TestGameNS;
-using namespace RandomAgentNS;
+//using namespace RandomAgentNS;
+using namespace MCTSAgentNS;
 
 int main()
 {
@@ -18,13 +19,14 @@ int main()
 	unsigned int player = 0;
 	MoveResult<PositionType> move_result;
 
-	//typedef  NodeContainerArray<PositionType, 100, 4> node_container;
-	//MCTS<TestGame, node_container, int, MoveType>Agent;
-	//Agent.find_move(position, player);
+	typedef  NodeContainerArray<PositionType, MoveType, 100, 4> node_container;
+	MCTSAgent<TestGame, node_container, int, PositionType, MoveType>Agent;
 
-	RandomAgent<TestGame, PositionType, MoveType>Agent;
+	//RandomAgent<TestGame, PositionType, MoveType>Agent;
 
-	for (auto x = 0u; x < 10; x++)
+	PerfTimer pf(true, true, true);
+	pf.start();
+	for (auto x = 0u; x < 1; x++)
 	{
 		cout << "----------" << endl;
 		TestGame::get_initial_position(position);
@@ -51,6 +53,8 @@ int main()
 			}
 		}
 	}
+	pf.stop();
+	pf.print();
 	
 }
 

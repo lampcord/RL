@@ -5,7 +5,7 @@ using namespace GameRulesNS;
 
 namespace TestGameNS
 {
-
+	
 	typedef unsigned char PositionType;
 	typedef unsigned char MoveType;
 

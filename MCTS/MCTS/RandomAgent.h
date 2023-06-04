@@ -35,7 +35,8 @@ namespace RandomAgentNS
 		auto num_moves = get_num_moves(legal_moves);
 		if (num_moves == 0)	return false;
 
-		move = get_nth_move(legal_moves, (*rng)() % num_moves);
+		auto move_num = (*rng)() % num_moves;
+		move = get_nth_move(legal_moves, move_num);
 		return true;
 	}
 }

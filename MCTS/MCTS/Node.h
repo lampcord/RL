@@ -4,6 +4,8 @@
 #include <iostream>
 #include <iomanip>
 #include <bitset>
+#include "game_rules.h"
+
 /*
 TNodeID: type of node id used to access nodes
 
@@ -16,6 +18,7 @@ is_null(node_id) -> bool
 */
 
 using namespace std;
+using namespace GameRulesNS;
 
 template <typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
 struct Node
@@ -30,7 +33,8 @@ struct Node
 	TPosition position;
 	int player_to_move = 0;
 	TMoveType move_to_reach_position = 0;
-	
+	GameResult result = GameResult::keep_playing;
+
 	TNodeID parent;
 	TMoveType remaining_moves_mask = 0;
 	array<TNodeID, TNumChildren> children;
@@ -100,7 +104,7 @@ inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::cre
 template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
 inline Node<int, TPosition, TMoveType, TNumChildren>* NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::get_node(int node_id)
 {
-	if (node_id >= 0 && node_id < num_elements) return &(nodes[node_id]);
+	if (node_id >= 0 && node_id < (int)num_elements) return &(nodes[node_id]);
 
 	return nullptr;
 }

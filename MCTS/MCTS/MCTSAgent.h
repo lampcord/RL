@@ -65,18 +65,19 @@ namespace MCTSAgentNS
 
 		for (auto x = 0u; x < 10; x++)
 		{
+			cout << "---------------------------" << endl;
 
 			auto node_id = select(root_node_id);
 
 			node_id = expand(node_id);
 
-			//RolloutResult rollout_result;
-			//rollout(node_id, rollout_result);
+			RolloutResult rollout_result;
+			rollout(node_id, rollout_result);
+			cout << "Result: " << (int)rollout_result.result << " Score: " << rollout_result.score << endl;
 
 			//back_propogate(node_id, rollout_result.firstValue, rollout_result);
 
-			cout << "---------------------------" << endl;
-			node_storage.dump();
+			//node_storage.dump();
 		}
 
 		return false;
@@ -118,7 +119,7 @@ namespace MCTSAgentNS
 	inline void MCTSAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::rollout(TNodeID node_id, RolloutResult& rollout_result)
 	{
 		auto node = node_storage.get_node(node_id);
-		if (node == nullptr) return node_id;
+		if (node == nullptr) return;
 		auto parent = node_storage.get_node(node->parent);
 		if (parent == nullptr) return;
 
@@ -127,6 +128,7 @@ namespace MCTSAgentNS
 		auto last_player = parent->player_to_move;
 		auto result = node->result;
 
+		TGameRules::render(position);
 		while (result == GameResult::keep_playing)
 		{
 			TMoveType legal_moves;
@@ -139,7 +141,7 @@ namespace MCTSAgentNS
 			}
 
 			auto move_num = (*rng)() % num_moves;
-			move = get_nth_move(legal_moves, move_num);
+			auto move = get_nth_move(legal_moves, move_num);
 
 			MoveResult<TPosition> move_result;
 			TGameRules::move(position, player, move, move_result);
@@ -148,6 +150,7 @@ namespace MCTSAgentNS
 			player = move_result.next_players_turn;
 			position = move_result.position;
 			result = move_result.result;
+			TGameRules::render(position);
 		}
 
 		rollout_result.result = result;
@@ -157,14 +160,14 @@ namespace MCTSAgentNS
 		}
 		else
 		{
-			if ((result == GameResult::player_1_win && node->last_player = 0) ||
-				(result == GameResult::player_2_win && node->last_player = 1))
+			if ((result == GameResult::player_0_win && last_player == 0) ||
+				(result == GameResult::player_1_win && last_player == 1))
 			{
-				rollout_result = 1.0f;
+				rollout_result.score = 1.0f;
 			}
 			else
 			{
-				rollout_result = 0.0f;
+				rollout_result.score = 0.0f;
 			}
 		}
 		rollout_result.result = result;

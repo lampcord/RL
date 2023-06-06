@@ -26,7 +26,7 @@ namespace MCTSAgentNS
 	struct RolloutResult
 	{
 		float score;
-		GameResult result;
+		unsigned int player;
 	};
 
 	template <typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
@@ -52,7 +52,7 @@ namespace MCTSAgentNS
 		TNodeID select(TNodeID node_id);
 		TNodeID expand(TNodeID node_id);
 		void rollout(TNodeID node_id, RolloutResult& rollout_result);
-		//void back_propopgate(TNodeID node_id, const RolloutResult& rollout_result);
+		void back_propogate(TNodeID node_id, const RolloutResult& rollout_result);
 		TNodeID best_child(TNodeID node_id);
 	};
 
@@ -73,11 +73,11 @@ namespace MCTSAgentNS
 
 			RolloutResult rollout_result;
 			rollout(node_id, rollout_result);
-			cout << "Result: " << (int)rollout_result.result << " Score: " << rollout_result.score << endl;
+			cout << "Result: " << (int)rollout_result.player << " Score: " << rollout_result.score << endl;
 
-			//back_propogate(node_id, rollout_result.firstValue, rollout_result);
+			back_propogate(node_id, rollout_result);
 
-			//node_storage.dump();
+			node_storage.dump();
 		}
 
 		return false;
@@ -120,19 +120,19 @@ namespace MCTSAgentNS
 	{
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return;
-		auto parent = node_storage.get_node(node->parent);
+		auto parent = node_storage.get_node(node->parent_id);
 		if (parent == nullptr) return;
 
 		auto position = node->position;
-		auto player = node->player_to_move;
-		auto last_player = parent->player_to_move;
+		auto player_to_move = node->player_to_move;
+		auto player_of_record = parent->player_to_move;
 		auto result = node->result;
 
 		TGameRules::render(position);
 		while (result == GameResult::keep_playing)
 		{
 			TMoveType legal_moves;
-			TGameRules::get_legal_moves(position, player, legal_moves);
+			TGameRules::get_legal_moves(position, player_to_move, legal_moves);
 			auto num_moves = get_num_moves(legal_moves);
 			if (num_moves == 0)
 			{
@@ -144,24 +144,23 @@ namespace MCTSAgentNS
 			auto move = get_nth_move(legal_moves, move_num);
 
 			MoveResult<TPosition> move_result;
-			TGameRules::move(position, player, move, move_result);
+			TGameRules::move(position, player_to_move, move, move_result);
 
-			last_player = player;
-			player = move_result.next_players_turn;
+			player_of_record = player_to_move;
+			player_to_move = move_result.next_players_turn;
 			position = move_result.position;
 			result = move_result.result;
 			TGameRules::render(position);
 		}
 
-		rollout_result.result = result;
 		if (result == GameResult::tie)
 		{
 			rollout_result.score = 0.5f;
 		}
 		else
 		{
-			if ((result == GameResult::player_0_win && last_player == 0) ||
-				(result == GameResult::player_1_win && last_player == 1))
+			if ((result == GameResult::player_0_win && player_of_record == 0) ||
+				(result == GameResult::player_1_win && player_of_record == 1))
 			{
 				rollout_result.score = 1.0f;
 			}
@@ -170,7 +169,22 @@ namespace MCTSAgentNS
 				rollout_result.score = 0.0f;
 			}
 		}
-		rollout_result.result = result;
+		rollout_result.player = player_of_record;
+	}
+
+	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
+	inline void MCTSAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::back_propogate(TNodeID node_id, const RolloutResult& rollout_result)
+	{
+		auto node = node_storage.get_node(node_id);
+		if (node == nullptr) return;
+		auto parent = node_storage.get_node(node->parent_id);
+		if (parent == nullptr) return;
+
+		node->num_visits += 1.0f;
+		auto score = parent->player_to_move == rollout_result.player ? rollout_result.score : 1.0f - rollout_result.score;
+		node->num_wins += score;
+
+		back_propogate(node->parent_id, rollout_result);
 	}
 
 	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>

@@ -24,7 +24,7 @@ template <typename TNodeID, typename TPosition, typename TMoveType, unsigned int
 struct Node
 {
 	Node() : children{} {};
-	void initialize(TPosition position, int player_to_move, int move, TNodeID parent, TNodeID null_id);
+	void initialize(TPosition position, int player_to_move, int move, TNodeID parent_id, TNodeID null_id);
 	void dump();
 
 	float num_visits = 0.0f;
@@ -35,7 +35,7 @@ struct Node
 	TMoveType move_to_reach_position = 0;
 	GameResult result = GameResult::keep_playing;
 
-	TNodeID parent;
+	TNodeID parent_id;
 	TMoveType remaining_moves_mask = 0;
 	array<TNodeID, TNumChildren> children;
 	int next_child_index = 0;
@@ -110,10 +110,10 @@ inline Node<int, TPosition, TMoveType, TNumChildren>* NodeContainerArray<TPositi
 }
 
 template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
-inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::initialize(TPosition position, int player_to_move, int move, TNodeID parent, TNodeID null_id)
+inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::initialize(TPosition position, int player_to_move, int move, TNodeID parent_id, TNodeID null_id)
 {
 	this->position = position;
-	this->parent = parent;
+	this->parent_id = parent_id;
 	this->player_to_move = player_to_move;
 	this->move_to_reach_position = move;
 
@@ -126,9 +126,10 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::initialize(TPosit
 template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
 inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::dump()
 {
-	cout << setw(3) << parent << " [ ";
+	cout << setw(3) << parent_id << " [ ";
 	for (auto x = 0; x < next_child_index; x++) cout << children[x] << " ";
 	cout << "] ";
+	cout << num_wins << "/" << num_visits << " ";
 	cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask);
 }
 

@@ -79,7 +79,7 @@ namespace TestGameNS
 			if ((move_mask & position) == move_mask)
 			{
 				auto ndx = (x % 4);
-				display[ndx] = x < 4 ? 'X' : 'O';
+				display[ndx] = x < 4 ? '0' : '1';
 			}
 			move_mask >>= 1;
 		}

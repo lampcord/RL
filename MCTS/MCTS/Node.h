@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <bitset>
+#include <assert.h>
 #include "game_rules.h"
 
 /*
@@ -56,6 +57,7 @@ public:
 	bool is_null(int node_id) { return node_id == null_id; }
 	int get_null() { return null_id; }
 
+	bool validate();
 private:
 	unsigned int num_elements;
 	const int null_id = -1;
@@ -126,10 +128,132 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::initialize(TPosit
 template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
 inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::dump()
 {
-	cout << setw(3) << parent_id << " [ ";
+	cout << setw(3) << parent_id << " ";
+	cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask);
+	cout << " [ ";
 	for (auto x = 0; x < next_child_index; x++) cout << children[x] << " ";
 	cout << "] ";
 	cout << num_wins << "/" << num_visits << " ";
-	cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask);
 }
 
+template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
+inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::validate()
+{
+	// all of a node's children should have their parent be the node
+	auto nodes_checked = 0;
+	for (auto node_id = 0u; node_id < num_elements; node_id ++)
+	{
+		auto node = nodes[node_id];
+		for (auto child_ndx = 0; child_ndx < node.next_child_index; child_ndx++)
+		{
+			auto child_id = node.children[child_ndx];
+			auto child_node = get_node(child_id);
+			if (child_node == nullptr)
+			{
+				cout << "VALIDATE FAILED (Valid Child) Node ID: " << node_id << " Child ID: " << child_id << endl;
+				return false;
+			}
+			if (child_node->parent_id != node_id)
+			{
+				cout << "VALIDATE FAILED (Parent of Child) Node ID: " << node_id << " Child ID: " << child_id << endl;
+				return false;
+			}
+		}
+		nodes_checked++;
+	}
+	cout << "Validate Children PASSED " << nodes_checked << endl;
+
+	// all nodes should have a parent who has them as a child
+	nodes_checked = 0;
+	for (auto node_id = 0u; node_id < num_elements; node_id++)
+	{
+		auto node = nodes[node_id];
+		auto parent = get_node(node.parent_id);
+		if (parent == nullptr) continue;
+
+		bool found_parents_child = false;
+		for (auto child_ndx = 0; child_ndx < parent->next_child_index; child_ndx++)
+		{
+			auto child_id = parent->children[child_ndx];
+			if (child_id == node_id)
+			{
+				found_parents_child = true;
+				break;
+			}
+		}
+		if (!found_parents_child)
+		{
+			cout << "VALIDATE FAILED (Child of Parent) Node ID: " << node_id << endl;
+			return false;
+		}
+		nodes_checked++;
+	}
+	cout << "Validate Parents PASSED " << nodes_checked << endl;
+
+	// the sum of a node's children's visits == node 
+	nodes_checked = 0;
+	for (auto node_id = 0u; node_id < num_elements; node_id++)
+	{
+		auto node = nodes[node_id];
+		if (node.next_child_index == 0) continue;
+
+		auto child_visits = 0.0f;
+		auto node_visits = node.parent_id == null_id ? node.num_visits : node.num_visits - 1;
+
+		for (auto child_ndx = 0; child_ndx < node.next_child_index; child_ndx++)
+		{
+			auto child_id = node.children[child_ndx];
+			auto child_node = get_node(child_id);
+			if (child_node == nullptr)
+			{
+				cout << "VALIDATE FAILED (Valid Child) Node ID: " << node_id << " Child ID: " << child_id << endl;
+				return false;
+			}
+			child_visits += child_node->num_visits;
+		}
+		if (node_visits != child_visits)
+		{
+			cout << "VALIDATE FAILED (Visits) Node ID: " << node_id << " Visits " << node_visits << " Child visits " << child_visits << endl;
+			return false;
+		}
+		nodes_checked++;
+	}
+	cout << "Validate Visits PASSED " << nodes_checked << endl;
+
+	// the sum of a node's children's wins == wins with same parent move + (1 - wins with different child's parent's move)
+	nodes_checked = 0;
+	for (auto node_id = 0u; node_id < num_elements; node_id++)
+	{
+		auto node = nodes[node_id];
+		if (node.next_child_index == 0) continue;
+
+		auto child_wins = 0.0f;
+		if (node.parent_id == null_id) continue;
+
+		auto parent = get_node(node.parent_id);
+		auto flip_results = node.player_to_move != parent->player_to_move;
+
+		for (auto child_ndx = 0; child_ndx < node.next_child_index; child_ndx++)
+		{
+			auto child_id = node.children[child_ndx];
+			auto child_node = get_node(child_id);
+			if (child_node == nullptr)
+			{
+				cout << "VALIDATE FAILED (Valid Child) Node ID: " << node_id << " Child ID: " << child_id << endl;
+				return false;
+			}
+			child_wins += flip_results ? (child_node->num_visits - child_node->num_wins) : child_node->num_wins;
+		}
+
+		if (node.num_wins < child_wins || node.num_wins > child_wins + 1.0f)
+		{
+			cout << "VALIDATE FAILED (Wins) Node ID: " << node_id << " Wins " << node.num_wins << " Child Wins " << child_wins << endl;
+			return false;
+		}
+		nodes_checked++;
+	}
+	cout << "Validate Wins PASSED " << nodes_checked << endl;
+
+
+	return false;
+}

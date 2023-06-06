@@ -63,9 +63,9 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(root_node_id);
 		if (node == nullptr) return false;
 
-		for (auto x = 0u; x < 10; x++)
+		for (auto x = 0u; x < 100; x++)
 		{
-			cout << "---------------------------" << endl;
+			//cout << "---------------------------" << endl;
 
 			auto node_id = select(root_node_id);
 
@@ -73,12 +73,13 @@ namespace MCTSAgentNS
 
 			RolloutResult rollout_result;
 			rollout(node_id, rollout_result);
-			cout << "Result: " << (int)rollout_result.player << " Score: " << rollout_result.score << endl;
+			//cout << "Result: " << (int)rollout_result.player << " Score: " << rollout_result.score << endl;
 
 			back_propogate(node_id, rollout_result);
 
-			node_storage.dump();
 		}
+		node_storage.dump();
+		node_storage.validate();
 
 		return false;
 	}
@@ -128,7 +129,7 @@ namespace MCTSAgentNS
 		auto player_of_record = parent->player_to_move;
 		auto result = node->result;
 
-		TGameRules::render(position);
+		//TGameRules::render(position);
 		while (result == GameResult::keep_playing)
 		{
 			TMoveType legal_moves;
@@ -150,7 +151,7 @@ namespace MCTSAgentNS
 			player_to_move = move_result.next_players_turn;
 			position = move_result.position;
 			result = move_result.result;
-			TGameRules::render(position);
+			//TGameRules::render(position);
 		}
 
 		if (result == GameResult::tie)
@@ -177,10 +178,10 @@ namespace MCTSAgentNS
 	{
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return;
+		node->num_visits += 1.0f;
 		auto parent = node_storage.get_node(node->parent_id);
 		if (parent == nullptr) return;
 
-		node->num_visits += 1.0f;
 		auto score = parent->player_to_move == rollout_result.player ? rollout_result.score : 1.0f - rollout_result.score;
 		node->num_wins += score;
 
@@ -193,7 +194,8 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return node_id;
 
-		return node->children[node->next_child_index - 1];
+		auto child_ndx = (*rng)() % node->next_child_index;
+		return node->children[child_ndx];
 	}
 
 }

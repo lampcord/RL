@@ -36,7 +36,7 @@ namespace MCTSAgentNS
 	public:
 		MCTSAgent(float c=1.41f) {
 			rng = new Squirrel3(42);
-			this->c = c;
+			_c = c;
 		};
 		~MCTSAgent() {
 			if (rng != nullptr)
@@ -50,7 +50,7 @@ namespace MCTSAgentNS
 	private:
 		TNodeStorage node_storage;
 		Squirrel3* rng = nullptr;
-		float c = 1.41f;
+		float _c = 1.41f;
 
 		TNodeID select(TNodeID node_id);
 		TNodeID expand(TNodeID node_id);

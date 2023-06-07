@@ -3,6 +3,7 @@
 #include <concepts>
 #include "game_rules.h"
 #include "squirrel3.h"
+#include <limits>
 
 using namespace std;
 using namespace GameRulesNS;
@@ -33,8 +34,9 @@ namespace MCTSAgentNS
 	class MCTSAgent
 	{
 	public:
-		MCTSAgent() {
+		MCTSAgent(float c=1.41f) {
 			rng = new Squirrel3(42);
+			this->c = c;
 		};
 		~MCTSAgent() {
 			if (rng != nullptr)
@@ -48,12 +50,14 @@ namespace MCTSAgentNS
 	private:
 		TNodeStorage node_storage;
 		Squirrel3* rng = nullptr;
+		float c = 1.41f;
 
 		TNodeID select(TNodeID node_id);
 		TNodeID expand(TNodeID node_id);
 		void rollout(TNodeID node_id, RolloutResult& rollout_result);
 		void back_propogate(TNodeID node_id, const RolloutResult& rollout_result);
 		TNodeID best_child(TNodeID node_id);
+		float ucb(TNodeID node_id, float c);
 	};
 
 	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
@@ -196,6 +200,27 @@ namespace MCTSAgentNS
 
 		auto child_ndx = (*rng)() % node->next_child_index;
 		return node->children[child_ndx];
+	}
+
+	/*
+	exploration = c * math.sqrt(math.log(self.parent.num_visits) / self.num_visits)
+	exploitation = self.num_wins / self.num_visits
+	*/
+	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
+	inline float MCTSAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::ucb(TNodeID node_id, float c)
+	{
+		auto node = node_storage.get_node(node_id);
+		if (node == nullptr) return 0.0f;
+
+		auto parent = node_storage.get_node(node->parent_id);
+		if (parent == nullptr) return 0.0f;
+
+		if (node->num_visits == 0.0f) return numeric_limits<float>::infinity();
+
+		auto exploration = c * sqrt(log(parent->num_visits) / node->num_visits);
+		auto exploitation = node->num_wins / node->num_visits;
+
+		return exploration + exploitation;
 	}
 
 }

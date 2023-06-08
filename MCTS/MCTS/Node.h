@@ -132,7 +132,8 @@ template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int 
 inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::dump()
 {
 	cout << setw(3) << parent_id << " ";
-	cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask);
+	cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask) << " ";
+	cout << bitset<sizeof(TMoveType) * 8>(move_to_reach_position);
 	cout << " [ ";
 	for (auto x = 0; x < next_child_index; x++) cout << children[x] << " ";
 	cout << "] ";

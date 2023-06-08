@@ -34,7 +34,7 @@ namespace MCTSAgentNS
 	class MCTSAgent
 	{
 	public:
-		MCTSAgent(float c=1.41f) {
+		MCTSAgent(float c = 1.41f) {
 			rng = make_unique<Squirrel3>(42);
 			_c = c;
 		};
@@ -52,6 +52,7 @@ namespace MCTSAgentNS
 		void rollout(TNodeID node_id, RolloutResult& rollout_result);
 		void back_propogate(TNodeID node_id, const RolloutResult& rollout_result);
 		TNodeID best_child(TNodeID node_id);
+		TNodeID most_visited(TNodeID node_id);
 		float ucb(TNodeID node_id, float c);
 	};
 
@@ -77,22 +78,28 @@ namespace MCTSAgentNS
 			back_propogate(node_id, rollout_result);
 
 		}
-		node_storage.dump();
-		node_storage.validate();
-		auto node_id = 0;
-		node = node_storage.get_node(node_id);
-		while (node != nullptr)
-		{
-			cout << node_id << " ";
-			TGameRules::render(node->position);
-			node->dump();
-			cout << " ";
-			node_id++;
-			node = node_storage.get_node(node_id);
-			cout << endl;
-		}
+		//node_storage.dump();
+		//node_storage.validate();
+		//auto node_id = 0;
+		//node = node_storage.get_node(node_id);
+		//while (node != nullptr)
+		//{
+		//	cout << node_id << " ";
+		//	TGameRules::render(node->position);
+		//	node->dump();
+		//	cout << " ";
+		//	node_id++;
+		//	node = node_storage.get_node(node_id);
+		//	cout << endl;
+		//}
+		auto best_node_id = most_visited(root_node_id);
+		auto best_node = node_storage.get_node(best_node_id);
+		if (best_node == nullptr) return false;
 
-		return false;
+		move = best_node->move_to_reach_position;
+		cout << "Best Move: " << bitset<4>(move) << endl;
+
+		return true;
 	}
 
 	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
@@ -124,7 +131,7 @@ namespace MCTSAgentNS
 		TGameRules::move(node->position, node->player_to_move, move, move_result);
 		node->remaining_moves_mask &= ~move;
 		auto child_node_id = node_storage.create_child_node(node_id, move_result.position, move_result.next_players_turn, move, move_result.result);
-		
+
 		return child_node_id;
 	}
 
@@ -217,6 +224,32 @@ namespace MCTSAgentNS
 				best_score = score;
 				best_child_id = node->children[child_ndx];
 			}
+		}
+		return best_child_id;
+	}
+
+	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
+	inline TNodeID MCTSAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::most_visited(TNodeID node_id)
+	{
+		auto node = node_storage.get_node(node_id);
+		if (node == nullptr) return node_id;
+		if (node->next_child_index == 0) return node_id;
+
+		auto best_score = 0;
+		auto best_child_id = -1;
+		for (auto child_ndx = 0; child_ndx < node->next_child_index; child_ndx++)
+		{
+			auto child_id = node->children[child_ndx];
+			auto child = node_storage.get_node(child_id);
+			if (child == nullptr) continue;
+
+			auto score = child->num_visits;
+			if (child_ndx == 0 || score > best_score)
+			{
+				best_score = score;
+				best_child_id = node->children[child_ndx];
+			}
+
 		}
 		return best_child_id;
 	}

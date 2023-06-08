@@ -8,6 +8,7 @@ namespace TestGameNS
 	
 	typedef unsigned char PositionType;
 	typedef unsigned char MoveType;
+	const unsigned int NumChildren = 4u;
 
 	class TestGame
 	{

@@ -63,7 +63,7 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(root_node_id);
 		if (node == nullptr) return false;
 
-		for (auto x = 0u; x < 1000000; x++)
+		for (auto x = 0u; x < 10000; x++)
 		{
 			//cout << "---------------------------" << endl;
 
@@ -97,7 +97,6 @@ namespace MCTSAgentNS
 		if (best_node == nullptr) return false;
 
 		move = best_node->move_to_reach_position;
-		cout << "Best Move: " << bitset<4>(move) << endl;
 
 		return true;
 	}

@@ -83,7 +83,7 @@ namespace TestGameNS
 			}
 			move_mask >>= 1;
 		}
-		cout << display << endl;
+		cout << display;
 	}
 
 }

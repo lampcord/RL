@@ -3,6 +3,8 @@
 #include "squirrel3.h"
 
 using namespace GameRulesNS;
+using namespace std;
+
 namespace RandomAgentNS
 {
 
@@ -11,19 +13,13 @@ namespace RandomAgentNS
 	{
 	public:
 		RandomAgent() {
-			rng = new Squirrel3(42);
+			rng = make_unique<Squirrel3>(42);
 		};
-		~RandomAgent() {
-			if (rng != nullptr)
-			{
-				delete rng;
-				rng = nullptr;
-			}
-		};
+		~RandomAgent() {};
 
 		bool choose_move(TPosition position, unsigned int player, TMoveType& move);
 	private:
-		Squirrel3* rng = nullptr;
+		unique_ptr<Squirrel3> rng = nullptr;
 	};
 
 

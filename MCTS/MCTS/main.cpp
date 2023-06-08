@@ -19,7 +19,7 @@ int main()
 	unsigned int player = 0;
 	MoveResult<PositionType> move_result;
 
-	typedef  NodeContainerArray<PositionType, MoveType, 100, 4> node_container;
+	typedef  NodeContainerArray<PositionType, MoveType, 1000000, 4> node_container;
 	MCTSAgent<TestGame, node_container, int, PositionType, MoveType>Agent;
 
 	//RandomAgent<TestGame, PositionType, MoveType>Agent;

@@ -35,21 +35,16 @@ namespace MCTSAgentNS
 	{
 	public:
 		MCTSAgent(float c=1.41f) {
-			rng = new Squirrel3(42);
+			rng = make_unique<Squirrel3>(42);
 			_c = c;
 		};
-		~MCTSAgent() {
-			if (rng != nullptr)
-			{
-				delete rng;
-				rng = nullptr;
-			}
-		};
+		~MCTSAgent() {};
+
 		bool choose_move(TPosition position, unsigned int player, TMoveType& move);
 
 	private:
 		TNodeStorage node_storage;
-		Squirrel3* rng = nullptr;
+		unique_ptr<Squirrel3> rng = nullptr;
 		float _c = 1.41f;
 
 		TNodeID select(TNodeID node_id);
@@ -67,7 +62,7 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(root_node_id);
 		if (node == nullptr) return false;
 
-		for (auto x = 0u; x < 100; x++)
+		for (auto x = 0u; x < 1000000; x++)
 		{
 			//cout << "---------------------------" << endl;
 
@@ -84,6 +79,18 @@ namespace MCTSAgentNS
 		}
 		node_storage.dump();
 		node_storage.validate();
+		auto node_id = 0;
+		node = node_storage.get_node(node_id);
+		while (node != nullptr)
+		{
+			cout << node_id << " ";
+			TGameRules::render(node->position);
+			node->dump();
+			cout << " ";
+			node_id++;
+			node = node_storage.get_node(node_id);
+			cout << endl;
+		}
 
 		return false;
 	}
@@ -105,6 +112,7 @@ namespace MCTSAgentNS
 	{
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return node_id;
+		if (node->result != GameResult::keep_playing) return node_id;
 		if (node->remaining_moves_mask == 0)
 		{
 			TGameRules::get_legal_moves(node->position, node->player_to_move, node->remaining_moves_mask);
@@ -115,8 +123,8 @@ namespace MCTSAgentNS
 		MoveResult<TPosition> move_result;
 		TGameRules::move(node->position, node->player_to_move, move, move_result);
 		node->remaining_moves_mask &= ~move;
-		auto child_node_id = node_storage.create_child_node(node_id, move_result.position, move_result.next_players_turn, move);
-
+		auto child_node_id = node_storage.create_child_node(node_id, move_result.position, move_result.next_players_turn, move, move_result.result);
+		
 		return child_node_id;
 	}
 
@@ -197,9 +205,20 @@ namespace MCTSAgentNS
 	{
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return node_id;
+		if (node->next_child_index == 0) return node_id;
 
-		auto child_ndx = (*rng)() % node->next_child_index;
-		return node->children[child_ndx];
+		auto best_score = ucb(node->children[0], _c);
+		auto best_child_id = node->children[0];
+		for (auto child_ndx = 1; child_ndx < node->next_child_index; child_ndx++)
+		{
+			auto score = ucb(node->children[child_ndx], _c);
+			if (score > best_score)
+			{
+				best_score = score;
+				best_child_id = node->children[child_ndx];
+			}
+		}
+		return best_child_id;
 	}
 
 	/*

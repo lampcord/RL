@@ -46,13 +46,15 @@ template <typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigne
 class NodeContainerArray
 {
 public:
-	NodeContainerArray() {};
+	NodeContainerArray() {
+		nodes = make_unique<array<Node<int, TPosition, TMoveType, TNumChildren>, TMaxNode>>();
+	};
 	~NodeContainerArray() {};
 	void dump();
 
 	int initialize(TPosition& position, int player_to_move);
 	int get_root_id() { return root_id; }
-	int create_child_node(int parent_id, TPosition& position, int player_to_move, int move);
+	int create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result);
 	Node<int, TPosition, TMoveType, TNumChildren> * get_node(int node_id);
 	bool is_null(int node_id) { return node_id == null_id; }
 	int get_null() { return null_id; }
@@ -62,7 +64,7 @@ private:
 	unsigned int num_elements;
 	const int null_id = -1;
 	const int root_id = 0;
-	array<Node<int, TPosition, TMoveType, TNumChildren>, TMaxNode> nodes;
+	unique_ptr<array<Node<int, TPosition, TMoveType, TNumChildren>, TMaxNode>> nodes;
 };
 
 
@@ -72,7 +74,7 @@ inline void NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::du
 	for (auto x = 0u; x < num_elements; x++)
 	{
 		cout << setw(3) << x << ") ";
-		nodes[x].dump();
+		(*nodes)[x].dump();
 		cout << endl;
 	}
 }
@@ -81,32 +83,33 @@ template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned
 inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::initialize(TPosition& position, int player_to_move)
 {
 	num_elements = root_id;
-	nodes[num_elements].initialize(position, player_to_move, -1, null_id, null_id);
+	(*nodes)[num_elements].initialize(position, player_to_move, -1, null_id, null_id);
 	num_elements++;
 	return root_id;
 }
 
 template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
-inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::create_child_node(int parent_id, TPosition& position, int player_to_move, int move)
+inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result)
 {
-	if (num_elements >= nodes.size()) return null_id;
+	if (num_elements >= nodes->size()) return null_id;
 	if (parent_id < 0 || parent_id >= (int)num_elements) return null_id;
 
-	auto parent_node = &nodes[parent_id];
+	auto parent_node = &(*nodes)[parent_id];
 	if (parent_node->next_child_index >= parent_node->children.size()) return null_id;
 
 	int next_node_id = num_elements++;
 
 	parent_node->children[parent_node->next_child_index++] = next_node_id;
 	
-	nodes[next_node_id].initialize(position, player_to_move, move, parent_id, null_id);
+	(*nodes)[next_node_id].initialize(position, player_to_move, move, parent_id, null_id);
+	(*nodes)[next_node_id].result = result;
 	return next_node_id;
 }
 
 template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
 inline Node<int, TPosition, TMoveType, TNumChildren>* NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::get_node(int node_id)
 {
-	if (node_id >= 0 && node_id < (int)num_elements) return &(nodes[node_id]);
+	if (node_id >= 0 && node_id < (int)num_elements) return &((*nodes)[node_id]);
 
 	return nullptr;
 }
@@ -143,7 +146,7 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 	auto nodes_checked = 0;
 	for (auto node_id = 0u; node_id < num_elements; node_id ++)
 	{
-		auto node = nodes[node_id];
+		auto node = (*nodes)[node_id];
 		for (auto child_ndx = 0; child_ndx < node.next_child_index; child_ndx++)
 		{
 			auto child_id = node.children[child_ndx];
@@ -167,7 +170,7 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 	nodes_checked = 0;
 	for (auto node_id = 0u; node_id < num_elements; node_id++)
 	{
-		auto node = nodes[node_id];
+		auto node = (*nodes)[node_id];
 		auto parent = get_node(node.parent_id);
 		if (parent == nullptr) continue;
 
@@ -194,7 +197,7 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 	nodes_checked = 0;
 	for (auto node_id = 0u; node_id < num_elements; node_id++)
 	{
-		auto node = nodes[node_id];
+		auto node = (*nodes)[node_id];
 		if (node.next_child_index == 0) continue;
 
 		auto child_visits = 0.0f;
@@ -224,7 +227,7 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 	nodes_checked = 0;
 	for (auto node_id = 0u; node_id < num_elements; node_id++)
 	{
-		auto node = nodes[node_id];
+		auto node = (*nodes)[node_id];
 		if (node.next_child_index == 0) continue;
 
 		auto child_wins = 0.0f;

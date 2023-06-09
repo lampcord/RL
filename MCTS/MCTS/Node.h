@@ -30,6 +30,7 @@ struct Node
 
 	float num_visits = 0.0f;
 	float num_wins = 0.0f;
+	float cached_exploration_denominator = -1.0f;
 
 	TPosition position;
 	int player_to_move = 0;
@@ -124,6 +125,7 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::initialize(TPosit
 
 	num_visits = 0.0f;
 	num_wins = 0.0f;
+	cached_exploration_denominator = -1.0f;
 	fill(children.begin(), children.end(), null_id);
 	next_child_index = 0;
 }

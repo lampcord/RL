@@ -25,10 +25,10 @@ void play_games(TAgentType& agent)
 
 		while (true)
 		{
-			TMoveType move;
+			TMoveType move = 0;
 			if (!agent.choose_move(position, player, move))
 			{
-				cout << "Tie." << endl;
+				cout << " Tie." << endl;
 				break;
 			}
 			TGameRules::move(position, player, move, move_result);

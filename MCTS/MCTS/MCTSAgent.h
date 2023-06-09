@@ -52,6 +52,7 @@ namespace MCTSAgentNS
 		void rollout(TNodeID node_id, RolloutResult& rollout_result);
 		void back_propogate(TNodeID node_id, const RolloutResult& rollout_result);
 		TNodeID best_child(TNodeID node_id);
+		TNodeID best_child_fast(TNodeID node_id);
 		TNodeID most_visited(TNodeID node_id);
 		float ucb(TNodeID node_id, float c);
 	};
@@ -59,11 +60,16 @@ namespace MCTSAgentNS
 	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
 	inline bool MCTSAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::choose_move(TPosition position, unsigned int player, TMoveType& move)
 	{
+		TMoveType legal_moves;
+		TGameRules::get_legal_moves(position, player, legal_moves);
+		auto num_moves = get_num_moves(legal_moves);
+		if (num_moves == 0) return false;
+
 		auto root_node_id = node_storage.initialize(position, player);
 		auto node = node_storage.get_node(root_node_id);
 		if (node == nullptr) return false;
 
-		for (auto x = 0u; x < 10000; x++)
+		for (auto x = 0u; x < 10000000; x++)
 		{
 			//cout << "---------------------------" << endl;
 
@@ -109,7 +115,8 @@ namespace MCTSAgentNS
 		if (node->next_child_index == 0) return node_id;
 		if (node->remaining_moves_mask != 0) return node_id;
 
-		auto best_child_id = best_child(node_id);
+		auto best_child_id = best_child_fast(node_id);
+
 		return select(best_child_id);
 	}
 
@@ -147,7 +154,6 @@ namespace MCTSAgentNS
 		auto player_of_record = parent->player_to_move;
 		auto result = node->result;
 
-		//TGameRules::render(position);
 		while (result == GameResult::keep_playing)
 		{
 			TMoveType legal_moves;
@@ -169,7 +175,6 @@ namespace MCTSAgentNS
 			player_to_move = move_result.next_players_turn;
 			position = move_result.position;
 			result = move_result.result;
-			//TGameRules::render(position);
 		}
 
 		if (result == GameResult::tie)
@@ -197,6 +202,7 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return;
 		node->num_visits += 1.0f;
+		node->cached_exploration_denominator = -1.0f;
 		auto parent = node_storage.get_node(node->parent_id);
 		if (parent == nullptr) return;
 
@@ -218,10 +224,62 @@ namespace MCTSAgentNS
 		for (auto child_ndx = 1; child_ndx < node->next_child_index; child_ndx++)
 		{
 			auto score = ucb(node->children[child_ndx], _c);
+			if (score == numeric_limits<float>::infinity())
+			{
+				best_child_id = node->children[child_ndx];
+				break;
+			}
+
 			if (score > best_score)
 			{
 				best_score = score;
 				best_child_id = node->children[child_ndx];
+			}
+		}
+		return best_child_id;
+	}
+
+	/*
+	Some optimization ideas.
+	1) We only need to calculate c * sqrt(log(parent_visits)) once.
+	2) We can cache sqrt(num_visits) (invalidate on change by setting to -1)
+	We go from N * log + N * sqrt => 1 * log + 2 * sqrt (N == number of children)
+	7 log + 7 sqrt => 1 * log + 2 * sqrt => ~4.7 times faster.
+	Average run time went down from appx 32%.
+	Expect better when we have more moves.
+	*/
+	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
+	inline TNodeID MCTSAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::best_child_fast(TNodeID node_id)
+	{
+		auto node = node_storage.get_node(node_id);
+		if (node == nullptr) return node_id;
+		if (node->next_child_index == 0) return node_id;
+
+		auto exploration_numerator = _c * sqrt(log(node->num_visits));
+
+		auto best_score = -1000.0f;
+		auto best_child_id = node->children[0];
+		for (auto child_ndx = 0; child_ndx < node->next_child_index; child_ndx++)
+		{
+			auto score = numeric_limits<float>::infinity();
+			auto child_id = node->children[child_ndx];
+			auto child = node_storage.get_node(child_id);
+			
+			if (child->num_visits == 0.0f)
+			{
+				best_child_id = child_id;
+				break;
+			}
+			
+			if (child->cached_exploration_denominator < 0.0f) child->cached_exploration_denominator = sqrt(child->num_visits);
+			auto exploration = exploration_numerator / child->cached_exploration_denominator;
+			auto exploitation = child->num_wins / child->num_visits;
+
+			score = exploration + exploitation;
+			if (score > best_score)
+			{
+				best_score = score;
+				best_child_id = child_id;
 			}
 		}
 		return best_child_id;

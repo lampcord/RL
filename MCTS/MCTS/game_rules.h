@@ -64,7 +64,7 @@ namespace GameRulesNS
 		return move;
 	}
 
-	enum class GameResult {
+	enum class GameResult : char {
 		player_0_win = 0,
 		player_1_win = 1,
 		tie = 2,

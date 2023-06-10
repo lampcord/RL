@@ -27,21 +27,42 @@ struct Node
 	Node() : children{} {};
 	void initialize(TPosition position, int player_to_move, int move, TNodeID parent_id, TNodeID null_id);
 	void dump();
+	void show_size();
 
 	float num_visits = 0.0f;
 	float num_wins = 0.0f;
 	float cached_exploration_denominator = -1.0f;
-
-	TPosition position;
-	int player_to_move = 0;
-	TMoveType move_to_reach_position = 0;
-	GameResult result = GameResult::keep_playing;
-
 	TNodeID parent_id;
-	TMoveType remaining_moves_mask = 0;
+
 	array<TNodeID, TNumChildren> children;
-	int next_child_index = 0;
+	
+	TPosition position;
+	TMoveType move_to_reach_position = 0;
+	TMoveType remaining_moves_mask = 0;
+
+	GameResult result = GameResult::keep_playing;
+	char player_to_move = 0;
+	char next_child_index = 0;
 };
+
+template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
+inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::show_size()
+{
+	cout << "Node Size: " << sizeof(*this) << endl;
+	cout << "num_visits: " << sizeof(num_visits) << endl;
+	cout << "num_wins: " << sizeof(num_wins) << endl;
+	cout << "cached_exploration_denominator: " << sizeof(cached_exploration_denominator) << endl;
+	cout << "parent_id: " << sizeof(parent_id) << endl;
+	
+	cout << "children: " << sizeof(children) << endl;
+	
+	cout << "position: " << sizeof(position) << endl;
+	cout << "move_to_reach_position: " << sizeof(move_to_reach_position) << endl;
+	cout << "remaining_moves_mask: " << sizeof(remaining_moves_mask) << endl;
+	cout << "result: " << sizeof(result) << endl;
+	cout << "player_to_move: " << sizeof(player_to_move) << endl;
+	cout << "next_child_index: " << sizeof(next_child_index) << endl;
+}
 
 template <typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
 class NodeContainerArray
@@ -86,6 +107,9 @@ inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::ini
 	num_elements = root_id;
 	(*nodes)[num_elements].initialize(position, player_to_move, -1, null_id, null_id);
 	num_elements++;
+
+	//(*nodes)[0].show_size();
+
 	return root_id;
 }
 

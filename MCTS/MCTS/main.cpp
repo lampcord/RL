@@ -66,6 +66,5 @@ int main()
 	play_games<PositionType, MoveType, TestGame, MCTSAgentType>(Agent);
 	pf.stop();
 	pf.print();
-	
 }
 

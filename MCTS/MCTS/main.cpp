@@ -9,6 +9,7 @@
 #include "test_game.h"
 #include "MCTSAgent.h"
 #include "RandomAgent.h"
+#include "TicTacToe.h"
 
 template <typename TPositionType, typename TMoveType, typename TGameRules, typename TAgentType>
 void play_games(TAgentType& agent)
@@ -53,6 +54,9 @@ using namespace TestGameNS;
 
 int main()
 {
+	//auto node = Node<int, TicTacToeNS::PositionType, TicTacToeNS::MoveType, 9u>();
+	//node.show_size();
+
 	typedef  NodeContainerArray<PositionType, MoveType, 1000000, NumChildren> node_container;
 	typedef MCTSAgentNS::MCTSAgent<TestGame, node_container, int, PositionType, MoveType> MCTSAgentType;
 	MCTSAgentType Agent;

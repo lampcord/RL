@@ -19,6 +19,9 @@
     <Filter Include="Header Files\Agents">
       <UniqueIdentifier>{902f3451-8639-4006-a21a-765649ba294d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ttt">
+      <UniqueIdentifier>{5262a6db-ee21-440e-806d-c7f1244b3bbd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -29,6 +32,9 @@
     </ClCompile>
     <ClCompile Include="test_game.cpp">
       <Filter>Source Files\test_game</Filter>
+    </ClCompile>
+    <ClCompile Include="TicTacToe.cpp">
+      <Filter>Source Files\ttt</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="game_rules.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TicTacToe.h">
+      <Filter>Source Files\ttt</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

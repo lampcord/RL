@@ -21,6 +21,10 @@ is_null(node_id) -> bool
 using namespace std;
 using namespace GameRulesNS;
 
+/*
+Instead of having an array of nodes, we could store only the position of the first node and then calculate the position of each of the next nodes as an offset from there.
+???? Would that waste a lot of space????.
+*/
 template <typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
 struct Node
 {
@@ -284,6 +288,19 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 	}
 	cout << "Validate Wins PASSED " << nodes_checked << endl;
 
+	// Check what pct of nodes have some but not all children.
+	nodes_checked = 0;
+	auto some_children = 0;
+	for (auto node_id = 0u; node_id < num_elements; node_id++)
+	{
+		auto node = (*nodes)[node_id];
+		if (node.next_child_index > 0 && node.remaining_moves_mask != 0)
+		{
+			some_children++;
+		}
+		nodes_checked ++;
+	}
+	cout << "Total Nodes: " << nodes_checked << " Some Children " << some_children << endl;
 
 	return false;
 }

@@ -140,6 +140,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PerfTimer.cpp" />
     <ClCompile Include="test_game.cpp" />
+    <ClCompile Include="TicTacToe.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RandomAgent.h" />
@@ -149,6 +150,7 @@
     <ClInclude Include="PerfTimer.h" />
     <ClInclude Include="squirrel3.h" />
     <ClInclude Include="test_game.h" />
+    <ClInclude Include="TicTacToe.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -25,27 +25,21 @@ using namespace GameRulesNS;
 Instead of having an array of nodes, we could store only the position of the first node and then calculate the position of each of the next nodes as an offset from there.
 ???? Would that waste a lot of space????.
 */
-template <typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
+template <typename TNodeID, typename TPosition, typename TMoveType>
 struct Node
 {
-	Node() : children{} {};
+	Node() {};
 	void initialize(TPosition position, int player_to_move, int move, TNodeID parent_id, TNodeID null_id);
 	void dump();
 	void show_size();
 	TNodeID get_child_id(unsigned int child_ndx);
-	void set_child_id(unsigned int child_ndx, TNodeID child_id);
 
 	float num_visits = 0.0f;
 	float num_wins = 0.0f;
 	float cached_exploration_denominator = -1.0f;
 	TNodeID parent_id;
 
-private:
-	
-	array<TNodeID, TNumChildren> children;
-
-public:
-
+	TNodeID first_child_id = TNodeID();
 	TPosition position;
 	TMoveType move_to_reach_position = 0;
 	TMoveType remaining_moves_mask = 0;
@@ -55,24 +49,16 @@ public:
 	unsigned char num_children = 0;
 };
 
-template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
-inline TNodeID Node<TNodeID, TPosition, TMoveType, TNumChildren>::get_child_id(unsigned int child_ndx)
+template<typename TNodeID, typename TPosition, typename TMoveType>
+inline TNodeID Node<TNodeID, TPosition, TMoveType>::get_child_id(unsigned int child_ndx)
 {
 	//if (child_ndx >= num_children) return -1;
 
-	return children[child_ndx];
+	return first_child_id + child_ndx;
 }
 
-template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
-inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::set_child_id(unsigned int child_ndx, TNodeID child_id)
-{
-	//if (child_ndx >= num_children) return;
-
-	children[child_ndx] = child_id;
-}
-
-template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
-inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::show_size()
+template<typename TNodeID, typename TPosition, typename TMoveType>
+inline void Node<TNodeID, TPosition, TMoveType>::show_size()
 {
 	cout << "Node Size: " << sizeof(*this) << endl;
 	cout << "num_visits: " << sizeof(num_visits) << endl;
@@ -80,8 +66,7 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::show_size()
 	cout << "cached_exploration_denominator: " << sizeof(cached_exploration_denominator) << endl;
 	cout << "parent_id: " << sizeof(parent_id) << endl;
 	
-	cout << "children: " << sizeof(children) << endl;
-	
+	cout << "first_child_id: " << sizeof(first_child_id) << endl;
 	cout << "position: " << sizeof(position) << endl;
 	cout << "move_to_reach_position: " << sizeof(move_to_reach_position) << endl;
 	cout << "remaining_moves_mask: " << sizeof(remaining_moves_mask) << endl;
@@ -90,12 +75,12 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::show_size()
 	cout << "num_children: " << sizeof(num_children) << endl;
 }
 
-template <typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
+template <typename TPosition, typename TMoveType, unsigned int TMaxNode>
 class NodeContainerArray
 {
 public:
 	NodeContainerArray() {
-		nodes = make_unique<array<Node<int, TPosition, TMoveType, TNumChildren>, TMaxNode>>();
+		nodes = make_unique<array<Node<int, TPosition, TMoveType>, TMaxNode>>();
 	};
 	~NodeContainerArray() {};
 	void dump();
@@ -104,7 +89,7 @@ public:
 	int get_root_id() { return root_id; }
 	bool reserve_child_nodes(int parent_id, unsigned int num_nodes);
 	int create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result);
-	Node<int, TPosition, TMoveType, TNumChildren> * get_node(int node_id);
+	Node<int, TPosition, TMoveType> * get_node(int node_id);
 	bool is_null(int node_id) { return node_id == null_id; }
 	int get_null() { return null_id; }
 
@@ -113,12 +98,12 @@ private:
 	unsigned int num_elements;
 	const int null_id = -1;
 	const int root_id = 0;
-	unique_ptr<array<Node<int, TPosition, TMoveType, TNumChildren>, TMaxNode>> nodes;
+	unique_ptr<array<Node<int, TPosition, TMoveType>, TMaxNode>> nodes;
 };
 
 
-template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
-inline void NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::dump()
+template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
+inline void NodeContainerArray<TPosition, TMoveType, TMaxNode>::dump()
 {
 	for (auto x = 0u; x < num_elements; x++)
 	{
@@ -128,8 +113,8 @@ inline void NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::du
 	}
 }
 
-template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
-inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::initialize(TPosition& position, int player_to_move)
+template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
+inline int NodeContainerArray<TPosition, TMoveType, TMaxNode>::initialize(TPosition& position, int player_to_move)
 {
 	num_elements = root_id;
 	(*nodes)[num_elements].initialize(position, player_to_move, -1, null_id, null_id);
@@ -138,8 +123,8 @@ inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::ini
 	return root_id;
 }
 
-template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
-inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::reserve_child_nodes(int parent_id, unsigned int num_nodes)
+template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
+inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode>::reserve_child_nodes(int parent_id, unsigned int num_nodes)
 {
 	if (num_elements + num_nodes >= nodes->size()) return false;
 	if (parent_id < 0 || parent_id >= (int)num_elements) return false;
@@ -150,24 +135,19 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::re
 	int next_node_id = num_elements;
 	num_elements += num_nodes;
 
-	parent_node->set_child_id(0, next_node_id);
+	parent_node->first_child_id = next_node_id;
 
 	return true;
 }
 
-template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
-inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result)
+template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
+inline int NodeContainerArray<TPosition, TMoveType, TMaxNode>::create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result)
 {
 	if (parent_id < 0 || parent_id >= (int)num_elements) return null_id;
 
 	auto parent_node = &(*nodes)[parent_id];
 
-	int child_id = parent_node->get_child_id(0);
-	if (parent_node->num_children > 0) 
-	{
-		child_id = parent_node->get_child_id(parent_node->num_children - 1) + 1;
-		parent_node->set_child_id(parent_node->num_children, child_id);
-	}
+	int child_id = parent_node->get_child_id(parent_node->num_children);
 	parent_node->num_children++;
 
 	(*nodes)[child_id].initialize(position, player_to_move, move, parent_id, null_id);
@@ -175,16 +155,16 @@ inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::cre
 	return child_id;
 }
 
-template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
-inline Node<int, TPosition, TMoveType, TNumChildren>* NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::get_node(int node_id)
+template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
+inline Node<int, TPosition, TMoveType>* NodeContainerArray<TPosition, TMoveType, TMaxNode>::get_node(int node_id)
 {
 	if (node_id >= 0 && node_id < (int)num_elements) return &((*nodes)[node_id]);
 
 	return nullptr;
 }
 
-template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
-inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::initialize(TPosition position, int player_to_move, int move, TNodeID parent_id, TNodeID null_id)
+template<typename TNodeID, typename TPosition, typename TMoveType>
+inline void Node<TNodeID, TPosition, TMoveType>::initialize(TPosition position, int player_to_move, int move, TNodeID parent_id, TNodeID null_id)
 {
 	this->position = position;
 	this->parent_id = parent_id;
@@ -194,24 +174,24 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::initialize(TPosit
 	num_visits = 0.0f;
 	num_wins = 0.0f;
 	cached_exploration_denominator = -1.0f;
-	fill(children.begin(), children.end(), null_id);
+	first_child_id = null_id;
 	num_children = 0;
 }
 
-template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
-inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::dump()
+template<typename TNodeID, typename TPosition, typename TMoveType>
+inline void Node<TNodeID, TPosition, TMoveType>::dump()
 {
 	cout << setw(3) << parent_id << " ";
 	cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask) << " ";
 	cout << bitset<sizeof(TMoveType) * 8>(move_to_reach_position);
 	cout << " [ ";
-	for (auto x = 0; x < num_children; x++) cout << children[x] << " ";
+	for (auto x = 0; x < num_children; x++) cout << get_child_id(x) << " ";
 	cout << "] ";
 	cout << num_wins << "/" << num_visits << " ";
 }
 
-template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
-inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::validate()
+template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
+inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode>::validate()
 {
 	// all of a node's children should have their parent be the node
 	auto nodes_checked = 0;

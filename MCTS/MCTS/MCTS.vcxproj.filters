@@ -62,5 +62,8 @@
     <ClInclude Include="TicTacToe.h">
       <Filter>Source Files\ttt</Filter>
     </ClInclude>
+    <ClInclude Include="ConsoleAgent.h">
+      <Filter>Header Files\Agents</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -12,8 +12,8 @@ namespace RandomAgentNS
 	class RandomAgent
 	{
 	public:
-		RandomAgent() {
-			rng = make_unique<Squirrel3>(42);
+		RandomAgent(uint32_t seed = 42) {
+			rng = make_unique<Squirrel3>(seed);
 		};
 		~RandomAgent() {};
 

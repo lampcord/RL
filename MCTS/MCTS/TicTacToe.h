@@ -23,6 +23,7 @@ namespace TicTacToeNS
 		static void get_legal_moves(const PositionType& position, const unsigned char player, MoveType& legal_moves);
 
 		static void render(const PositionType& position);
+		static MoveType prompt_user(const PositionType& position, const unsigned char player);
 	};
 }
 

@@ -1,4 +1,6 @@
 #include "TicTacToe.h"
+#include <map>
+#include <set>
 #include <iostream>
 
 /*
@@ -11,6 +13,7 @@ Move is represented by a number instead of a mask to keep under 256 bits
 
 */
 
+using namespace std;
 
 namespace TicTacToeNS
 {
@@ -24,6 +27,19 @@ namespace TicTacToeNS
 		0b001001001,
 		0b100010001,
 		0b001010100
+	};
+	const char user_keys[] = { 'q','w','e','a','s','d','z','x','c' };
+	map<char, unsigned short> key_to_move =
+	{
+		{'q', 0b100000000},
+		{'w', 0b010000000},
+		{'e', 0b001000000},
+		{'a', 0b000100000},
+		{'s', 0b000010000},
+		{'d', 0b000001000},
+		{'z', 0b000000100},
+		{'x', 0b000000010},
+		{'c', 0b000000001},
 	};
 
 	void TicTacToe::move(const PositionType& position, const unsigned char player, const MoveType move, MoveResult<PositionType>& move_result)
@@ -59,10 +75,26 @@ namespace TicTacToeNS
 
 	void TicTacToe::render(const PositionType& position)
 	{
+		unsigned short win_result = 0b0;
+		for (auto player = 0u; player < 2; player++)
+		{
+			auto win_compare = position.position[player];
+
+			for (auto win_entry : win_table)
+			{
+				if ((win_entry & win_compare) == win_entry)
+				{
+					win_result = win_entry;
+					break;
+				}
+			}
+			if (win_result != 0b0) break;
+		}
+
 		unsigned short mask = 0b100000000;
 		for (auto x = 0u; x < 9u; x++)
 		{
-			if (x % 3 == 0) std::cout << std::endl;
+			if (x % 3 == 0) cout << endl << "+---+---+---+" << endl << '|';
 			auto c = '.';
 			if (position.position[0] & mask)
 			{
@@ -72,9 +104,58 @@ namespace TicTacToeNS
 			{
 				c = '1';
 			}
-			std::cout << c;
+			if (mask & win_result)
+			{
+				cout << '(' << c << ")|";
+			}
+			else
+			{
+				cout << ' ' << c << " |";
+			}
 			mask = mask >> 1;
 		}
-		std::cout << std::endl;
+		cout << endl << "+---+---+---+" << endl;
+	}
+	MoveType TicTacToe::prompt_user(const PositionType& position, const unsigned char player)
+	{
+		unsigned short mask = 0b100000000;
+		set<char> valid_moves;
+
+		for (auto x = 0u; x < 9u; x++)
+		{
+			if (x % 3 == 0) cout << endl << "+---+---+---+" << endl << '|';
+			char c = user_keys[x];
+			if (position.position[0] & mask)
+			{
+				c = '.';
+			}
+			else if (position.position[1] & mask)
+			{
+				c = '.';
+			}
+			else
+			{
+				valid_moves.insert(c);
+			}
+			cout << ' ' << c << " |";
+			mask = mask >> 1;
+		}
+		cout << endl << "+---+---+---+" << endl;
+
+		char move_choice = '.';
+		while (valid_moves.size() > 0)
+		{
+			cout << "Enter move: (";
+			for (auto c : valid_moves) cout << c << ", ";
+			cout << ")";
+			cout << endl;
+			cin >> move_choice;
+			if (key_to_move.count(move_choice) > 0 && valid_moves.count(move_choice))
+			{
+				return key_to_move[move_choice];
+			}
+		}
+
+		return 0;
 	}
 }

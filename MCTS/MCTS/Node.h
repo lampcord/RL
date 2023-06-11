@@ -218,9 +218,15 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode>::validate()
 
 	// all nodes should have a parent who has them as a child
 	nodes_checked = 0;
+	auto unused_nodes = 0u;
 	for (auto node_id = 0u; node_id < num_elements; node_id++)
 	{
 		auto node = (*nodes)[node_id];
+		if (node.num_visits == 0)
+		{
+			unused_nodes++;
+			continue;
+		}
 		auto parent = get_node(node.parent_id);
 		if (parent == nullptr) continue;
 
@@ -241,7 +247,7 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode>::validate()
 		}
 		nodes_checked++;
 	}
-	cout << "Validate Parents PASSED " << nodes_checked << endl;
+	cout << "Validate Parents PASSED " << nodes_checked << " unused: " << unused_nodes << endl;
 
 	// the sum of a node's children's visits == node 
 	nodes_checked = 0;

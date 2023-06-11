@@ -128,6 +128,8 @@
       <Optimization>Full</Optimization>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,6 +145,7 @@
     <ClCompile Include="TicTacToe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleAgent.h" />
     <ClInclude Include="RandomAgent.h" />
     <ClInclude Include="game_rules.h" />
     <ClInclude Include="MCTSAgent.h" />

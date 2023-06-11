@@ -34,8 +34,8 @@ namespace MCTSAgentNS
 	class MCTSAgent
 	{
 	public:
-		MCTSAgent(float c = 1.41f) {
-			rng = make_unique<Squirrel3>(42);
+		MCTSAgent(uint32_t seed = 42, float c = 1.41f) {
+			rng = make_unique<Squirrel3>(seed);
 			_c = c;
 		};
 		~MCTSAgent() {};
@@ -69,7 +69,7 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(root_node_id);
 		if (node == nullptr) return false;
 
-		for (auto x = 0u; x < 1000000; x++)
+		for (auto x = 0u; x < 10000000; x++)
 		{
 			//cout << "---------------------------" << endl;
 
@@ -302,6 +302,17 @@ namespace MCTSAgentNS
 			auto child_id = node->get_child_id(child_ndx);
 			auto child = node_storage.get_node(child_id);
 			if (child == nullptr) continue;
+
+			// check for instant win to avoid MCTS habit of 'delayed gratification'
+			if (child->result != GameResult::keep_playing)
+			{
+				if (child->result == GameResult::player_0_win && node->player_to_move == 0 ||
+					child->result == GameResult::player_1_win && node->player_to_move == 1)
+				{
+					best_child_id = child_id;
+					break;
+				}
+			}
 
 			auto score = child->num_visits;
 			if (child_ndx == 0 || score > best_score)

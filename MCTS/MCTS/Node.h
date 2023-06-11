@@ -32,22 +32,44 @@ struct Node
 	void initialize(TPosition position, int player_to_move, int move, TNodeID parent_id, TNodeID null_id);
 	void dump();
 	void show_size();
+	TNodeID get_child_id(unsigned int child_ndx);
+	void set_child_id(unsigned int child_ndx, TNodeID child_id);
 
 	float num_visits = 0.0f;
 	float num_wins = 0.0f;
 	float cached_exploration_denominator = -1.0f;
 	TNodeID parent_id;
 
-	array<TNodeID, TNumChildren> children;
+private:
 	
+	array<TNodeID, TNumChildren> children;
+
+public:
+
 	TPosition position;
 	TMoveType move_to_reach_position = 0;
 	TMoveType remaining_moves_mask = 0;
 
 	GameResult result = GameResult::keep_playing;
-	char player_to_move = 0;
-	char next_child_index = 0;
+	unsigned char player_to_move = 0;
+	unsigned char num_children = 0;
 };
+
+template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
+inline TNodeID Node<TNodeID, TPosition, TMoveType, TNumChildren>::get_child_id(unsigned int child_ndx)
+{
+	//if (child_ndx >= num_children) return -1;
+
+	return children[child_ndx];
+}
+
+template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
+inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::set_child_id(unsigned int child_ndx, TNodeID child_id)
+{
+	//if (child_ndx >= num_children) return;
+
+	children[child_ndx] = child_id;
+}
 
 template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
 inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::show_size()
@@ -65,7 +87,7 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::show_size()
 	cout << "remaining_moves_mask: " << sizeof(remaining_moves_mask) << endl;
 	cout << "result: " << sizeof(result) << endl;
 	cout << "player_to_move: " << sizeof(player_to_move) << endl;
-	cout << "next_child_index: " << sizeof(next_child_index) << endl;
+	cout << "num_children: " << sizeof(num_children) << endl;
 }
 
 template <typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
@@ -80,6 +102,7 @@ public:
 
 	int initialize(TPosition& position, int player_to_move);
 	int get_root_id() { return root_id; }
+	bool reserve_child_nodes(int parent_id, unsigned int num_nodes);
 	int create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result);
 	Node<int, TPosition, TMoveType, TNumChildren> * get_node(int node_id);
 	bool is_null(int node_id) { return node_id == null_id; }
@@ -112,27 +135,44 @@ inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::ini
 	(*nodes)[num_elements].initialize(position, player_to_move, -1, null_id, null_id);
 	num_elements++;
 
-	//(*nodes)[0].show_size();
-
 	return root_id;
+}
+
+template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
+inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::reserve_child_nodes(int parent_id, unsigned int num_nodes)
+{
+	if (num_elements + num_nodes >= nodes->size()) return false;
+	if (parent_id < 0 || parent_id >= (int)num_elements) return false;
+
+	auto parent_node = &(*nodes)[parent_id];
+	if (parent_node->num_children > 0) return false;
+
+	int next_node_id = num_elements;
+	num_elements += num_nodes;
+
+	parent_node->set_child_id(0, next_node_id);
+
+	return true;
 }
 
 template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
 inline int NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result)
 {
-	if (num_elements >= nodes->size()) return null_id;
 	if (parent_id < 0 || parent_id >= (int)num_elements) return null_id;
 
 	auto parent_node = &(*nodes)[parent_id];
-	if (parent_node->next_child_index >= parent_node->children.size()) return null_id;
 
-	int next_node_id = num_elements++;
+	int child_id = parent_node->get_child_id(0);
+	if (parent_node->num_children > 0) 
+	{
+		child_id = parent_node->get_child_id(parent_node->num_children - 1) + 1;
+		parent_node->set_child_id(parent_node->num_children, child_id);
+	}
+	parent_node->num_children++;
 
-	parent_node->children[parent_node->next_child_index++] = next_node_id;
-	
-	(*nodes)[next_node_id].initialize(position, player_to_move, move, parent_id, null_id);
-	(*nodes)[next_node_id].result = result;
-	return next_node_id;
+	(*nodes)[child_id].initialize(position, player_to_move, move, parent_id, null_id);
+	(*nodes)[child_id].result = result;
+	return child_id;
 }
 
 template<typename TPosition, typename TMoveType, unsigned int TMaxNode, unsigned int TNumChildren>
@@ -155,7 +195,7 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::initialize(TPosit
 	num_wins = 0.0f;
 	cached_exploration_denominator = -1.0f;
 	fill(children.begin(), children.end(), null_id);
-	next_child_index = 0;
+	num_children = 0;
 }
 
 template<typename TNodeID, typename TPosition, typename TMoveType, unsigned int TNumChildren>
@@ -165,7 +205,7 @@ inline void Node<TNodeID, TPosition, TMoveType, TNumChildren>::dump()
 	cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask) << " ";
 	cout << bitset<sizeof(TMoveType) * 8>(move_to_reach_position);
 	cout << " [ ";
-	for (auto x = 0; x < next_child_index; x++) cout << children[x] << " ";
+	for (auto x = 0; x < num_children; x++) cout << children[x] << " ";
 	cout << "] ";
 	cout << num_wins << "/" << num_visits << " ";
 }
@@ -178,9 +218,9 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 	for (auto node_id = 0u; node_id < num_elements; node_id ++)
 	{
 		auto node = (*nodes)[node_id];
-		for (auto child_ndx = 0; child_ndx < node.next_child_index; child_ndx++)
+		for (auto child_ndx = 0; child_ndx < node.num_children; child_ndx++)
 		{
-			auto child_id = node.children[child_ndx];
+			auto child_id = node.get_child_id(child_ndx);
 			auto child_node = get_node(child_id);
 			if (child_node == nullptr)
 			{
@@ -206,9 +246,9 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 		if (parent == nullptr) continue;
 
 		bool found_parents_child = false;
-		for (auto child_ndx = 0; child_ndx < parent->next_child_index; child_ndx++)
+		for (auto child_ndx = 0; child_ndx < parent->num_children; child_ndx++)
 		{
-			auto child_id = parent->children[child_ndx];
+			auto child_id = parent->get_child_id(child_ndx);
 			if (child_id == node_id)
 			{
 				found_parents_child = true;
@@ -229,14 +269,14 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 	for (auto node_id = 0u; node_id < num_elements; node_id++)
 	{
 		auto node = (*nodes)[node_id];
-		if (node.next_child_index == 0) continue;
+		if (node.num_children == 0) continue;
 
 		auto child_visits = 0.0f;
 		auto node_visits = node.parent_id == null_id ? node.num_visits : node.num_visits - 1;
 
-		for (auto child_ndx = 0; child_ndx < node.next_child_index; child_ndx++)
+		for (auto child_ndx = 0; child_ndx < node.num_children; child_ndx++)
 		{
-			auto child_id = node.children[child_ndx];
+			auto child_id = node.get_child_id(child_ndx);
 			auto child_node = get_node(child_id);
 			if (child_node == nullptr)
 			{
@@ -259,7 +299,7 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 	for (auto node_id = 0u; node_id < num_elements; node_id++)
 	{
 		auto node = (*nodes)[node_id];
-		if (node.next_child_index == 0) continue;
+		if (node.num_children == 0) continue;
 
 		auto child_wins = 0.0f;
 		if (node.parent_id == null_id) continue;
@@ -267,9 +307,9 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 		auto parent = get_node(node.parent_id);
 		auto flip_results = node.player_to_move != parent->player_to_move;
 
-		for (auto child_ndx = 0; child_ndx < node.next_child_index; child_ndx++)
+		for (auto child_ndx = 0; child_ndx < node.num_children; child_ndx++)
 		{
-			auto child_id = node.children[child_ndx];
+			auto child_id = node.get_child_id(child_ndx);
 			auto child_node = get_node(child_id);
 			if (child_node == nullptr)
 			{
@@ -294,7 +334,7 @@ inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode, TNumChildren>::va
 	for (auto node_id = 0u; node_id < num_elements; node_id++)
 	{
 		auto node = (*nodes)[node_id];
-		if (node.next_child_index > 0 && node.remaining_moves_mask != 0)
+		if (node.num_children > 0 && node.remaining_moves_mask != 0)
 		{
 			some_children++;
 		}

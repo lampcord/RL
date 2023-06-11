@@ -54,8 +54,8 @@ using namespace TestGameNS;
 
 int main()
 {
-	//auto node = Node<int, TicTacToeNS::PositionType, TicTacToeNS::MoveType, 9u>();
-	//node.show_size();
+	auto node = Node<int, TicTacToeNS::PositionType, TicTacToeNS::MoveType, 9u>();
+	node.show_size();
 
 	typedef  NodeContainerArray<PositionType, MoveType, 1000000, NumChildren> node_container;
 	typedef MCTSAgentNS::MCTSAgent<TestGame, node_container, int, PositionType, MoveType> MCTSAgentType;

@@ -84,8 +84,8 @@ namespace MCTSAgentNS
 			back_propogate(node_id, rollout_result);
 
 		}
-		//node_storage.dump();
-		//node_storage.validate();
+		node_storage.dump();
+		node_storage.validate();
 		//auto node_id = 0;
 		//node = node_storage.get_node(node_id);
 		//while (node != nullptr)
@@ -112,7 +112,7 @@ namespace MCTSAgentNS
 	{
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return node_id;
-		if (node->next_child_index == 0) return node_id;
+		if (node->num_children == 0) return node_id;
 		if (node->remaining_moves_mask != 0) return node_id;
 
 		auto best_child_id = best_child_fast(node_id);
@@ -126,9 +126,14 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return node_id;
 		if (node->result != GameResult::keep_playing) return node_id;
-		if (node->remaining_moves_mask == 0)
+		if (node->remaining_moves_mask == 0 && node->num_children == 0)
 		{
 			TGameRules::get_legal_moves(node->position, node->player_to_move, node->remaining_moves_mask);
+			auto num_children = get_num_moves(node->remaining_moves_mask);
+			if (num_children > 0)
+			{
+				node_storage.reserve_child_nodes(node_id, num_children);
+			}
 		}
 		if (node->remaining_moves_mask == 0) return node_id;
 
@@ -217,23 +222,23 @@ namespace MCTSAgentNS
 	{
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return node_id;
-		if (node->next_child_index == 0) return node_id;
+		if (node->num_children == 0) return node_id;
 
 		auto best_score = ucb(node->children[0], _c);
 		auto best_child_id = node->children[0];
-		for (auto child_ndx = 1; child_ndx < node->next_child_index; child_ndx++)
+		for (auto child_ndx = 1; child_ndx < node->num_children; child_ndx++)
 		{
-			auto score = ucb(node->children[child_ndx], _c);
+			auto score = ucb(node->get_child_id(child_ndx), _c);
 			if (score == numeric_limits<float>::infinity())
 			{
-				best_child_id = node->children[child_ndx];
+				best_child_id = node->get_child_id(child_ndx);
 				break;
 			}
 
 			if (score > best_score)
 			{
 				best_score = score;
-				best_child_id = node->children[child_ndx];
+				best_child_id = node->get_child_id(child_ndx);
 			}
 		}
 		return best_child_id;
@@ -253,16 +258,16 @@ namespace MCTSAgentNS
 	{
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return node_id;
-		if (node->next_child_index == 0) return node_id;
+		if (node->num_children == 0) return node_id;
 
 		auto exploration_numerator = _c * sqrt(log(node->num_visits));
 
 		auto best_score = -1000.0f;
-		auto best_child_id = node->children[0];
-		for (auto child_ndx = 0; child_ndx < node->next_child_index; child_ndx++)
+		auto best_child_id = node->get_child_id(0);
+		for (auto child_ndx = 0; child_ndx < node->num_children; child_ndx++)
 		{
 			auto score = numeric_limits<float>::infinity();
-			auto child_id = node->children[child_ndx];
+			auto child_id = node->get_child_id(child_ndx);
 			auto child = node_storage.get_node(child_id);
 			
 			if (child->num_visits == 0.0f)
@@ -290,13 +295,13 @@ namespace MCTSAgentNS
 	{
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return node_id;
-		if (node->next_child_index == 0) return node_id;
+		if (node->num_children == 0) return node_id;
 
-		auto best_score = 0;
+		auto best_score = 0.0f;
 		auto best_child_id = -1;
-		for (auto child_ndx = 0; child_ndx < node->next_child_index; child_ndx++)
+		for (auto child_ndx = 0; child_ndx < node->num_children; child_ndx++)
 		{
-			auto child_id = node->children[child_ndx];
+			auto child_id = node->get_child_id(child_ndx);
 			auto child = node_storage.get_node(child_id);
 			if (child == nullptr) continue;
 
@@ -304,7 +309,7 @@ namespace MCTSAgentNS
 			if (child_ndx == 0 || score > best_score)
 			{
 				best_score = score;
-				best_child_id = node->children[child_ndx];
+				best_child_id = node->get_child_id(child_ndx);
 			}
 
 		}

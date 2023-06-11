@@ -69,7 +69,7 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(root_node_id);
 		if (node == nullptr) return false;
 
-		for (auto x = 0u; x < 10000000; x++)
+		for (auto x = 0u; x < 1000000; x++)
 		{
 			//cout << "---------------------------" << endl;
 
@@ -84,8 +84,8 @@ namespace MCTSAgentNS
 			back_propogate(node_id, rollout_result);
 
 		}
-		node_storage.dump();
-		node_storage.validate();
+		//node_storage.dump();
+		//node_storage.validate();
 		//auto node_id = 0;
 		//node = node_storage.get_node(node_id);
 		//while (node != nullptr)
@@ -207,7 +207,6 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return;
 		node->num_visits += 1.0f;
-		node->cached_exploration_denominator = -1.0f;
 		auto parent = node_storage.get_node(node->parent_id);
 		if (parent == nullptr) return;
 
@@ -224,8 +223,8 @@ namespace MCTSAgentNS
 		if (node == nullptr) return node_id;
 		if (node->num_children == 0) return node_id;
 
-		auto best_score = ucb(node->children[0], _c);
-		auto best_child_id = node->children[0];
+		auto best_score = ucb(node->get_child_id(0), _c);
+		auto best_child_id = node->get_child_id(0);
 		for (auto child_ndx = 1; child_ndx < node->num_children; child_ndx++)
 		{
 			auto score = ucb(node->get_child_id(child_ndx), _c);
@@ -276,8 +275,7 @@ namespace MCTSAgentNS
 				break;
 			}
 			
-			if (child->cached_exploration_denominator < 0.0f) child->cached_exploration_denominator = sqrt(child->num_visits);
-			auto exploration = exploration_numerator / child->cached_exploration_denominator;
+			auto exploration = exploration_numerator / sqrt(child->num_visits);
 			auto exploitation = child->num_wins / child->num_visits;
 
 			score = exploration + exploitation;

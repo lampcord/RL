@@ -6,18 +6,21 @@ using namespace GameRulesNS;
 
 namespace TicTacToeNS
 {
-	typedef unsigned int PositionType;
+	struct PositionStruct {
+		unsigned short position[2];
+	};
+	typedef PositionStruct PositionType;
 	typedef unsigned short MoveType;
-	const unsigned int NumChildren = 9u;
 
 	class TicTacToe
 	{
+	public:
 		TicTacToe() {};
 		~TicTacToe() {};
 		
-		static void move(const PositionType& position, unsigned int player, unsigned int move, MoveResult<PositionType>& move_result);
+		static void move(const PositionType& position, const unsigned char player, const MoveType move, MoveResult<PositionType>& move_result);
 		static void get_initial_position(PositionType& position);
-		static void get_legal_moves(const PositionType& position, const unsigned int player, MoveType& legal_moves);
+		static void get_legal_moves(const PositionType& position, const unsigned char player, MoveType& legal_moves);
 
 		static void render(const PositionType& position);
 	};

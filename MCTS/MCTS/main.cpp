@@ -48,7 +48,8 @@ void play_games(TAgentType& agent)
 	}
 }
 
-using namespace TestGameNS;
+//using namespace TestGameNS;
+using namespace TicTacToeNS;
 //using namespace RandomAgentNS;
 //using namespace MCTSAgentNS;
 
@@ -58,7 +59,7 @@ int main()
 	node.show_size();
 
 	typedef  NodeContainerArray<PositionType, MoveType, 1000000> node_container;
-	typedef MCTSAgentNS::MCTSAgent<TestGame, node_container, int, PositionType, MoveType> MCTSAgentType;
+	typedef MCTSAgentNS::MCTSAgent<TicTacToe, node_container, int, PositionType, MoveType> MCTSAgentType;
 	MCTSAgentType Agent;
 
 	//typedef RandomAgentNS::RandomAgent<TestGame, PositionType, MoveType> RandomAgentType;
@@ -67,7 +68,7 @@ int main()
 	PerfTimer pf(true, true, true);
 	pf.start();
 	//play_games<PositionType, MoveType, TestGame, MCTSAgent<TestGame, node_container, int, PositionType, MoveType>>(Agent);
-	play_games<PositionType, MoveType, TestGame, MCTSAgentType>(Agent);
+	play_games<PositionType, MoveType, TicTacToe, MCTSAgentType>(Agent);
 	pf.stop();
 	pf.print();
 }

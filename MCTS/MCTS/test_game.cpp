@@ -36,7 +36,7 @@ namespace TestGameNS
 		0b0011
 	};
 
-	void TestGame::move(const PositionType& position, unsigned int player, unsigned int move, MoveResult<MoveType>& move_result)
+	void TestGame::move(const PositionType& position, unsigned int player, MoveType move, MoveResult<MoveType>& move_result)
 	{
 		unsigned int move_mask = player == 0 ? move << 4 : move;
 

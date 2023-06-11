@@ -36,7 +36,6 @@ struct Node
 
 	float num_visits = 0.0f;
 	float num_wins = 0.0f;
-	float cached_exploration_denominator = -1.0f;
 	TNodeID parent_id;
 
 	TNodeID first_child_id = TNodeID();
@@ -63,7 +62,6 @@ inline void Node<TNodeID, TPosition, TMoveType>::show_size()
 	cout << "Node Size: " << sizeof(*this) << endl;
 	cout << "num_visits: " << sizeof(num_visits) << endl;
 	cout << "num_wins: " << sizeof(num_wins) << endl;
-	cout << "cached_exploration_denominator: " << sizeof(cached_exploration_denominator) << endl;
 	cout << "parent_id: " << sizeof(parent_id) << endl;
 	
 	cout << "first_child_id: " << sizeof(first_child_id) << endl;
@@ -149,7 +147,7 @@ inline int NodeContainerArray<TPosition, TMoveType, TMaxNode>::create_child_node
 
 	int child_id = parent_node->get_child_id(parent_node->num_children);
 	parent_node->num_children++;
-
+		
 	(*nodes)[child_id].initialize(position, player_to_move, move, parent_id, null_id);
 	(*nodes)[child_id].result = result;
 	return child_id;
@@ -173,10 +171,11 @@ inline void Node<TNodeID, TPosition, TMoveType>::initialize(TPosition position, 
 
 	num_visits = 0.0f;
 	num_wins = 0.0f;
-	cached_exploration_denominator = -1.0f;
 	first_child_id = null_id;
 	num_children = 0;
-}
+	remaining_moves_mask = 0;
+	result = GameResult::keep_playing;
+}	
 
 template<typename TNodeID, typename TPosition, typename TMoveType>
 inline void Node<TNodeID, TPosition, TMoveType>::dump()

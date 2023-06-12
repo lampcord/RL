@@ -106,7 +106,7 @@ play_console_console = [game_rules, [UserAgent(game_rules, console_renderer), Us
 train_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_vs_A0), MCTSAgent(game_rules, mcts_config_rollout_vs_A0)], 320, None]
 # train_mcts_mcts = [game_rules, [MCTSAgent(game_rules, mcts_config_rollout_vs_A0), MCTSAgent(game_rules, mcts_config_rollout_vs_A0)], 10, None]
 
-director = TournamentDirector(*play_mcts_mcts)
+director = TournamentDirector(*play_against_MCTS_gui)
 tournament_set = director.run()
 restart_function()
 # my_functions.C4_save_learn()

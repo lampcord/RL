@@ -120,7 +120,8 @@ int main()
 	
 	PerfTimer pf(true, true, true);
 	pf.start();
-	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 1, false);
+	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 1, true);
+	auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSAgentType>(console_agent, mcts_agent, 1, true);
 	pf.stop();
 	pf.print();
 	cout << "Total Moves: " << moves << endl;

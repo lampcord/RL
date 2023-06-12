@@ -2,6 +2,8 @@
 #include <iostream>
 #include <bitset>
 #include <unordered_map>
+#include <map>
+#include <set>
 #include <vector>
 using namespace std;
 
@@ -79,6 +81,16 @@ namespace Connect4NS
 		0b000000100000100000100000100000000000000000,
 		0b000000000000010000010000010000010000000000,
 		0b000000000000000000001000001000001000001000
+	};
+
+	static map<char, unsigned char> user_keys = {
+		{'1', 0b1000000},
+		{'2', 0b0100000},
+		{'3', 0b0010000},
+		{'4', 0b0001000},
+		{'5', 0b0000100},
+		{'6', 0b0000010},
+		{'7', 0b0000001}
 	};
 
 	static unordered_map<unsigned long long, vector<unsigned long long>> win_table_set;
@@ -190,12 +202,38 @@ namespace Connect4NS
 			}
 			mask = mask >> 1;
 		}
-		cout << endl << "+---+---+---+---+---+---+---+" << endl;
+		cout << endl;
+		cout << "+---+---+---+---+---+---+---+" << endl;
+		cout << "  1   2   3   4   5   6   7  " << endl;
 
 	}
 
 	MoveType Connect4NS::Connect4::prompt_user(const PositionType& position, const unsigned char player)
 	{
+		MoveType legal_moves;
+		get_legal_moves(position, player, legal_moves);
+		set<char> valid_moves;
+
+		cout << "Enter Move: (";
+		for (auto pair : user_keys)
+		{
+			if (pair.second & legal_moves)
+			{
+				cout << pair.first << ",";
+				valid_moves.insert(pair.first);
+			}
+		}
+		cout << ") " << endl;
+
+		char move_choice;
+		while (valid_moves.size() > 0)
+		{
+			cin >> move_choice;
+			if (valid_moves.count(move_choice) > 0)
+			{
+				return user_keys[move_choice];
+			}
+		}
 		return MoveType();
 	}
 }

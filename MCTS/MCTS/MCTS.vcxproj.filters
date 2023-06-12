@@ -22,6 +22,9 @@
     <Filter Include="Source Files\ttt">
       <UniqueIdentifier>{5262a6db-ee21-440e-806d-c7f1244b3bbd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\connect4">
+      <UniqueIdentifier>{baea347a-f748-4025-af34-4ca2238031e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -35,6 +38,9 @@
     </ClCompile>
     <ClCompile Include="TicTacToe.cpp">
       <Filter>Source Files\ttt</Filter>
+    </ClCompile>
+    <ClCompile Include="Connect4.cpp">
+      <Filter>Source Files\connect4</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="ConsoleAgent.h">
       <Filter>Header Files\Agents</Filter>
+    </ClInclude>
+    <ClInclude Include="Connect4.h">
+      <Filter>Source Files\connect4</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

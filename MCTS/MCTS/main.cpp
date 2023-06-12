@@ -6,15 +6,18 @@
 #include <bitset>
 #include <map>
 #include "PerfTimer.h"
+
 #include "test_game.h"
 #include "TicTacToe.h"
+#include "Connect4.h"
+
 #include "Node.h"
 #include "MCTSAgent.h"
 #include "RandomAgent.h"
 #include "ConsoleAgent.h"
 
 template <typename TPositionType, typename TMoveType, typename TGameRules, typename TAgent0Type, typename TAgent1Type>
-void play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int games = 1, bool show=true)
+unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int games = 1, bool show=true)
 {
 	TPositionType position;
 	unsigned int player = 0;
@@ -24,6 +27,7 @@ void play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int games =
 		{ "Player 1", 0u },
 		{ "Tie", 0u }
 	};
+	unsigned int total_moves = 0u;
 
 	for (auto x = 0u; x < games; x++)
 	{
@@ -61,6 +65,7 @@ void play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int games =
 					break;
 				}
 			}
+			total_moves++;
 
 			TGameRules::move(position, player, move, move_result);
 			if (show) cout << " Move: " << bitset <sizeof(TMoveType) * 8> (move) << endl;
@@ -89,33 +94,35 @@ void play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int games =
 	{
 		cout << pair.first << ": " << pair.second << endl;
 	}
+	return total_moves;
 }
 
 //using namespace TestGameNS;
-using namespace TicTacToeNS;
+//using namespace TicTacToeNS;
+using namespace Connect4NS;
 
 int main()
 {
-	//auto node = Node<int, TicTacToeNS::PositionType, TicTacToeNS::MoveType>();
+	//auto node = Node<int, Connect4NS::PositionType, Connect4NS::MoveType>();
 	//node.show_size();
 
-	typedef  NodeContainerArray<PositionType, MoveType, 1000000> node_container;
-	typedef MCTSAgentNS::MCTSAgent<TicTacToe, node_container, int, PositionType, MoveType> MCTSAgentType;
+	typedef  NodeContainerArray<PositionType, MoveType, 10000000> node_container;
+	typedef MCTSAgentNS::MCTSAgent<Connect4, node_container, int, PositionType, MoveType> MCTSAgentType;
 	MCTSAgentType mcts_agent;
 
-	typedef RandomAgentNS::RandomAgent<TicTacToe, PositionType, MoveType> RandomAgentType;
+	typedef RandomAgentNS::RandomAgent<Connect4, PositionType, MoveType> RandomAgentType;
 	auto seed = (uint32_t)time(NULL);
-	seed = 1686510551;
 	cout << "Seed: " << seed << endl;
 	RandomAgentType random_agent(seed);
 
-	typedef ConsoleAgentNS::ConsoleAgent<TicTacToe, PositionType, MoveType> ConsoleAgentType;
+	typedef ConsoleAgentNS::ConsoleAgent<Connect4, PositionType, MoveType> ConsoleAgentType;
 	ConsoleAgentType console_agent;
 	
 	PerfTimer pf(true, true, true);
 	pf.start();
-	play_games<PositionType, MoveType, TicTacToe, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 1, true);
+	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 1, false);
 	pf.stop();
 	pf.print();
+	cout << "Total Moves: " << moves << endl;
 }
 

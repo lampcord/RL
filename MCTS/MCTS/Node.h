@@ -36,7 +36,7 @@ struct Node
 
 	float num_visits = 0.0f;
 	float num_wins = 0.0f;
-	TNodeID parent_id;
+	TNodeID parent_id = TNodeID();
 
 	TNodeID first_child_id = TNodeID();
 	TPosition position;

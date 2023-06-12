@@ -24,6 +24,7 @@ get_initial_position() -> position
 //};
 namespace MCTSAgentNS
 {
+	static map<float, float> numerator_cache;
 	struct RolloutResult
 	{
 		float score;
@@ -69,7 +70,7 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(root_node_id);
 		if (node == nullptr) return false;
 
-		for (auto x = 0u; x < 10000000; x++)
+		for (auto x = 0u; x < 1000000; x++)
 		{
 			//cout << "---------------------------" << endl;
 

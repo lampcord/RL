@@ -138,7 +138,7 @@ namespace MCTSAgentNS
 		}
 		if (node->remaining_moves_mask == 0) return node_id;
 
-		auto move = get_nth_move(node->remaining_moves_mask, 0);
+		auto move = get_first_move(node->remaining_moves_mask);
 		MoveResult<TPosition> move_result;
 		TGameRules::move(node->position, node->player_to_move, move, move_result);
 		node->remaining_moves_mask &= ~move;

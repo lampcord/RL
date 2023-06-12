@@ -2,6 +2,15 @@
 
 namespace GameRulesNS
 {
+	template <typename TMoveType>
+	TMoveType get_first_move(const TMoveType& move_mask)
+	{
+		if (move_mask == 0) return 0;
+		unsigned long index;
+
+		_BitScanForward64(&index, move_mask);
+		return 0b1 << index;
+	}
 
 	template <typename TMoveType>
 	void clear_nth_move(TMoveType& move_mask, unsigned int n)

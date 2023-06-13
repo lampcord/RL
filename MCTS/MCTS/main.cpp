@@ -28,6 +28,7 @@ unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int
 		{ "Tie", 0u }
 	};
 	unsigned int total_moves = 0u;
+	unsigned int changed_moves = 0u;
 
 	for (auto x = 0u; x < games; x++)
 	{
@@ -50,11 +51,46 @@ unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int
 			TMoveType move = 0;
 			if (player == 0)
 			{
+				unordered_map<TMoveType, float> choice_map;
+				choice_map.clear();
 				if (!agent_0.choose_move(position, player, move))
 				{
 					results["Tie"]++;
 					if (show) cout << " Tie." << endl;
 					break;
+				}
+				agent_0.get_root_choice_map(choice_map);
+				agent_0.choose_move(position, player, move);
+				agent_0.get_root_choice_map(choice_map);
+				agent_0.choose_move(position, player, move);
+				agent_0.get_root_choice_map(choice_map);
+				agent_0.choose_move(position, player, move);
+				agent_0.get_root_choice_map(choice_map);
+				agent_0.choose_move(position, player, move);
+				agent_0.get_root_choice_map(choice_map);
+				agent_0.choose_move(position, player, move);
+				agent_0.get_root_choice_map(choice_map);
+				agent_0.choose_move(position, player, move);
+				agent_0.get_root_choice_map(choice_map);
+				agent_0.choose_move(position, player, move);
+				agent_0.get_root_choice_map(choice_map);
+				//cout << "---------------------" << endl;
+				auto best_score = 0.0f;
+				auto best_move = move;
+				for (auto pair : choice_map)
+				{
+					if (pair.second > best_score)
+					{
+						best_score = pair.second;
+						best_move = pair.first;
+					}
+					//cout << bitset<sizeof(TMoveType) * 8>(pair.first) << " " << pair.second << endl;
+				}
+				//cout << " Best: " << bitset<sizeof(TMoveType) * 8>(best_move) << endl;
+				if (move != best_move)
+				{
+					changed_moves++;
+					move = best_move;
 				}
 			}
 			else
@@ -95,6 +131,7 @@ unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int
 	{
 		cout << pair.first << ": " << pair.second << endl;
 	}
+	cout << "Changed: " << changed_moves << endl;
 	return total_moves;
 }
 
@@ -107,9 +144,9 @@ int main()
 	//auto node = Node<int, Connect4NS::PositionType, Connect4NS::MoveType>();
 	//node.show_size();
 
-	typedef  NodeContainerArray<PositionType, MoveType, 5000000> node_container;
+	typedef  NodeContainerArray<PositionType, MoveType, 10000000> node_container;
 	typedef MCTSAgentNS::MCTSAgent<Connect4, node_container, int, PositionType, MoveType> MCTSAgentType;
-	MCTSAgentType mcts_agent(32000000);
+	MCTSAgentType mcts_agent(100000);
 
 	typedef RandomAgentNS::RandomAgent<Connect4, PositionType, MoveType> RandomAgentType;
 	auto seed = (uint32_t)time(NULL);
@@ -121,9 +158,9 @@ int main()
 	
 	PerfTimer pf(true, true, true);
 	pf.start();
-	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 10, true);
+	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 10, true);
 	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSAgentType>(console_agent, mcts_agent, 10, true);
-	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 1, true);
+	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 100, false);
 	pf.stop();
 	pf.print();
 	cout << "Total Moves: " << moves << endl;

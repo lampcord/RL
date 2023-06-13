@@ -2,6 +2,7 @@
 #include <utility>
 #include <concepts>
 #include <limits>
+#include <unordered_map>
 #include "game_rules.h"
 #include "squirrel3.h"
 #include "PerfTimer.h"
@@ -44,7 +45,7 @@ namespace MCTSAgentNS
 		~MCTSAgent() {};
 
 		bool choose_move(TPosition position, unsigned int player, TMoveType& move);
-
+		void get_root_choice_map(unordered_map<TMoveType, float> &choice_map);
 	private:
 		TNodeStorage node_storage;
 		unique_ptr<Squirrel3> rng = nullptr;
@@ -92,7 +93,7 @@ namespace MCTSAgentNS
 
 			if (timer->GetElapsedThreadTime() > max_time) break;
 		}
-		cout << "Time: " << (float)timer->GetElapsedThreadTime() / 10000000.0 << " Loops: " << x << " Nodes: " << node_storage.get_num_elements() << endl;
+		//cout << "Time: " << (float)timer->GetElapsedThreadTime() / 10000000.0 << " Loops: " << x << " Nodes: " << node_storage.get_num_elements() << endl;
 		//node_storage.dump();
 		//node_storage.validate();
 		//auto node_id = 0;
@@ -112,8 +113,30 @@ namespace MCTSAgentNS
 		if (best_node == nullptr) return false;
 
 		move = best_node->move_to_reach_position;
-
+		unordered_map<TMoveType, float> choice_map;
+		get_root_choice_map(choice_map);
+		//for (auto pair : choice_map)
+		//{
+		//	cout << bitset<sizeof(TMoveType) * 8>(pair.first) << " " << pair.second << endl;
+		//}
 		return true;
+	}
+
+	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
+	inline void MCTSAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::get_root_choice_map(unordered_map<TMoveType, float> &choice_map)
+	{
+		auto root_node = node_storage.get_node(node_storage.get_root_id());
+		if (root_node == nullptr) return;
+
+		for (auto child_ndx = 0; child_ndx < root_node->num_children; child_ndx++)
+		{
+			auto child_id = root_node->get_child_id(child_ndx);
+			auto child = node_storage.get_node(child_id);
+			if (child == nullptr) continue;
+
+			if (choice_map.count(child->move_to_reach_position) == 0) choice_map[child->move_to_reach_position] = 0.0f;
+			choice_map[child->move_to_reach_position] += child->num_visits / root_node->num_visits;
+		}
 	}
 
 	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>

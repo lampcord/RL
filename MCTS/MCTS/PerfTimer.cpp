@@ -97,3 +97,18 @@ void PerfTimer::print()
 	cout << endl;
 }
 
+ULONGLONG PerfTimer::GetElapsedSystemTime()
+{
+	return GetSystemTime() - system_time_start;
+}
+
+ULONGLONG PerfTimer::GetElapsedProcessTime()
+{
+	return GetProcessTime() - process_time_start;
+}
+
+ULONGLONG PerfTimer::GetElapsedThreadTime()
+{
+	return GetThreadTime() - thread_time_start;
+}
+

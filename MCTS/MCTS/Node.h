@@ -90,7 +90,7 @@ public:
 	Node<int, TPosition, TMoveType> * get_node(int node_id);
 	bool is_null(int node_id) { return node_id == null_id; }
 	int get_null() { return null_id; }
-
+	unsigned int get_num_elements() { return num_elements; }
 	bool validate();
 private:
 	unsigned int num_elements;

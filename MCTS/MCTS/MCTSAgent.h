@@ -1,10 +1,10 @@
 #pragma once
 #include <utility>
 #include <concepts>
+#include <limits>
 #include "game_rules.h"
 #include "squirrel3.h"
-#include <limits>
-
+#include "PerfTimer.h"
 using namespace std;
 using namespace GameRulesNS;
 
@@ -35,9 +35,11 @@ namespace MCTSAgentNS
 	class MCTSAgent
 	{
 	public:
-		MCTSAgent(uint32_t seed = 42, float c = 1.41f) {
+		MCTSAgent(unsigned long long max_time = 10000000, uint32_t seed = 42, float c = 1.41f) {
 			rng = make_unique<Squirrel3>(seed);
+			timer = make_unique<PerfTimer>(false, false, true);
 			_c = c;
+			this->max_time = max_time;
 		};
 		~MCTSAgent() {};
 
@@ -46,7 +48,9 @@ namespace MCTSAgentNS
 	private:
 		TNodeStorage node_storage;
 		unique_ptr<Squirrel3> rng = nullptr;
+		unique_ptr<PerfTimer> timer = nullptr;
 		float _c = 1.41f;
+		unsigned long long max_time = 0;
 
 		TNodeID select(TNodeID node_id);
 		TNodeID expand(TNodeID node_id);
@@ -70,7 +74,9 @@ namespace MCTSAgentNS
 		auto node = node_storage.get_node(root_node_id);
 		if (node == nullptr) return false;
 
-		for (auto x = 0u; x < 2000000; x++)
+		timer->start();
+		auto x = 0u;
+		for (x = 0u; x < 5000000; x++)
 		{
 			//cout << "---------------------------" << endl;
 
@@ -84,7 +90,9 @@ namespace MCTSAgentNS
 
 			back_propogate(node_id, rollout_result);
 
+			if (timer->GetElapsedThreadTime() > max_time) break;
 		}
+		cout << "Time: " << (float)timer->GetElapsedThreadTime() / 10000000.0 << " Loops: " << x << " Nodes: " << node_storage.get_num_elements() << endl;
 		//node_storage.dump();
 		//node_storage.validate();
 		//auto node_id = 0;
@@ -133,7 +141,12 @@ namespace MCTSAgentNS
 			auto num_children = get_num_moves(node->remaining_moves_mask);
 			if (num_children > 0)
 			{
-				node_storage.reserve_child_nodes(node_id, num_children);
+				auto expanded = node_storage.reserve_child_nodes(node_id, num_children);
+				if (!expanded)
+				{
+					node->remaining_moves_mask = 0u;
+					return node_id;
+				}
 			}
 		}
 		if (node->remaining_moves_mask == 0) return node_id;

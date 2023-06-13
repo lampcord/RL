@@ -17,6 +17,10 @@ public:
 	void stop();
 	void print();
 
+	ULONGLONG GetElapsedSystemTime();
+	ULONGLONG GetElapsedProcessTime();
+	ULONGLONG GetElapsedThreadTime();
+
 private:
 	bool use_system;
 	bool use_process;

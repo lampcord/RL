@@ -31,6 +31,7 @@ unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int
 
 	for (auto x = 0u; x < games; x++)
 	{
+		player = x % 2;
 		if (show) cout << "----------" << endl;
 		if (!show)
 		{
@@ -106,9 +107,9 @@ int main()
 	//auto node = Node<int, Connect4NS::PositionType, Connect4NS::MoveType>();
 	//node.show_size();
 
-	typedef  NodeContainerArray<PositionType, MoveType, 10000000> node_container;
+	typedef  NodeContainerArray<PositionType, MoveType, 5000000> node_container;
 	typedef MCTSAgentNS::MCTSAgent<Connect4, node_container, int, PositionType, MoveType> MCTSAgentType;
-	MCTSAgentType mcts_agent;
+	MCTSAgentType mcts_agent(32000000);
 
 	typedef RandomAgentNS::RandomAgent<Connect4, PositionType, MoveType> RandomAgentType;
 	auto seed = (uint32_t)time(NULL);
@@ -120,9 +121,9 @@ int main()
 	
 	PerfTimer pf(true, true, true);
 	pf.start();
-	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 1, true);
-	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSAgentType>(console_agent, mcts_agent, 1, true);
-	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 1, true);
+	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 10, true);
+	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSAgentType>(console_agent, mcts_agent, 10, true);
+	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 1, true);
 	pf.stop();
 	pf.print();
 	cout << "Total Moves: " << moves << endl;

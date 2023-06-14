@@ -1,0 +1,13 @@
+Optimization results
+
+Running 8 simultaneous threads vs. 1 equal time for all threads.
+Player 0: 502 (8 threads)
+Player 1: 444
+Tie: 54
+Changed: 1887
+System: 4220.88 Process: 2125.55 Thread: 2125.55
+Total Moves: 29853
+
+This feels like a lot of resources for minimal improvement.
+
+Running 8 simultaneous threads vs. 1 equal TOTAL time.

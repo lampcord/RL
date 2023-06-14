@@ -75,4 +75,7 @@
       <Filter>Source Files\connect4</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Notes.txt" />
+  </ItemGroup>
 </Project>

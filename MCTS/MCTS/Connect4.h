@@ -7,6 +7,10 @@ namespace Connect4NS
 {
 	struct PositionStruct {
 		unsigned long long position[2];
+
+		bool operator==(const PositionStruct& other) const {
+			return position[0] == other.position[0] && position[1] == other.position[1];
+		}
 	};
 	typedef PositionStruct PositionType;
 	typedef unsigned char MoveType;

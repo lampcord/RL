@@ -11,3 +11,11 @@ Total Moves: 29853
 This feels like a lot of resources for minimal improvement.
 
 Running 8 simultaneous threads vs. 1 equal TOTAL time.
+Player 0: 59
+Player 1: 929
+Tie: 12
+Changed: 2507
+System: 5691.35 Process: 3409.69 Thread: 3409.69
+Total Moves: 30967
+
+Obviously, this is much more effective than combining multiple runs.

@@ -28,7 +28,6 @@ unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int
 		{ "Tie", 0u }
 	};
 	unsigned int total_moves = 0u;
-	unsigned int changed_moves = 0u;
 
 	for (auto x = 0u; x < games; x++)
 	{
@@ -58,39 +57,6 @@ unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int
 					results["Tie"]++;
 					if (show) cout << " Tie." << endl;
 					break;
-				}
-				agent_0.get_root_choice_map(choice_map);
-				agent_0.choose_move(position, player, move);
-				agent_0.get_root_choice_map(choice_map);
-				agent_0.choose_move(position, player, move);
-				agent_0.get_root_choice_map(choice_map);
-				agent_0.choose_move(position, player, move);
-				agent_0.get_root_choice_map(choice_map);
-				agent_0.choose_move(position, player, move);
-				agent_0.get_root_choice_map(choice_map);
-				agent_0.choose_move(position, player, move);
-				agent_0.get_root_choice_map(choice_map);
-				agent_0.choose_move(position, player, move);
-				agent_0.get_root_choice_map(choice_map);
-				agent_0.choose_move(position, player, move);
-				agent_0.get_root_choice_map(choice_map);
-				//cout << "---------------------" << endl;
-				auto best_score = 0.0f;
-				auto best_move = move;
-				for (auto pair : choice_map)
-				{
-					if (pair.second > best_score)
-					{
-						best_score = pair.second;
-						best_move = pair.first;
-					}
-					//cout << bitset<sizeof(TMoveType) * 8>(pair.first) << " " << pair.second << endl;
-				}
-				//cout << " Best: " << bitset<sizeof(TMoveType) * 8>(best_move) << endl;
-				if (move != best_move)
-				{
-					changed_moves++;
-					move = best_move;
 				}
 			}
 			else
@@ -131,7 +97,6 @@ unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int
 	{
 		cout << pair.first << ": " << pair.second << endl;
 	}
-	cout << "Changed: " << changed_moves << endl;
 	return total_moves;
 }
 
@@ -160,7 +125,7 @@ int main()
 	pf.start();
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 10, true);
 	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSAgentType>(console_agent, mcts_agent, 10, true);
-	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 100, false);
+	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 10, false);
 	pf.stop();
 	pf.print();
 	cout << "Total Moves: " << moves << endl;

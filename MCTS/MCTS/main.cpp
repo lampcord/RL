@@ -12,9 +12,14 @@
 #include "Connect4.h"
 
 #include "Node.h"
+#include "NodeRGD.h"
 #include "MCTSAgent.h"
+#include "MCTSRGDAgent.h"
 #include "RandomAgent.h"
 #include "ConsoleAgent.h"
+
+using namespace NodeNS;
+using namespace NodeRGDNS;
 
 template <typename TPositionType, typename TMoveType, typename TGameRules, typename TAgent0Type, typename TAgent1Type>
 unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int games = 1, bool show=true)
@@ -109,6 +114,10 @@ int main()
 	//auto node = Node<int, Connect4NS::PositionType, Connect4NS::MoveType>();
 	//node.show_size();
 
+	typedef  NodeContainerArrayRGD<PositionType, MoveType, 10000000> node_container_RGD;
+	typedef MCTSRGDAgentNS::MCTSRGDAgent<Connect4, node_container_RGD, int, PositionType, MoveType> MCTSRGDAgentType;
+	MCTSRGDAgentType mcts_rgd_agent(100000);
+
 	typedef  NodeContainerArray<PositionType, MoveType, 10000000> node_container;
 	typedef MCTSAgentNS::MCTSAgent<Connect4, node_container, int, PositionType, MoveType> MCTSAgentType;
 	MCTSAgentType mcts_agent(100000);
@@ -125,7 +134,7 @@ int main()
 	pf.start();
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 10, true);
 	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSAgentType>(console_agent, mcts_agent, 10, true);
-	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 10, true);
+	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 10, true);
 	pf.stop();
 	pf.print();
 	cout << "Total Moves: " << moves << endl;

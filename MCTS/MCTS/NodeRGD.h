@@ -21,16 +21,16 @@ is_null(node_id) -> bool
 using namespace std;
 using namespace GameRulesNS;
 
-namespace NodeNS
+namespace NodeRGDNS
 {
 	/*
 	Instead of having an array of nodes, we could store only the position of the first node and then calculate the position of each of the next nodes as an offset from there.
 	???? Would that waste a lot of space????.
 	*/
 	template <typename TNodeID, typename TPosition, typename TMoveType>
-	struct Node
+	struct NodeRGD
 	{
-		Node() {};
+		NodeRGD() {};
 		void initialize(TPosition position, int player_to_move, int move, GameResult result, TNodeID parent_id, TNodeID null_id);
 		void dump();
 		void show_size();
@@ -51,7 +51,7 @@ namespace NodeNS
 	};
 
 	template<typename TNodeID, typename TPosition, typename TMoveType>
-	inline TNodeID Node<TNodeID, TPosition, TMoveType>::get_child_id(unsigned int child_ndx)
+	inline TNodeID NodeRGD<TNodeID, TPosition, TMoveType>::get_child_id(unsigned int child_ndx)
 	{
 		//if (child_ndx >= num_children) return -1;
 
@@ -59,7 +59,7 @@ namespace NodeNS
 	}
 
 	template<typename TNodeID, typename TPosition, typename TMoveType>
-	inline void Node<TNodeID, TPosition, TMoveType>::show_size()
+	inline void NodeRGD<TNodeID, TPosition, TMoveType>::show_size()
 	{
 		cout << "Node Size: " << sizeof(*this) << endl;
 		cout << "num_visits: " << sizeof(num_visits) << endl;
@@ -76,20 +76,20 @@ namespace NodeNS
 	}
 
 	template <typename TPosition, typename TMoveType, unsigned int TMaxNode>
-	class NodeContainerArray
+	class NodeContainerArrayRGD
 	{
 	public:
-		NodeContainerArray() {
-			nodes = make_unique<array<Node<int, TPosition, TMoveType>, TMaxNode>>();
+		NodeContainerArrayRGD() {
+			nodes = make_unique<array<NodeRGD<int, TPosition, TMoveType>, TMaxNode>>();
 		};
-		~NodeContainerArray() {};
+		~NodeContainerArrayRGD() {};
 		void dump();
 
 		int initialize(TPosition& position, int player_to_move);
 		int get_root_id() { return root_id; }
 		bool reserve_child_nodes(int parent_id, unsigned int num_nodes);
 		int create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result);
-		Node<int, TPosition, TMoveType>* get_node(int node_id);
+		NodeRGD<int, TPosition, TMoveType>* get_node(int node_id);
 		bool is_null(int node_id) { return node_id == null_id; }
 		int get_null() { return null_id; }
 		unsigned int get_num_elements() { return num_elements; }
@@ -98,12 +98,12 @@ namespace NodeNS
 		unsigned int num_elements;
 		const int null_id = -1;
 		const int root_id = 0;
-		unique_ptr<array<Node<int, TPosition, TMoveType>, TMaxNode>> nodes;
+		unique_ptr<array<NodeRGD<int, TPosition, TMoveType>, TMaxNode>> nodes;
 	};
 
 
 	template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
-	inline void NodeContainerArray<TPosition, TMoveType, TMaxNode>::dump()
+	inline void NodeContainerArrayRGD<TPosition, TMoveType, TMaxNode>::dump()
 	{
 		for (auto x = 0u; x < num_elements; x++)
 		{
@@ -114,7 +114,7 @@ namespace NodeNS
 	}
 
 	template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
-	inline int NodeContainerArray<TPosition, TMoveType, TMaxNode>::initialize(TPosition& position, int player_to_move)
+	inline int NodeContainerArrayRGD<TPosition, TMoveType, TMaxNode>::initialize(TPosition& position, int player_to_move)
 	{
 		num_elements = root_id;
 		(*nodes)[num_elements].initialize(position, player_to_move, -1, GameResult::keep_playing, null_id, null_id);
@@ -124,7 +124,7 @@ namespace NodeNS
 	}
 
 	template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
-	inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode>::reserve_child_nodes(int parent_id, unsigned int num_nodes)
+	inline bool NodeContainerArrayRGD<TPosition, TMoveType, TMaxNode>::reserve_child_nodes(int parent_id, unsigned int num_nodes)
 	{
 		if (num_elements + num_nodes >= nodes->size()) return false;
 		if (parent_id < 0 || parent_id >= (int)num_elements) return false;
@@ -141,7 +141,7 @@ namespace NodeNS
 	}
 
 	template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
-	inline int NodeContainerArray<TPosition, TMoveType, TMaxNode>::create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result)
+	inline int NodeContainerArrayRGD<TPosition, TMoveType, TMaxNode>::create_child_node(int parent_id, TPosition& position, int player_to_move, int move, GameResult result)
 	{
 		if (parent_id < 0 || parent_id >= (int)num_elements) return null_id;
 
@@ -157,7 +157,7 @@ namespace NodeNS
 	}
 
 	template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
-	inline Node<int, TPosition, TMoveType>* NodeContainerArray<TPosition, TMoveType, TMaxNode>::get_node(int node_id)
+	inline NodeRGD<int, TPosition, TMoveType>* NodeContainerArrayRGD<TPosition, TMoveType, TMaxNode>::get_node(int node_id)
 	{
 		if (node_id >= 0 && node_id < (int)num_elements) return &((*nodes)[node_id]);
 
@@ -165,7 +165,7 @@ namespace NodeNS
 	}
 
 	template<typename TNodeID, typename TPosition, typename TMoveType>
-	inline void Node<TNodeID, TPosition, TMoveType>::initialize(TPosition position, int player_to_move, int move, GameResult result, TNodeID parent_id, TNodeID null_id)
+	inline void NodeRGD<TNodeID, TPosition, TMoveType>::initialize(TPosition position, int player_to_move, int move, GameResult result, TNodeID parent_id, TNodeID null_id)
 	{
 		// These never change after being initialized from create_child_node.
 		this->position = position;
@@ -183,7 +183,7 @@ namespace NodeNS
 	}
 
 	template<typename TNodeID, typename TPosition, typename TMoveType>
-	inline void Node<TNodeID, TPosition, TMoveType>::dump()
+	inline void NodeRGD<TNodeID, TPosition, TMoveType>::dump()
 	{
 		cout << setw(3) << parent_id << " ";
 		cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask) << " ";
@@ -195,7 +195,7 @@ namespace NodeNS
 	}
 
 	template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
-	inline bool NodeContainerArray<TPosition, TMoveType, TMaxNode>::validate()
+	inline bool NodeContainerArrayRGD<TPosition, TMoveType, TMaxNode>::validate()
 	{
 		// all of a node's children should have their parent be the node
 		auto nodes_checked = 0;

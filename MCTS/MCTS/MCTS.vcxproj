@@ -148,6 +148,8 @@
   <ItemGroup>
     <ClInclude Include="Connect4.h" />
     <ClInclude Include="ConsoleAgent.h" />
+    <ClInclude Include="MCTSRGDAgent.h" />
+    <ClInclude Include="NodeRGD.h" />
     <ClInclude Include="RandomAgent.h" />
     <ClInclude Include="game_rules.h" />
     <ClInclude Include="MCTSAgent.h" />

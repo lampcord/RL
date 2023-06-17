@@ -74,6 +74,12 @@
     <ClInclude Include="Connect4.h">
       <Filter>Source Files\connect4</Filter>
     </ClInclude>
+    <ClInclude Include="MCTSRGDAgent.h">
+      <Filter>Header Files\Agents</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeRGD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Notes.txt" />

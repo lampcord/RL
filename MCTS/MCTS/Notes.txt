@@ -24,3 +24,5 @@ Things to look at:
 1) Multithreading
 2) Temporal Decay (100s +.5) / 101 => (s + .005) * 100/101 
    Note: We may not need extra mini-minmax if TD works.
+3) Add call to intrinsic function for get_num_moves. Used in a lot of performance critical places.
+4) Changing from pass by reference to returning tuple.

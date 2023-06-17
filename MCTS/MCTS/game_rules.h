@@ -34,6 +34,9 @@ namespace GameRulesNS
 		}
 	}
 
+	// NOTE:
+	// There is an intrinsic function for this
+	//
 	template <typename TMoveType>
 	unsigned int get_num_moves(const TMoveType& move_mask)
 	{

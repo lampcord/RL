@@ -243,12 +243,19 @@ namespace MCTSAgentNS
 	{
 		auto node = node_storage.get_node(node_id);
 		if (node == nullptr) return;
-		node->num_visits += 1.0f;
-		auto parent = node_storage.get_node(node->parent_id);
-		if (parent == nullptr) return;
 
+		auto parent = node_storage.get_node(node->parent_id);
+		if (parent == nullptr) 
+		{
+			// must update visits even if we have no parent because that would mean we are the root node.
+			node->num_visits += 1.0f;
+			return;
+		}
 		auto score = parent->player_to_move == rollout_result.player ? rollout_result.score : 1.0f - rollout_result.score;
 		node->num_wins += score;
+
+		// need to do this last because it is a trigger to best_child_fast
+		node->num_visits += 1.0f;
 
 		back_propogate(node->parent_id, rollout_result);
 	}
@@ -298,7 +305,7 @@ namespace MCTSAgentNS
 
 		auto exploration_numerator = _c * sqrt(log(node->num_visits));
 
-		auto best_score = -1000.0f;
+		auto best_score = -numeric_limits<float>::infinity();
 		auto best_child_id = node->get_child_id(0);
 		for (auto child_ndx = 0; child_ndx < node->num_children; child_ndx++)
 		{

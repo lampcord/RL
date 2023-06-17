@@ -29,7 +29,7 @@ template <typename TNodeID, typename TPosition, typename TMoveType>
 struct Node
 {
 	Node() {};
-	void initialize(TPosition position, int player_to_move, int move, TNodeID parent_id, TNodeID null_id);
+	void initialize(TPosition position, int player_to_move, int move, GameResult result, TNodeID parent_id, TNodeID null_id);
 	void dump();
 	void show_size();
 	TNodeID get_child_id(unsigned int child_ndx);
@@ -115,7 +115,7 @@ template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
 inline int NodeContainerArray<TPosition, TMoveType, TMaxNode>::initialize(TPosition& position, int player_to_move)
 {
 	num_elements = root_id;
-	(*nodes)[num_elements].initialize(position, player_to_move, -1, null_id, null_id);
+	(*nodes)[num_elements].initialize(position, player_to_move, -1, GameResult::keep_playing, null_id, null_id);
 	num_elements++;
 
 	return root_id;
@@ -146,10 +146,11 @@ inline int NodeContainerArray<TPosition, TMoveType, TMaxNode>::create_child_node
 	auto parent_node = &(*nodes)[parent_id];
 
 	int child_id = parent_node->get_child_id(parent_node->num_children);
-	parent_node->num_children++;
 		
-	(*nodes)[child_id].initialize(position, player_to_move, move, parent_id, null_id);
-	(*nodes)[child_id].result = result;
+	(*nodes)[child_id].initialize(position, player_to_move, move, result, parent_id, null_id);
+
+	// This MUST be done last, otherwise a thread may try to access an uninitialized child.
+	parent_node->num_children++;
 	return child_id;
 }
 
@@ -162,19 +163,19 @@ inline Node<int, TPosition, TMoveType>* NodeContainerArray<TPosition, TMoveType,
 }
 
 template<typename TNodeID, typename TPosition, typename TMoveType>
-inline void Node<TNodeID, TPosition, TMoveType>::initialize(TPosition position, int player_to_move, int move, TNodeID parent_id, TNodeID null_id)
+inline void Node<TNodeID, TPosition, TMoveType>::initialize(TPosition position, int player_to_move, int move, GameResult result, TNodeID parent_id, TNodeID null_id)
 {
 	this->position = position;
 	this->parent_id = parent_id;
 	this->player_to_move = player_to_move;
 	this->move_to_reach_position = move;
+	this->result = result;
 
 	num_visits = 0.0f;
 	num_wins = 0.0f;
 	first_child_id = null_id;
 	num_children = 0;
 	remaining_moves_mask = 0;
-	result = GameResult::keep_playing;
 }	
 
 template<typename TNodeID, typename TPosition, typename TMoveType>

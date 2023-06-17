@@ -19,3 +19,8 @@ System: 5691.35 Process: 3409.69 Thread: 3409.69
 Total Moves: 30967
 
 Obviously, this is much more effective than combining multiple runs.
+
+Things to look at:
+1) Multithreading
+2) Temporal Decay (100s +.5) / 101 => (s + .005) * 100/101 
+   Note: We may not need extra mini-minmax if TD works.

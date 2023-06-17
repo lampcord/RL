@@ -125,7 +125,7 @@ int main()
 	pf.start();
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 10, true);
 	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSAgentType>(console_agent, mcts_agent, 10, true);
-	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 10, false);
+	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSAgentType>(mcts_agent, mcts_agent, 10, true);
 	pf.stop();
 	pf.print();
 	cout << "Total Moves: " << moves << endl;

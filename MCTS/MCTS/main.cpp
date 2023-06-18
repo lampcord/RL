@@ -111,6 +111,9 @@ using namespace Connect4NS;
 
 int main()
 {
+	const unsigned thread_count = std::thread::hardware_concurrency();
+	cout << thread_count << endl;
+
 	//auto node = Node<int, Connect4NS::PositionType, Connect4NS::MoveType>();
 	//node.show_size();
 

@@ -41,7 +41,7 @@ namespace NodeNS
 		TNodeID parent_id = TNodeID();
 
 		TNodeID first_child_id = TNodeID();
-		TPosition position;
+		TPosition position = TPosition();
 		TMoveType move_to_reach_position = 0;
 		TMoveType remaining_moves_mask = 0;
 

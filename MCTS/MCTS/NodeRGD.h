@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <bitset>
 #include <assert.h>
+#include <atomic>
 #include "game_rules.h"
 
 /*
@@ -30,32 +31,31 @@ namespace NodeRGDNS
 	template <typename TNodeID, typename TPosition, typename TMoveType>
 	struct NodeRGD
 	{
-		NodeRGD() {};
+		NodeRGD() : num_visits(0.0f), num_wins(0.0f), first_child_id(TNodeID()), num_children(0) {};
 		void initialize(TPosition position, int player_to_move, int move, GameResult result, TNodeID parent_id, TNodeID null_id);
 		void dump();
 		void show_size();
 		TNodeID get_child_id(unsigned int child_ndx);
 
-		float num_visits = 0.0f;
-		float num_wins = 0.0f;
+		atomic<float>num_visits;
+		atomic<float>num_wins;
 		TNodeID parent_id = TNodeID();
 
-		TNodeID first_child_id = TNodeID();
-		TPosition position;
+		atomic<TNodeID> first_child_id;
+		TPosition position = TPosition();
 		TMoveType move_to_reach_position = 0;
-		TMoveType remaining_moves_mask = 0;
+		atomic<TMoveType> remaining_moves_mask;
 
 		GameResult result = GameResult::keep_playing;
 		unsigned char player_to_move = 0;
-		unsigned char num_children = 0;
+		atomic<unsigned char> num_children;
 	};
-
 	template<typename TNodeID, typename TPosition, typename TMoveType>
 	inline TNodeID NodeRGD<TNodeID, TPosition, TMoveType>::get_child_id(unsigned int child_ndx)
 	{
 		//if (child_ndx >= num_children) return -1;
 
-		return first_child_id + child_ndx;
+		return first_child_id.load() + child_ndx;
 	}
 
 	template<typename TNodeID, typename TPosition, typename TMoveType>
@@ -135,7 +135,7 @@ namespace NodeRGDNS
 		int next_node_id = num_elements;
 		num_elements += num_nodes;
 
-		parent_node->first_child_id = next_node_id;
+		parent_node->first_child_id.store(next_node_id);
 
 		return true;
 	}
@@ -147,7 +147,7 @@ namespace NodeRGDNS
 
 		auto parent_node = &(*nodes)[parent_id];
 
-		int child_id = parent_node->get_child_id(parent_node->num_children);
+		int child_id = parent_node->get_child_id(parent_node->num_children.load());
 
 		(*nodes)[child_id].initialize(position, player_to_move, move, result, parent_id, null_id);
 
@@ -175,23 +175,23 @@ namespace NodeRGDNS
 		this->result = result;
 
 		// These are constantly updated and may need to be atomic.
-		num_visits = 0.0f;
-		num_wins = 0.0f;
-		first_child_id = null_id;
-		num_children = 0;
-		remaining_moves_mask = 0;
+		num_visits.store(0.0f);
+		num_wins.store(0.0f);
+		first_child_id.store(null_id);
+		num_children.store(0);
+		remaining_moves_mask.store(0);
 	}
 
 	template<typename TNodeID, typename TPosition, typename TMoveType>
 	inline void NodeRGD<TNodeID, TPosition, TMoveType>::dump()
 	{
 		cout << setw(3) << parent_id << " ";
-		cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask) << " ";
+		cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask.load()) << " ";
 		cout << bitset<sizeof(TMoveType) * 8>(move_to_reach_position);
 		cout << " [ ";
-		for (auto x = 0; x < num_children; x++) cout << get_child_id(x) << " ";
+		for (auto x = 0; x < num_children.load(); x++) cout << get_child_id(x) << " ";
 		cout << "] ";
-		cout << num_wins << "/" << num_visits << " ";
+		cout << num_wins.load() << "/" << num_visits.load() << " ";
 	}
 
 	template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
@@ -202,7 +202,7 @@ namespace NodeRGDNS
 		for (auto node_id = 0u; node_id < num_elements; node_id++)
 		{
 			auto node = (*nodes)[node_id];
-			for (auto child_ndx = 0; child_ndx < node.num_children; child_ndx++)
+			for (auto child_ndx = 0; child_ndx < node.num_children.load(); child_ndx++)
 			{
 				auto child_id = node.get_child_id(child_ndx);
 				auto child_node = get_node(child_id);
@@ -236,7 +236,7 @@ namespace NodeRGDNS
 			if (parent == nullptr) continue;
 
 			bool found_parents_child = false;
-			for (auto child_ndx = 0; child_ndx < parent->num_children; child_ndx++)
+			for (auto child_ndx = 0; child_ndx < parent->num_children.load(); child_ndx++)
 			{
 				auto child_id = parent->get_child_id(child_ndx);
 				if (child_id == node_id)
@@ -262,9 +262,9 @@ namespace NodeRGDNS
 			if (node.num_children == 0) continue;
 
 			auto child_visits = 0.0f;
-			auto node_visits = node.parent_id == null_id ? node.num_visits : node.num_visits - 1;
+			auto node_visits = node.parent_id == null_id ? node.num_visits.load() : node.num_visits.load() - 1;
 
-			for (auto child_ndx = 0; child_ndx < node.num_children; child_ndx++)
+			for (auto child_ndx = 0; child_ndx < node.num_children.load(); child_ndx++)
 			{
 				auto child_id = node.get_child_id(child_ndx);
 				auto child_node = get_node(child_id);
@@ -273,7 +273,7 @@ namespace NodeRGDNS
 					cout << "VALIDATE FAILED (Valid Child) Node ID: " << node_id << " Child ID: " << child_id << endl;
 					return false;
 				}
-				child_visits += child_node->num_visits;
+				child_visits += child_node->num_visits.load();
 			}
 			if (node_visits != child_visits)
 			{
@@ -297,7 +297,7 @@ namespace NodeRGDNS
 			auto parent = get_node(node.parent_id);
 			auto flip_results = node.player_to_move != parent->player_to_move;
 
-			for (auto child_ndx = 0; child_ndx < node.num_children; child_ndx++)
+			for (auto child_ndx = 0; child_ndx < node.num_children.load(); child_ndx++)
 			{
 				auto child_id = node.get_child_id(child_ndx);
 				auto child_node = get_node(child_id);
@@ -306,12 +306,12 @@ namespace NodeRGDNS
 					cout << "VALIDATE FAILED (Valid Child) Node ID: " << node_id << " Child ID: " << child_id << endl;
 					return false;
 				}
-				child_wins += flip_results ? (child_node->num_visits - child_node->num_wins) : child_node->num_wins;
+				child_wins += flip_results ? (child_node->num_visits.load() - child_node->num_wins.load()) : child_node->num_wins.load();
 			}
 
 			if (node.num_wins < child_wins || node.num_wins > child_wins + 1.0f)
 			{
-				cout << "VALIDATE FAILED (Wins) Node ID: " << node_id << " Wins " << node.num_wins << " Child Wins " << child_wins << endl;
+				cout << "VALIDATE FAILED (Wins) Node ID: " << node_id << " Wins " << node.num_wins.load() << " Child Wins " << child_wins << endl;
 				return false;
 			}
 			nodes_checked++;

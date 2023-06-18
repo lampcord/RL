@@ -7,6 +7,7 @@
 #include "game_rules.h"
 #include "squirrel3.h"
 #include "PerfTimer.h"
+#include "concurrent_queue_cv.h"
 using namespace std;
 using namespace GameRulesNS;
 
@@ -27,10 +28,18 @@ get_initial_position() -> position
 namespace MCTSRGDAgentNS
 {
 	static map<float, float> numerator_cache;
+	
 	struct RolloutResult
 	{
 		float score;
 		unsigned int player;
+	};
+	
+	template <typename TNodeID>
+	struct rollout_queue_package
+	{
+		TNodeID node_id;
+		RolloutResult rollout_result;
 	};
 
 	template <typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
@@ -42,8 +51,25 @@ namespace MCTSRGDAgentNS
 			timer = make_unique<PerfTimer>(false, false, true);
 			_c = c;
 			this->max_time = max_time;
+			worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::expand_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::back_propogate_thread, this);
 		};
-		~MCTSRGDAgent() {};
+		~MCTSRGDAgent() {
+			cout << "Discarded Select:         " << select_queue.release_all() << endl;
+			cout << "Discarded Expand:         " << expand_queue.release_all() << endl;
+			cout << "Discarded Rollout:        " << rollout_queue.release_all() << endl;
+			cout << "Discarded Back Propogate: " << back_propogate_queue.release_all() << endl;
+			for (auto& t : worker_threads) t.join();
+		};
 
 		bool choose_move(TPosition position, unsigned int player, TMoveType& move);
 		void get_root_choice_map(unordered_map<TMoveType, float>& choice_map);
@@ -64,6 +90,18 @@ namespace MCTSRGDAgentNS
 		TNodeID best_child_fast(TNodeID node_id);
 		TNodeID most_visited(TNodeID node_id);
 		float ucb(TNodeID node_id, float c);
+
+		vector<thread> worker_threads;
+
+		void select_thread();
+		void expand_thread();
+		void rollout_thread();
+		void back_propogate_thread();
+
+		cq::concurrent_queue<TNodeID>select_queue;
+		cq::concurrent_queue<TNodeID>expand_queue;
+		cq::concurrent_queue<rollout_queue_package<TNodeID>>rollout_queue;
+		cq::concurrent_queue<rollout_queue_package<TNodeID>>back_propogate_queue;
 	};
 
 	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
@@ -78,24 +116,38 @@ namespace MCTSRGDAgentNS
 		auto node = node_storage.get_node(root_node_id);
 		if (node == nullptr) return false;
 
-		timer->start();
-		auto x = 0u;
-		for (x = 0u; x < 5000000; x++)
-		{
-			//cout << "---------------------------" << endl;
+		select_queue.enable_push();
+		rollout_queue.enable_push();
+		rollout_queue.enable_push();
+		back_propogate_queue.enable_push();
 
-			auto node_id = select(root_node_id);
+		for (auto x = 0; x < 64; x ++) select_queue.push(root_node_id);
 
-			node_id = expand(node_id);
+		this_thread::sleep_for(chrono::milliseconds(100));
 
-			RolloutResult rollout_result;
-			rollout(node_id, rollout_result);
-			//cout << "Result: " << (int)rollout_result.player << " Score: " << rollout_result.score << endl;
+		back_propogate_queue.disable_push();
+		rollout_queue.disable_push();
+		rollout_queue.disable_push();
+		select_queue.disable_push();
 
-			back_propogate(node_id, rollout_result);
+		//timer->start();
+		//auto x = 0u;
+		//for (x = 0u; x < 5000000; x++)
+		//{
+		//	//cout << "---------------------------" << endl;
 
-			if (timer->GetElapsedThreadTime() > max_time) break;
-		}
+		//	auto node_id = select(root_node_id);
+
+		//	node_id = expand(node_id);
+
+		//	RolloutResult rollout_result;
+		//	rollout(node_id, rollout_result);
+		//	//cout << "Result: " << (int)rollout_result.player << " Score: " << rollout_result.score << endl;
+
+		//	back_propogate(node_id, rollout_result);
+
+		//	if (timer->GetElapsedThreadTime() > max_time) break;
+		//}
 		//cout << "Time: " << (float)timer->GetElapsedThreadTime() / 10000000.0 << " Loops: " << x << " Nodes: " << node_storage.get_num_elements() << endl;
 		//node_storage.dump();
 		//node_storage.validate();
@@ -394,6 +446,52 @@ namespace MCTSRGDAgentNS
 		auto exploitation = node->num_wins.load() / node->num_visits.load();
 
 		return exploration + exploitation;
+	}
+
+	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
+	inline void MCTSRGDAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::select_thread()
+	{
+		TNodeID id;
+		while (select_queue.pop(id))
+		{
+			TNodeID new_id = select(id);
+			expand_queue.push(new_id);
+		}
+	}
+
+	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
+	inline void MCTSRGDAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::expand_thread()
+	{
+		TNodeID id;
+		while (expand_queue.pop(id))
+		{
+			TNodeID new_id = expand(id);
+			rollout_queue_package<TNodeID> package;
+			package.node_id = new_id;
+			rollout_queue.push(package);
+		}
+	}
+
+	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
+	inline void MCTSRGDAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::rollout_thread()
+	{
+		rollout_queue_package<TNodeID> package;
+		while (rollout_queue.pop(package))
+		{
+			rollout(package.node_id, package.rollout_result);
+			back_propogate_queue.push(package);
+		}
+	}
+
+	template<typename TGameRules, typename TNodeStorage, typename TNodeID, typename TPosition, typename TMoveType>
+	inline void MCTSRGDAgent<TGameRules, TNodeStorage, TNodeID, TPosition, TMoveType>::back_propogate_thread()
+	{
+		rollout_queue_package<TNodeID> package;
+		while (back_propogate_queue.pop(package))
+		{
+			back_propogate(package.node_id, package.rollout_result);
+			select_queue.push(node_storage.get_root_id());
+		}
 	}
 
 }

@@ -137,6 +137,8 @@ int main()
 	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 10, true);
 	pf.stop();
 	pf.print();
-	cout << "Total Moves: " << moves << endl;
+	cout << "Total Moves:   " << moves << endl;
+	cout << "BPS (MCTS):    " << mcts_agent.get_num_back_propogates() << endl;
+	cout << "BPS (MCTSRGD): " << mcts_rgd_agent.get_num_back_propogates() << endl;
 }
 

@@ -46,12 +46,14 @@ namespace MCTSAgentNS
 
 		bool choose_move(TPosition position, unsigned int player, TMoveType& move);
 		void get_root_choice_map(unordered_map<TMoveType, float> &choice_map);
+		unsigned long long get_num_back_propogates() { return num_back_propogates; }
 	private:
 		TNodeStorage node_storage;
 		unique_ptr<Squirrel3> rng = nullptr;
 		unique_ptr<PerfTimer> timer = nullptr;
 		float _c = 1.41f;
-		unsigned long long max_time = 0;
+		unsigned long long max_time = 0u;
+		unsigned long long num_back_propogates = 0u;
 
 		TNodeID select(TNodeID node_id);
 		TNodeID expand(TNodeID node_id);
@@ -249,6 +251,7 @@ namespace MCTSAgentNS
 		{
 			// must update visits even if we have no parent because that would mean we are the root node.
 			node->num_visits += 1.0f;
+			num_back_propogates++;
 			return;
 		}
 		auto score = parent->player_to_move == rollout_result.player ? rollout_result.score : 1.0f - rollout_result.score;

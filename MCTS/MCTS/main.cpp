@@ -22,7 +22,7 @@ using namespace NodeNS;
 using namespace NodeRGDNS;
 
 template <typename TPositionType, typename TMoveType, typename TGameRules, typename TAgent0Type, typename TAgent1Type>
-unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int games = 1, bool show=true)
+unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int games = 1, bool show = true)
 {
 	TPositionType position;
 	unsigned int player = 0;
@@ -76,7 +76,7 @@ unsigned int play_games(TAgent0Type& agent_0, TAgent1Type& agent_1, unsigned int
 			total_moves++;
 
 			TGameRules::move(position, player, move, move_result);
-			if (show) cout << " Move: " << bitset <sizeof(TMoveType) * 8> (move) << endl;
+			if (show) cout << " Move: " << bitset <sizeof(TMoveType) * 8>(move) << endl;
 
 			position = move_result.position;
 			player = move_result.next_players_turn;
@@ -132,26 +132,22 @@ int main()
 
 	typedef ConsoleAgentNS::ConsoleAgent<Connect4, PositionType, MoveType> ConsoleAgentType;
 	ConsoleAgentType console_agent;
-	
+
 	PerfTimer pf(true, true, true);
 	pf.start();
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 10, true);
 	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSAgentType>(console_agent, mcts_agent, 10, true);
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 10, true);
-	auto moves = 0;
-	for (auto x = 0; x < 10; x++)
-	{
-		mcts_rgd_agent.clear_back_propogates();
-		moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 1, false);
-		cout << "Total Moves:   " << moves << endl;
-		cout << "BPS (MCTS):    " << mcts_agent.get_num_back_propogates() << endl;
-		cout << "BPS (MCTSRGD): " << mcts_rgd_agent.get_num_back_propogates() << endl;
-		cout << "Cycles / move: " << (float)mcts_rgd_agent.get_num_back_propogates() / (float)moves << endl;
-		mcts_rgd_agent.add_select_thread();
-		mcts_rgd_agent.add_rollout_thread();
-		mcts_rgd_agent.add_back_propogate_thread();
-	}
-	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSRGDAgentType, MCTSRGDAgentType>(mcts_rgd_agent, mcts_rgd_agent, 10, true);
+		//mcts_rgd_agent.clear_back_propogates();
+	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 10, false);
+	cout << "Total Moves:   " << moves << endl;
+	cout << "BPS (MCTS):    " << mcts_agent.get_num_back_propogates() << endl;
+	cout << "BPS (MCTSRGD): " << mcts_rgd_agent.get_num_back_propogates() << endl;
+	cout << "Cycles / move: " << (float)mcts_rgd_agent.get_num_back_propogates() / (float)moves << endl;
+	//mcts_rgd_agent.add_select_thread();
+	//mcts_rgd_agent.add_rollout_thread();
+	//mcts_rgd_agent.add_back_propogate_thread();
+//auto moves = play_games<PositionType, MoveType, Connect4, MCTSRGDAgentType, MCTSRGDAgentType>(mcts_rgd_agent, mcts_rgd_agent, 10, true);
 	pf.stop();
 	pf.print();
 

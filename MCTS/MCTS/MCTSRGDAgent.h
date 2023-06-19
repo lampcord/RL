@@ -75,6 +75,22 @@ namespace MCTSRGDAgentNS
 		bool choose_move(TPosition position, unsigned int player, TMoveType& move);
 		void get_root_choice_map(unordered_map<TMoveType, float>& choice_map);
 		unsigned long long get_num_back_propogates() { return num_back_propogates; }
+		void clear_back_propogates() { num_back_propogates = 0u; }
+		void add_select_thread()
+		{
+			worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
+			cout << "Total Threads: " << worker_threads.size() << endl;
+		}
+		void add_rollout_thread()
+		{
+			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
+			cout << "Total Threads: " << worker_threads.size() << endl;
+		}
+		void add_back_propogate_thread()
+		{
+			worker_threads.emplace_back(&MCTSRGDAgent::back_propogate_thread, this);
+			cout << "Total Threads: " << worker_threads.size() << endl;
+		}
 	private:
 		TNodeStorage node_storage;
 		unique_ptr<Squirrel3> rng = nullptr;

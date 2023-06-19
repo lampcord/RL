@@ -138,12 +138,22 @@ int main()
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, ConsoleAgentType>(mcts_agent, console_agent, 10, true);
 	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSAgentType>(console_agent, mcts_agent, 10, true);
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 10, true);
-	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 10, false);
+	auto moves = 0;
+	for (auto x = 0; x < 10; x++)
+	{
+		mcts_rgd_agent.clear_back_propogates();
+		moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 1, false);
+		cout << "Total Moves:   " << moves << endl;
+		cout << "BPS (MCTS):    " << mcts_agent.get_num_back_propogates() << endl;
+		cout << "BPS (MCTSRGD): " << mcts_rgd_agent.get_num_back_propogates() << endl;
+		cout << "Cycles / move: " << (float)mcts_rgd_agent.get_num_back_propogates() / (float)moves << endl;
+		mcts_rgd_agent.add_select_thread();
+		mcts_rgd_agent.add_rollout_thread();
+		mcts_rgd_agent.add_back_propogate_thread();
+	}
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSRGDAgentType, MCTSRGDAgentType>(mcts_rgd_agent, mcts_rgd_agent, 10, true);
 	pf.stop();
 	pf.print();
-	cout << "Total Moves:   " << moves << endl;
-	cout << "BPS (MCTS):    " << mcts_agent.get_num_back_propogates() << endl;
-	cout << "BPS (MCTSRGD): " << mcts_rgd_agent.get_num_back_propogates() << endl;
+
 }
 

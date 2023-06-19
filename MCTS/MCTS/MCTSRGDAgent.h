@@ -62,6 +62,8 @@ namespace MCTSRGDAgentNS
 			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
 			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
 			worker_threads.emplace_back(&MCTSRGDAgent::back_propogate_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::back_propogate_thread, this);
+			worker_threads.emplace_back(&MCTSRGDAgent::back_propogate_thread, this);
 		};
 		~MCTSRGDAgent() {
 			cout << "Discarded Select:         " << select_queue.release_all() << endl;

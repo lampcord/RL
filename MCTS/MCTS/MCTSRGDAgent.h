@@ -183,14 +183,14 @@ namespace MCTSRGDAgentNS
 		auto root_node = node_storage.get_node(node_storage.get_root_id());
 		if (root_node == nullptr) return;
 
-		for (auto child_ndx = 0; child_ndx < root_node->num_children.load(memory_order_seq_cst); child_ndx++)
+		for (auto child_ndx = 0; child_ndx < root_node->num_children.load(memory_order_acquire); child_ndx++)
 		{
 			auto child_id = root_node->get_child_id(child_ndx);
 			auto child = node_storage.get_node(child_id);
 			if (child == nullptr) continue;
 
 			if (choice_map.count(child->move_to_reach_position) == 0) choice_map[child->move_to_reach_position] = 0.0f;
-			choice_map[child->move_to_reach_position] += child->num_visits.load(memory_order_seq_cst) / root_node->num_visits.load(memory_order_seq_cst);
+			choice_map[child->move_to_reach_position] += child->num_visits.load(memory_order_acquire) / root_node->num_visits.load(memory_order_acquire);
 		}
 	}
 
@@ -217,21 +217,21 @@ namespace MCTSRGDAgentNS
 		{
 			TMoveType remaining_moves_mask;
 			TGameRules::get_legal_moves(node->position, node->player_to_move, remaining_moves_mask);
-			node->remaining_moves_mask.store(remaining_moves_mask, memory_order_seq_cst);
-			auto num_children = get_num_moves(node->remaining_moves_mask.load(memory_order_seq_cst));
+			node->remaining_moves_mask.store(remaining_moves_mask, memory_order_release);
+			auto num_children = get_num_moves(node->remaining_moves_mask.load(memory_order_acquire));
 			if (num_children > 0)
 			{
 				auto expanded = node_storage.reserve_child_nodes(node_id, num_children);
 				if (!expanded)
 				{
-					node->remaining_moves_mask.store(0u, memory_order_seq_cst);
+					node->remaining_moves_mask.store(0u, memory_order_release);
 					return node_id;
 				}
 			}
 		}
 		if (node->remaining_moves_mask == 0) return node_id;
 
-		auto move = get_first_move(node->remaining_moves_mask.load(memory_order_seq_cst));
+		auto move = get_first_move(node->remaining_moves_mask.load(memory_order_acquire));
 		MoveResult<TPosition> move_result;
 		TGameRules::move(node->position, node->player_to_move, move, move_result);
 		node->remaining_moves_mask &= ~move;
@@ -327,7 +327,7 @@ namespace MCTSRGDAgentNS
 
 		auto best_score = ucb(node->get_child_id(0), _c);
 		auto best_child_id = node->get_child_id(0);
-		for (auto child_ndx = 1; child_ndx < node->num_children.load(memory_order_seq_cst); child_ndx++)
+		for (auto child_ndx = 1; child_ndx < node->num_children.load(memory_order_acquire); child_ndx++)
 		{
 			auto score = ucb(node->get_child_id(child_ndx), _c);
 			if (score == numeric_limits<float>::infinity())
@@ -361,11 +361,11 @@ namespace MCTSRGDAgentNS
 		if (node == nullptr) return node_id;
 		if (node->num_children == 0) return node_id;
 
-		auto exploration_numerator = _c * sqrt(log(node->num_visits.load(memory_order_seq_cst)));
+		auto exploration_numerator = _c * sqrt(log(node->num_visits.load(memory_order_acquire)));
 
 		auto best_score = -numeric_limits<float>::infinity();
 		auto best_child_id = node->get_child_id(0);
-		for (auto child_ndx = 0; child_ndx < node->num_children.load(memory_order_seq_cst); child_ndx++)
+		for (auto child_ndx = 0; child_ndx < node->num_children.load(memory_order_acquire); child_ndx++)
 		{
 			auto score = numeric_limits<float>::infinity();
 			auto child_id = node->get_child_id(child_ndx);
@@ -377,8 +377,8 @@ namespace MCTSRGDAgentNS
 				break;
 			}
 
-			auto exploration = exploration_numerator / sqrt(child->num_visits.load(memory_order_seq_cst));
-			auto exploitation = child->num_wins.load(memory_order_seq_cst) / child->num_visits.load(memory_order_seq_cst);
+			auto exploration = exploration_numerator / sqrt(child->num_visits.load(memory_order_acquire));
+			auto exploitation = child->num_wins.load(memory_order_acquire) / child->num_visits.load(memory_order_acquire);
 
 			score = exploration + exploitation;
 			if (score > best_score)
@@ -399,7 +399,7 @@ namespace MCTSRGDAgentNS
 
 		auto best_score = 0.0f;
 		auto best_child_id = -1;
-		for (auto child_ndx = 0; child_ndx < node->num_children.load(memory_order_seq_cst); child_ndx++)
+		for (auto child_ndx = 0; child_ndx < node->num_children.load(memory_order_acquire); child_ndx++)
 		{
 			auto child_id = node->get_child_id(child_ndx);
 			auto child = node_storage.get_node(child_id);
@@ -416,7 +416,7 @@ namespace MCTSRGDAgentNS
 				}
 			}
 
-			auto score = child->num_visits.load(memory_order_seq_cst);
+			auto score = child->num_visits.load(memory_order_acquire);
 			if (child_ndx == 0 || score > best_score)
 			{
 				best_score = score;
@@ -442,8 +442,8 @@ namespace MCTSRGDAgentNS
 
 		if (node->num_visits == 0.0f) return numeric_limits<float>::infinity();
 
-		auto exploration = c * sqrt(log(parent->num_visits.load(memory_order_seq_cst)) / node->num_visits.load(memory_order_seq_cst));
-		auto exploitation = node->num_wins.load(memory_order_seq_cst) / node->num_visits.load(memory_order_seq_cst);
+		auto exploration = c * sqrt(log(parent->num_visits.load(memory_order_acquire)) / node->num_visits.load(memory_order_acquire));
+		auto exploitation = node->num_wins.load(memory_order_acquire) / node->num_visits.load(memory_order_acquire);
 
 		return exploration + exploitation;
 	}

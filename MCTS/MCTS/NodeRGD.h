@@ -55,7 +55,7 @@ namespace NodeRGDNS
 	{
 		//if (child_ndx >= num_children) return -1;
 
-		return first_child_id.load(memory_order_seq_cst) + child_ndx;
+		return first_child_id.load(memory_order_acquire) + child_ndx;
 	}
 
 	template<typename TNodeID, typename TPosition, typename TMoveType>
@@ -135,7 +135,7 @@ namespace NodeRGDNS
 		int next_node_id = num_elements;
 		num_elements += num_nodes;
 
-		parent_node->first_child_id.store(next_node_id, memory_order_seq_cst);
+		parent_node->first_child_id.store(next_node_id, memory_order_release);
 
 		return true;
 	}
@@ -147,7 +147,7 @@ namespace NodeRGDNS
 
 		auto parent_node = &(*nodes)[parent_id];
 
-		int child_id = parent_node->get_child_id(parent_node->num_children.load(memory_order_seq_cst));
+		int child_id = parent_node->get_child_id(parent_node->num_children.load(memory_order_acquire));
 
 		(*nodes)[child_id].initialize(position, player_to_move, move, result, parent_id, null_id);
 
@@ -175,23 +175,23 @@ namespace NodeRGDNS
 		this->result = result;
 
 		// These are constantly updated and may need to be atomic.
-		num_visits.store(0.0f, memory_order_seq_cst);
-		num_wins.store(0.0f, memory_order_seq_cst);
-		first_child_id.store(null_id, memory_order_seq_cst);
-		num_children.store(0, memory_order_seq_cst);
-		remaining_moves_mask.store(0, memory_order_seq_cst);
+		num_visits.store(0.0f, memory_order_release);
+		num_wins.store(0.0f, memory_order_release);
+		first_child_id.store(null_id, memory_order_release);
+		num_children.store(0, memory_order_release);
+		remaining_moves_mask.store(0, memory_order_release);
 	}
 
 	template<typename TNodeID, typename TPosition, typename TMoveType>
 	inline void NodeRGD<TNodeID, TPosition, TMoveType>::dump()
 	{
 		cout << setw(3) << parent_id << " ";
-		cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask.load(memory_order_seq_cst)) << " ";
+		cout << bitset<sizeof(TMoveType) * 8>(remaining_moves_mask.load(memory_order_acquire)) << " ";
 		cout << bitset<sizeof(TMoveType) * 8>(move_to_reach_position);
 		cout << " [ ";
-		for (auto x = 0; x < num_children.load(memory_order_seq_cst); x++) cout << get_child_id(x) << " ";
+		for (auto x = 0; x < num_children.load(memory_order_acquire); x++) cout << get_child_id(x) << " ";
 		cout << "] ";
-		cout << num_wins.load(memory_order_seq_cst) << "/" << num_visits.load(memory_order_seq_cst) << " ";
+		cout << num_wins.load(memory_order_acquire) << "/" << num_visits.load(memory_order_acquire) << " ";
 	}
 
 	template<typename TPosition, typename TMoveType, unsigned int TMaxNode>
@@ -202,7 +202,7 @@ namespace NodeRGDNS
 		for (auto node_id = 0u; node_id < num_elements; node_id++)
 		{
 			auto node = (*nodes)[node_id];
-			for (auto child_ndx = 0; child_ndx < node.num_children.load(memory_order_seq_cst); child_ndx++)
+			for (auto child_ndx = 0; child_ndx < node.num_children.load(memory_order_acquire); child_ndx++)
 			{
 				auto child_id = node.get_child_id(child_ndx);
 				auto child_node = get_node(child_id);
@@ -236,7 +236,7 @@ namespace NodeRGDNS
 			if (parent == nullptr) continue;
 
 			bool found_parents_child = false;
-			for (auto child_ndx = 0; child_ndx < parent->num_children.load(memory_order_seq_cst); child_ndx++)
+			for (auto child_ndx = 0; child_ndx < parent->num_children.load(memory_order_acquire); child_ndx++)
 			{
 				auto child_id = parent->get_child_id(child_ndx);
 				if (child_id == node_id)
@@ -262,9 +262,9 @@ namespace NodeRGDNS
 			if (node.num_children == 0) continue;
 
 			auto child_visits = 0.0f;
-			auto node_visits = node.parent_id == null_id ? node.num_visits.load(memory_order_seq_cst) : node.num_visits.load(memory_order_seq_cst) - 1;
+			auto node_visits = node.parent_id == null_id ? node.num_visits.load(memory_order_acquire) : node.num_visits.load(memory_order_acquire) - 1;
 
-			for (auto child_ndx = 0; child_ndx < node.num_children.load(memory_order_seq_cst); child_ndx++)
+			for (auto child_ndx = 0; child_ndx < node.num_children.load(memory_order_acquire); child_ndx++)
 			{
 				auto child_id = node.get_child_id(child_ndx);
 				auto child_node = get_node(child_id);
@@ -273,7 +273,7 @@ namespace NodeRGDNS
 					cout << "VALIDATE FAILED (Valid Child) Node ID: " << node_id << " Child ID: " << child_id << endl;
 					return false;
 				}
-				child_visits += child_node->num_visits.load(memory_order_seq_cst);
+				child_visits += child_node->num_visits.load(memory_order_acquire);
 			}
 			if (node_visits != child_visits)
 			{
@@ -297,7 +297,7 @@ namespace NodeRGDNS
 			auto parent = get_node(node.parent_id);
 			auto flip_results = node.player_to_move != parent->player_to_move;
 
-			for (auto child_ndx = 0; child_ndx < node.num_children.load(memory_order_seq_cst); child_ndx++)
+			for (auto child_ndx = 0; child_ndx < node.num_children.load(memory_order_acquire); child_ndx++)
 			{
 				auto child_id = node.get_child_id(child_ndx);
 				auto child_node = get_node(child_id);
@@ -306,12 +306,12 @@ namespace NodeRGDNS
 					cout << "VALIDATE FAILED (Valid Child) Node ID: " << node_id << " Child ID: " << child_id << endl;
 					return false;
 				}
-				child_wins += flip_results ? (child_node->num_visits.load(memory_order_seq_cst) - child_node->num_wins.load(memory_order_seq_cst)) : child_node->num_wins.load(memory_order_seq_cst);
+				child_wins += flip_results ? (child_node->num_visits.load(memory_order_acquire) - child_node->num_wins.load(memory_order_acquire)) : child_node->num_wins.load(memory_order_acquire);
 			}
 
 			if (node.num_wins < child_wins || node.num_wins > child_wins + 1.0f)
 			{
-				cout << "VALIDATE FAILED (Wins) Node ID: " << node_id << " Wins " << node.num_wins.load(memory_order_seq_cst) << " Child Wins " << child_wins << endl;
+				cout << "VALIDATE FAILED (Wins) Node ID: " << node_id << " Wins " << node.num_wins.load(memory_order_acquire) << " Child Wins " << child_wins << endl;
 				return false;
 			}
 			nodes_checked++;

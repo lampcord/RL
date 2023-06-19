@@ -46,24 +46,23 @@ namespace MCTSRGDAgentNS
 	class MCTSRGDAgent
 	{
 	public:
-		MCTSRGDAgent(unsigned long long max_time = 10000000, uint32_t seed = 42, float c = 1.41f) {
+		MCTSRGDAgent(unsigned long long max_time = 10000000, 
+			uint32_t seed = 42,
+			unsigned int select_threads = 4u,
+			unsigned int expand_threads = 1u,
+			unsigned int rollout_threads = 5u,
+			unsigned int back_propogate_threads = 4u,
+			float c = 1.41f) {
 			rng = make_unique<Squirrel3>(seed);
 			timer = make_unique<PerfTimer>(false, false, true);
 			_c = c;
 			this->max_time = max_time;
-			worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::expand_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::back_propogate_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::back_propogate_thread, this);
-			worker_threads.emplace_back(&MCTSRGDAgent::back_propogate_thread, this);
+
+			for (auto x = 0u; x < select_threads; x++)	worker_threads.emplace_back(&MCTSRGDAgent::select_thread, this);
+			for (auto x = 0u; x < expand_threads; x++)	worker_threads.emplace_back(&MCTSRGDAgent::expand_thread, this);
+			for (auto x = 0u; x < rollout_threads; x++)	worker_threads.emplace_back(&MCTSRGDAgent::rollout_thread, this);
+			for (auto x = 0u; x < back_propogate_threads; x++ )	worker_threads.emplace_back(&MCTSRGDAgent::back_propogate_thread, this);
+			cout << "Total Threads: " << worker_threads.size() << endl;
 		};
 		~MCTSRGDAgent() {
 			cout << "Discarded Select:         " << select_queue.release_all() << endl;
@@ -125,7 +124,7 @@ namespace MCTSRGDAgentNS
 
 		for (auto x = 0; x < 64; x ++) select_queue.push(root_node_id);
 
-		this_thread::sleep_for(chrono::milliseconds(100));
+		this_thread::sleep_for(chrono::microseconds(max_time));
 
 		back_propogate_queue.disable_push();
 		rollout_queue.disable_push();

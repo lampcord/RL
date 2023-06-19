@@ -119,7 +119,7 @@ int main()
 
 	typedef  NodeContainerArrayRGD<PositionType, MoveType, 10000000> node_container_RGD;
 	typedef MCTSRGDAgentNS::MCTSRGDAgent<Connect4, node_container_RGD, int, PositionType, MoveType> MCTSRGDAgentType;
-	MCTSRGDAgentType mcts_rgd_agent(100000);
+	MCTSRGDAgentType mcts_rgd_agent(100000, 42, 1, 1, 1, 1);
 
 	typedef  NodeContainerArray<PositionType, MoveType, 10000000> node_container;
 	typedef MCTSAgentNS::MCTSAgent<Connect4, node_container, int, PositionType, MoveType> MCTSAgentType;

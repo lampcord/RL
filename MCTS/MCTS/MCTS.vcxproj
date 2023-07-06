@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="backgammon.cpp" />
     <ClCompile Include="Connect4.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PerfTimer.cpp" />

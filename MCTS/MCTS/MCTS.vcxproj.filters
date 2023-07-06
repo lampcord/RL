@@ -25,6 +25,9 @@
     <Filter Include="Source Files\connect4">
       <UniqueIdentifier>{baea347a-f748-4025-af34-4ca2238031e4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\backgammon">
+      <UniqueIdentifier>{a61e4836-adb1-4de7-a34f-8335fd984b0f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -41,6 +44,9 @@
     </ClCompile>
     <ClCompile Include="Connect4.cpp">
       <Filter>Source Files\connect4</Filter>
+    </ClCompile>
+    <ClCompile Include="backgammon.cpp">
+      <Filter>Source Files\backgammon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

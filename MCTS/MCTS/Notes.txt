@@ -26,3 +26,6 @@ Things to look at:
    Note: We may not need extra mini-minmax if TD works.
 3) Add call to intrinsic function for get_num_moves. Used in a lot of performance critical places.
 4) Changing from pass by reference to returning tuple.
+5) Instead of passing node id to rollout, can we just pass the position, player_to_move and result?
+   This would eliminate the uneeded access to the node storage.
+6) Look into 'striping' the node class if there is a way to isolate information only needed in some areas. 

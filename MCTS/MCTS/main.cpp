@@ -10,6 +10,7 @@
 #include "test_game.h"
 #include "TicTacToe.h"
 #include "Connect4.h"
+#include "backgammon.h"
 
 #include "Node.h"
 #include "NodeRGD.h"
@@ -111,6 +112,11 @@ using namespace Connect4NS;
 
 int main()
 {
+	BackgammonNS::PositionType bgposition;
+	BackgammonNS::Backgammon::get_initial_position(bgposition);
+	BackgammonNS::Backgammon::render(bgposition);
+	return 0;
+
 	const unsigned thread_count = std::thread::hardware_concurrency();
 	cout << thread_count << endl;
 
@@ -119,11 +125,11 @@ int main()
 
 	typedef  NodeContainerArrayRGD<PositionType, MoveType, 10000000> node_container_RGD;
 	typedef MCTSRGDAgentNS::MCTSRGDAgent<Connect4, node_container_RGD, int, PositionType, MoveType> MCTSRGDAgentType;
-	MCTSRGDAgentType mcts_rgd_agent(3200000, 42, 1, 1, 1, 1);
+	MCTSRGDAgentType mcts_rgd_agent(100000, 42, 1, 1, 1, 1);
 
 	typedef  NodeContainerArray<PositionType, MoveType, 10000000> node_container;
 	typedef MCTSAgentNS::MCTSAgent<Connect4, node_container, int, PositionType, MoveType> MCTSAgentType;
-	MCTSAgentType mcts_agent(3200000);
+	MCTSAgentType mcts_agent(100000);
 
 	typedef RandomAgentNS::RandomAgent<Connect4, PositionType, MoveType> RandomAgentType;
 	auto seed = (uint32_t)time(NULL);
@@ -136,8 +142,8 @@ int main()
 	PerfTimer pf(true, true, true);
 	pf.start();
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSRGDAgentType, ConsoleAgentType>(mcts_rgd_agent, console_agent, 10, true);
-	auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSRGDAgentType>(console_agent, mcts_rgd_agent, 10, true);
-	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 10, true);
+	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSRGDAgentType>(console_agent, mcts_rgd_agent, 10, true);
+	auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 10, false);
 		//mcts_rgd_agent.clear_back_propogates();
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSAgentType, MCTSRGDAgentType>(mcts_agent, mcts_rgd_agent, 10, false);
 	cout << "Total Moves:   " << moves << endl;

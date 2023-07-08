@@ -3,7 +3,7 @@
 
 using namespace GameRulesNS;
 
-namespace Connect4NS
+namespace BackgammonNS
 {
 	struct PositionStruct {
 		unsigned long long position[2];
@@ -15,7 +15,7 @@ namespace Connect4NS
 	typedef PositionStruct PositionType;
 	typedef unsigned char MoveType;
 
-	class Connect4
+	class Backgammon
 	{
 	public:
 		static void move(const PositionType& position, const unsigned char player, const MoveType move, MoveResult<PositionType>& move_result);
@@ -24,8 +24,6 @@ namespace Connect4NS
 		static void render(const PositionType& position);
 		static MoveType prompt_user(const PositionType& position, const unsigned char player);
 
-		static void build_win_table_set();
+		static void render_board_section(const BackgammonNS::PositionType& position, bool top);
 	};
-
 }
-

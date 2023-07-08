@@ -151,6 +151,7 @@
     <ClCompile Include="TicTacToe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="backgammon.h" />
     <ClInclude Include="concurrent_queue_cv.h" />
     <ClInclude Include="Connect4.h" />
     <ClInclude Include="ConsoleAgent.h" />

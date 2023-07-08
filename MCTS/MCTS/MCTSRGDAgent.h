@@ -185,7 +185,7 @@ namespace MCTSRGDAgentNS
 		if (best_node == nullptr) return false;
 
 		move = best_node->move_to_reach_position;
-		cout << "EV:" << best_node->num_wins / best_node->num_visits << endl;
+		//cout << "EV:" << best_node->num_wins / best_node->num_visits << endl;
 		unordered_map<TMoveType, float> choice_map;
 		get_root_choice_map(choice_map);
 		//for (auto pair : choice_map)

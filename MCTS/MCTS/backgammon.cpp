@@ -2,6 +2,7 @@
 #include <tuple>
 #include <iostream>
 #include <array>
+#include <bitset>
 /*
 
 Format for storing a backgammon position:
@@ -105,6 +106,35 @@ namespace BackgammonNS
     {
         position.position[0] = 0b0000000100000000000000000000010101000001001100000000000000000101;
         position.position[1] = 0b0000101010000000000000000001100000001010000000000000000000010010;
+    }
+
+    void Backgammon::get_legal_moves(const PositionType& position, const unsigned char player, MoveType& legal_moves)
+    {
+        unsigned long long workspace = position.position[0];
+        unsigned int blocked = 0x0;
+        unsigned int blocked_ndx = 0x1 << 12;
+        const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
+        for (auto slot = 0; slot < 12; slot++)
+        {
+            unsigned char slot_value = (workspace & 0b1110) != 0;
+            unsigned char is_oponent = (workspace & 0b10000) == oponent_test;
+            blocked |= (blocked_ndx * slot_value * is_oponent);
+
+            blocked_ndx <<= 1;
+            workspace >>= 5;
+        }
+        workspace = position.position[1];
+        blocked_ndx = 0x1;
+        for (auto slot = 0; slot < 12; slot++)
+        {
+            unsigned char slot_value = (workspace & 0b1110) != 0;
+            unsigned char is_oponent = (workspace & 0b10000) == oponent_test;
+            blocked |= (blocked_ndx * slot_value * is_oponent);
+
+            blocked_ndx <<= 1;
+            workspace >>= 5;
+        }
+        cout << bitset<24>(blocked) << endl;
     }
 
     void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top)

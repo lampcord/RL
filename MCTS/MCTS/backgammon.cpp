@@ -71,12 +71,26 @@ using namespace std;
 namespace BackgammonNS
 {
     typedef tuple<unsigned char, unsigned char> slot_info;
+    
+    slot_info get_bar_info(const PositionType& position)
+    {
+        unsigned long long workspace = 0x0;
+        const unsigned char shift = 60;
+        workspace = position.position[0];
+        workspace >>= shift;
+        unsigned int player_0_bar = workspace & 0b1111;
+        workspace = position.position[1];
+        workspace >>= shift;
+        unsigned int player_1_bar = workspace & 0b1111;
+
+        return slot_info{ player_0_bar, player_1_bar };
+    }
 
     slot_info get_slot_info(const PositionType& position, unsigned char slot)
     {
         unsigned long long workspace = 0x0;
-        unsigned char shift = 55 - (slot % 12) * 5;
-        unsigned char position_ndx = slot / 12;
+        const unsigned char shift = 55 - (slot % 12) * 5;
+        const unsigned char position_ndx = slot / 12;
 
         workspace = position.position[position_ndx];
         workspace >>= shift;
@@ -119,7 +133,7 @@ namespace BackgammonNS
             cout << '|';
             for (auto slot: *slots)
             {
-                auto [player, num_checkers] = get_slot_info(position, slot);
+                const auto [player, num_checkers] = get_slot_info(position, slot);
                 if (num_checkers > line)
                 {
                     if (line >= 5)
@@ -154,11 +168,21 @@ namespace BackgammonNS
 
     void Backgammon::render(const PositionType& position)
     {
+        const auto [player_0_bar, player_1_bar] = get_bar_info(position);
+
         cout << "+-----------+-----------+" << endl;
         render_board_section(position, true);
         cout << "+-----------+-----------+" << endl;
-        cout << "|           |           |" << endl;
-        cout << "|           |           |" << endl;
+        cout << '|';
+        for (auto bar = 0; bar < 11; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
+        cout << '|';
+        for (auto bar = 0; bar < 11; bar++) cout << (player_1_bar > bar ? 'X' : ' ');
+        cout << "|" << endl;
+        cout << '|';
+        for (auto bar = 11; bar < 15; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
+        cout << "       |";
+        for (auto bar = 11; bar < 15; bar++) cout << (player_1_bar > bar ? 'X' : ' ');
+        cout << "       |" << endl;
         cout << "+-----------+-----------+" << endl;
         render_board_section(position, false);
         cout << "+-----------+-----------+" << endl;

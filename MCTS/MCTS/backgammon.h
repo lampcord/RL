@@ -13,7 +13,7 @@ namespace BackgammonNS
 		}
 	};
 	typedef PositionStruct PositionType;
-	typedef unsigned char MoveType;
+	typedef unsigned int MoveType;
 
 	class Backgammon
 	{

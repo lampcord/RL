@@ -14,8 +14,14 @@ namespace BackgammonNS
 	};
 	struct MoveStruct
 	{
-		unsigned int moves;
+		unsigned char moves[4];
 		PositionStruct result_position;
+		void clear()
+		{
+			for (auto x = 0; x < 4; x++) moves[x] = 0;
+			result_position.position[0] = 0;
+			result_position.position[1] = 0;
+		}
 	};
 	typedef PositionStruct PositionType;
 	typedef unsigned int MoveType;

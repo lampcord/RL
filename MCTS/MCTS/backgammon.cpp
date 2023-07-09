@@ -112,13 +112,28 @@ namespace BackgammonNS
         return slot_info{ player, num_checkers };
     }
 
+    void update_slot(PositionType &position, unsigned char player, unsigned char slot, bool increment)
+    {
+        const unsigned char shift = 55 - (slot % 12) * 5;
+        const unsigned char position_ndx = slot / 12;
+
+        if (increment)
+        {
+            position.position[position_ndx] += (1ull << shift);
+        }
+        else
+        {
+            position.position[position_ndx] -= (1ull << shift);
+        }
+    }
+
     void Backgammon::get_initial_position(PositionType& position)
     {
         position.position[0] = 0b0000000100000000000000000000010101000001001100000000000000000101;
         position.position[1] = 0b0000101010000000000000000001100000001010000000000000000000010010;
     }
 
-    void gen_moves_for_1_die(const PositionType& position, const unsigned int& blocked, const unsigned char player, const unsigned int die)
+    void gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx)
     {
         unsigned long long workspace = 0x0;
         const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
@@ -126,13 +141,21 @@ namespace BackgammonNS
         char delta = player == 0 ? die : -(char)die;
         for (auto slot = 0; slot < 24; slot++)
         {
-            auto [position_player, num_checkers] = get_slot_info(position, slot);
+            auto [position_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, slot);
             if (position_player == player && num_checkers > 0)
             {
                 char target = slot + delta;
                 if (target < 0 || target >= 24) continue;
                 if (blocked & (blocked_ndx >> target)) continue;
+                
                 cout << "Die " << (int)die << " From " << (int)slot << " To " << (int)target << endl;
+                unsigned char move = (slot << 3) + die;
+
+                move_list[move_list_size] = move_list[pos_ndx];
+                move_list[move_list_size].moves[move_ndx] = move;
+                update_slot(move_list[move_list_size].result_position, player, target, true);
+                update_slot(move_list[move_list_size].result_position, player, slot, false);
+                move_list_size++;
             }
         }
     }
@@ -165,7 +188,39 @@ namespace BackgammonNS
 
         auto die1 = roll % 6 + 1;
         auto die2 = roll / 6 + 1;
-        gen_moves_for_1_die(position, blocked, player, die1);
+
+        move_list[0].clear();
+        move_list[0].result_position = position;
+        move_list_size = 1;
+
+        auto start_move_list = move_list_size;
+        gen_moves_for_1_die(0, blocked, player, die1, 0);
+        auto end_move_list = move_list_size;
+        for (auto x = start_move_list; x < end_move_list; x++)
+        {
+            gen_moves_for_1_die(x, blocked, player, die2, 1);
+        }
+        start_move_list = move_list_size;
+        gen_moves_for_1_die(0, blocked, player, die2, 0);
+        end_move_list = move_list_size;
+        for (auto x = start_move_list; x < end_move_list; x++)
+        {
+            gen_moves_for_1_die(x, blocked, player, die1, 1);
+        }
+
+        for (auto x = 0; x < move_list_size; x++)
+        {
+            cout << "-----------------------------------------" << endl;
+            for (auto y = 0; y < 4; y++)
+            {
+                if (move_list[x].moves[y] == 0) continue;
+                auto die = move_list[x].moves[y] & 0b111;
+                auto slot = move_list[x].moves[y] >> 3;
+                cout << "Die " << (int)die << " From " << (int)slot << endl;
+            }
+            render(move_list[x].result_position);
+        }
+        cout << "Total Moves Generated: " << move_list_size << endl;
     }
 
     void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top)

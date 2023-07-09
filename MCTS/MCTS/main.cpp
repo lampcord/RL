@@ -114,12 +114,12 @@ int main()
 {
 	BackgammonNS::PositionType bgposition;
 	BackgammonNS::Backgammon::get_initial_position(bgposition);
-	for (auto roll = 0; roll < 6; roll++)
+	for (auto roll = 0; roll < 1; roll++)
 	{
 		BackgammonNS::Backgammon::render(bgposition);
-		BackgammonNS::Backgammon::get_legal_moves(bgposition, 0, roll);
-		BackgammonNS::Backgammon::render(bgposition);
-		BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
+		BackgammonNS::Backgammon::get_legal_moves(bgposition, 0, 2);
+		//BackgammonNS::Backgammon::render(bgposition);
+		//BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
 	}
 	return 0;
 

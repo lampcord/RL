@@ -65,6 +65,12 @@ d1 = (roll % 6) + 1
 d2 = (roll / 6) + 1
 
 This allows die rolls with only 1 call to rand.
+
+A move can be represented by a collection of starting locations (5 bits) and die values (3 bits).
+Worst case is a double (5 + 3) * 4 = 32 bits.
+
+Example, moving 1-1 from starting position for player 0:
+10000 001 10000 001 10010 001 10010 001
 */
 
 using namespace std;
@@ -72,7 +78,11 @@ using namespace std;
 namespace BackgammonNS
 {
     typedef tuple<unsigned char, unsigned char> slot_info;
-    
+ 
+    const unsigned int max_move_list = 1024;
+    static MoveStruct move_list[max_move_list];
+    static unsigned int move_list_size = 0;
+
     slot_info get_bar_info(const PositionType& position)
     {
         unsigned long long workspace = 0x0;
@@ -108,7 +118,25 @@ namespace BackgammonNS
         position.position[1] = 0b0000101010000000000000000001100000001010000000000000000000010010;
     }
 
-    void Backgammon::get_legal_moves(const PositionType& position, const unsigned char player, MoveType& legal_moves)
+    void gen_moves_for_1_die(const PositionType& position, const unsigned int& blocked, const unsigned char player, const unsigned int die)
+    {
+        unsigned long long workspace = 0x0;
+        const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
+        unsigned int blocked_ndx = 1 << 23;
+        char delta = player == 0 ? die : -(char)die;
+        for (auto slot = 0; slot < 24; slot++)
+        {
+            auto [position_player, num_checkers] = get_slot_info(position, slot);
+            if (position_player == player && num_checkers > 0)
+            {
+                char target = slot + delta;
+                if (target < 0 || target >= 24) continue;
+                if (blocked & (blocked_ndx >> target)) continue;
+                cout << "Die " << (int)die << " From " << (int)slot << " To " << (int)target << endl;
+            }
+        }
+    }
+    void Backgammon::get_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll)
     {
         unsigned long long workspace = position.position[0];
         unsigned int blocked = 0x0;
@@ -134,7 +162,10 @@ namespace BackgammonNS
             blocked_ndx <<= 1;
             workspace >>= 5;
         }
-        cout << bitset<24>(blocked) << endl;
+
+        auto die1 = roll % 6 + 1;
+        auto die2 = roll / 6 + 1;
+        gen_moves_for_1_die(position, blocked, player, die1);
     }
 
     void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top)
@@ -196,13 +227,9 @@ namespace BackgammonNS
         }
     }
 
-    void Backgammon::render(const PositionType& position)
+    void Backgammon::render_bar_section(const BackgammonNS::PositionType& position)
     {
         const auto [player_0_bar, player_1_bar] = get_bar_info(position);
-
-        cout << "+-----------+-----------+" << endl;
-        render_board_section(position, true);
-        cout << "+-----------+-----------+" << endl;
         cout << '|';
         for (auto bar = 0; bar < 11; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
         cout << '|';
@@ -213,9 +240,20 @@ namespace BackgammonNS
         cout << "       |";
         for (auto bar = 11; bar < 15; bar++) cout << (player_1_bar > bar ? 'X' : ' ');
         cout << "       |" << endl;
+    }
+    void Backgammon::render(const PositionType& position)
+    {
+        cout << "                     1 1" << endl;
+        cout << " 0 1 2 3 4 5 6 7 8 9 0 1" << endl;
+        cout << "+-----------+-----------+" << endl;
+        render_board_section(position, true);
+        cout << "+-----------+-----------+" << endl;
+        render_bar_section(position);
         cout << "+-----------+-----------+" << endl;
         render_board_section(position, false);
         cout << "+-----------+-----------+" << endl;
+        cout << " 2 2 2 2 1 1 1 1 1 1 1 1" << endl;
+        cout << " 3 2 1 0 9 8 7 6 5 4 3 2" << endl;
 
     }
 }

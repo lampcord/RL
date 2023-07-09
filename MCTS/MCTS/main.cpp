@@ -114,10 +114,13 @@ int main()
 {
 	BackgammonNS::PositionType bgposition;
 	BackgammonNS::Backgammon::get_initial_position(bgposition);
-	BackgammonNS::Backgammon::render(bgposition);
-	BackgammonNS::MoveType bgmoves;
-	BackgammonNS::Backgammon::get_legal_moves(bgposition, 0, bgmoves);
-	BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, bgmoves);
+	for (auto roll = 0; roll < 6; roll++)
+	{
+		BackgammonNS::Backgammon::render(bgposition);
+		BackgammonNS::Backgammon::get_legal_moves(bgposition, 0, roll);
+		BackgammonNS::Backgammon::render(bgposition);
+		BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
+	}
 	return 0;
 
 	const unsigned thread_count = std::thread::hardware_concurrency();

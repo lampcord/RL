@@ -95,5 +95,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Notes.txt" />
+    <Text Include="test_positions.txt" />
   </ItemGroup>
 </Project>

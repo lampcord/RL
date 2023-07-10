@@ -117,7 +117,7 @@ int main()
 	for (auto roll = 0; roll < 1; roll++)
 	{
 		BackgammonNS::Backgammon::render(bgposition);
-		BackgammonNS::Backgammon::get_legal_moves(bgposition, 0, 2);
+		BackgammonNS::Backgammon::get_legal_moves(bgposition, 0, 0);
 		//BackgammonNS::Backgammon::render(bgposition);
 		//BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
 	}

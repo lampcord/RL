@@ -82,6 +82,7 @@ namespace BackgammonNS
     const unsigned int max_move_list = 1024;
     static MoveStruct move_list[max_move_list];
     static unsigned int move_list_size = 0;
+    static unordered_map<PositionStruct, unsigned char, PositionStructHash> duplicate_positions;
 
     slot_info get_bar_info(const PositionType& position)
     {
@@ -139,6 +140,7 @@ namespace BackgammonNS
         const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
         unsigned int blocked_ndx = 1 << 23;
         char delta = player == 0 ? die : -(char)die;
+        bool expanded = false;
         for (auto slot = 0; slot < 24; slot++)
         {
             auto [position_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, slot);
@@ -147,7 +149,8 @@ namespace BackgammonNS
                 char target = slot + delta;
                 if (target < 0 || target >= 24) continue;
                 if (blocked & (blocked_ndx >> target)) continue;
-                
+                expanded = true;
+
                 cout << "Die " << (int)die << " From " << (int)slot << " To " << (int)target << endl;
                 unsigned char move = (slot << 3) + die;
 
@@ -155,8 +158,22 @@ namespace BackgammonNS
                 move_list[move_list_size].moves[move_ndx] = move;
                 update_slot(move_list[move_list_size].result_position, player, target, true);
                 update_slot(move_list[move_list_size].result_position, player, slot, false);
-                move_list_size++;
+                
+                auto loc = duplicate_positions.find(move_list[move_list_size].result_position);
+                if (loc == duplicate_positions.end())
+                {
+                    duplicate_positions[move_list[move_list_size].result_position] = 1;
+                    move_list_size++;
+                }
+                else
+                {
+                    loc->second++;
+                }
             }
+        }
+        if (expanded)
+        {
+            move_list[pos_ndx].moves[0] = 0;
         }
     }
     void Backgammon::get_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll)
@@ -192,35 +209,69 @@ namespace BackgammonNS
         move_list[0].clear();
         move_list[0].result_position = position;
         move_list_size = 1;
+        duplicate_positions.clear();
 
-        auto start_move_list = move_list_size;
-        gen_moves_for_1_die(0, blocked, player, die1, 0);
-        auto end_move_list = move_list_size;
-        for (auto x = start_move_list; x < end_move_list; x++)
+        if (die1 == die2)
         {
-            gen_moves_for_1_die(x, blocked, player, die2, 1);
+            auto start_move_list = move_list_size;
+            gen_moves_for_1_die(0, blocked, player, die1, 0);
+            auto end_move_list = move_list_size;
+            for (auto turn = 0; turn < 3; turn++)
+            {
+                for (auto x = start_move_list; x < end_move_list; x++)
+                {
+                    gen_moves_for_1_die(x, blocked, player, die2, turn + 1);
+                }
+                start_move_list = end_move_list;
+                end_move_list = move_list_size;
+            }
         }
-        start_move_list = move_list_size;
-        gen_moves_for_1_die(0, blocked, player, die2, 0);
-        end_move_list = move_list_size;
-        for (auto x = start_move_list; x < end_move_list; x++)
+        else
         {
-            gen_moves_for_1_die(x, blocked, player, die1, 1);
+            auto start_move_list = move_list_size;
+            gen_moves_for_1_die(0, blocked, player, die1, 0);
+            auto end_move_list = move_list_size;
+            for (auto x = start_move_list; x < end_move_list; x++)
+            {
+                gen_moves_for_1_die(x, blocked, player, die2, 1);
+            }
+            start_move_list = move_list_size;
+            gen_moves_for_1_die(0, blocked, player, die2, 0);
+            end_move_list = move_list_size;
+            for (auto x = start_move_list; x < end_move_list; x++)
+            {
+                gen_moves_for_1_die(x, blocked, player, die1, 1);
+            }
         }
 
+        auto duplicates = 0;
+        auto total_valid = 0;
         for (auto x = 0; x < move_list_size; x++)
         {
             cout << "-----------------------------------------" << endl;
+            cout << "Position " << x << endl;
+            bool valid = false;
             for (auto y = 0; y < 4; y++)
             {
                 if (move_list[x].moves[y] == 0) continue;
                 auto die = move_list[x].moves[y] & 0b111;
                 auto slot = move_list[x].moves[y] >> 3;
                 cout << "Die " << (int)die << " From " << (int)slot << endl;
+                valid = true;
             }
             render(move_list[x].result_position);
+            cout << (valid ? "OK" : "INVALID") << endl;
+            if (valid) total_valid++;
+            auto loc = duplicate_positions.find(move_list[x].result_position);
+            if (loc != duplicate_positions.end())
+            {
+                cout << "Found " << (int)loc->second << " duplicates. " << endl;
+                duplicates += loc->second;
+            }
         }
         cout << "Total Moves Generated: " << move_list_size << endl;
+        cout << "Total Duplicates: " << duplicates << endl;
+        cout << "Total Valid: " << total_valid << endl;
     }
 
     void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top)

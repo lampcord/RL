@@ -152,6 +152,33 @@ namespace BackgammonNS
         }
     }
 
+    void Backgammon::position_from_string(const string str_pos, BackgammonNS::PositionType& position)
+    {
+        auto player = 0;
+        unsigned long long workspace = atoi(str_pos.substr(24 * 3, 3).c_str());
+        for (auto slot = 0; slot < 12; slot++)
+        {
+            workspace <<= 5;
+            auto str_value = str_pos.substr(slot * 3, 3);
+            player = str_value[0] == 'B' ? 0b10000 : 0b00000;
+            auto value = atoi(str_value.substr(1, 2).c_str());
+            workspace |= (player + value);
+        }
+        cout << bitset<64>(workspace) << endl;
+        position.position[0] = workspace;
+        workspace = atoi(str_pos.substr(25 * 3, 3).c_str());
+        for (auto slot = 0; slot < 12; slot++)
+        {
+            workspace <<= 5;
+            auto str_value = str_pos.substr((slot + 12) * 3, 3);
+            player = str_value[0] == 'B' ? 0b10000 : 0b00000;
+            auto value = atoi(str_value.substr(1, 2).c_str());
+            workspace |= (player + value);
+        }
+        cout << bitset<64>(workspace) << endl;
+        position.position[1] = workspace;
+    }
+
     void Backgammon::get_initial_position(PositionType& position)
     {
         //position.position[0] = 0b0000000100000000000000000000010101000001001100000000000000000101;
@@ -160,8 +187,12 @@ namespace BackgammonNS
         //position.position[0] = 0b0000000100000000000000000000010101000001001100000000000000000101;
         //position.position[1] = 0b0000101010000000000000000001100000001011000100000000000000010001;
 
+        //position.position[0] = 0b0000000100000000000000000000010101000001001100000000000000000101;
+        //position.position[1] = 0b0001101010000000000000000001100000001000000000000000000000110001;
+
         position.position[0] = 0b0000000100000000000000000000010101000001001100000000000000000101;
-        position.position[1] = 0b0001101010000000000000000001100000001000000000000000000000110001;
+        position.position[1] = 0b0000101010000000000000000001100000001010000000000000000000010010;
+
     }
 
     bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx)

@@ -114,6 +114,9 @@ int main()
 {
 	BackgammonNS::PositionType bgposition;
 	BackgammonNS::Backgammon::get_initial_position(bgposition);
+	//BackgammonNS::Backgammon::position_from_string("W02  0  0  0  0B05  0B03  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0", bgposition);
+	BackgammonNS::Backgammon::position_from_string("B02B02B02B02B02B05  0  0  0  0  0  0  0  0  0  0  0  0W05W02W02W02W02W02  0  0", bgposition);
+
 	for (auto roll = 0; roll < 1; roll++)
 	{
 		BackgammonNS::Backgammon::render(bgposition);

@@ -2,6 +2,7 @@
 #include "game_rules.h"
 #include <functional>
 #include <unordered_map>
+#include <string>
 
 using namespace GameRulesNS;
 
@@ -48,6 +49,7 @@ namespace BackgammonNS
 		static void render_board_section(const BackgammonNS::PositionType& position, bool top);
 
 	public:
+		static void position_from_string(const std::string str_pos, BackgammonNS::PositionType& position);
 		static void move(const PositionType& position, const unsigned char player, const MoveType move, MoveResult<PositionType>& move_result);
 		static void get_initial_position(PositionType& position);
 		static void get_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll);

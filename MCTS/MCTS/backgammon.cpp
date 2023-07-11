@@ -81,7 +81,7 @@ using namespace std;
 namespace BackgammonNS
 {
     typedef tuple<unsigned char, unsigned char> slot_info;
- 
+    
     const unsigned int max_move_list = 1024;
     const unsigned char bar_indicator = 0b11111000;
 
@@ -242,25 +242,44 @@ namespace BackgammonNS
         unsigned int blocked = 0x0;
         unsigned int blocked_ndx = 0x1 << 12;
         const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
+
+        unsigned char moves_to_castoff = 0;
+        auto [bar_0_count, bar_1_count] = get_bar_info(position);
+        auto bar_count = player == 0 ? bar_0_count : bar_1_count;
+        moves_to_castoff += (4 * bar_count);
+        auto castoff_counter = player == 1 ? 1 : 2;
+        auto castoff_delta = player == 1 ? -1 : 1;
+
         for (auto slot = 0; slot < 12; slot++)
         {
             unsigned char slot_value = (workspace & 0b1110) != 0;
             unsigned char is_oponent = (workspace & 0b10000) == oponent_test;
             blocked |= (blocked_ndx * slot_value * is_oponent);
 
+            moves_to_castoff += (castoff_counter * (workspace & 0b1111) * !is_oponent);
+
             blocked_ndx <<= 1;
             workspace >>= 5;
+
+            castoff_counter += ((slot == 5) * castoff_delta);
         }
+
         workspace = position.position[1];
         blocked_ndx = 0x1;
+        castoff_counter = player == 0 ? 0 : 3;
+
         for (auto slot = 0; slot < 12; slot++)
         {
             unsigned char slot_value = (workspace & 0b1110) != 0;
             unsigned char is_oponent = (workspace & 0b10000) == oponent_test;
             blocked |= (blocked_ndx * slot_value * is_oponent);
 
+            moves_to_castoff += (castoff_counter * (workspace & 0b1111) * !is_oponent);
+
             blocked_ndx <<= 1;
             workspace >>= 5;
+
+            castoff_counter += ((slot == 5) * castoff_delta);
         }
 
         auto die1 = roll % 6 + 1;
@@ -314,7 +333,7 @@ namespace BackgammonNS
             if (expanded) max_moves_die2++;
             max_moves = max_moves_die1 > max_moves_die2 ? max_moves_die1 : max_moves_die2;
         }
-        cout << "Max Moves: " << max_moves << endl;
+        cout << "Max Moves: " << max_moves << " moves_to_castoff " << (int)moves_to_castoff << endl;
 
         auto duplicates = 0;
         auto total_valid = 0;

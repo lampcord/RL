@@ -8,6 +8,11 @@ using namespace GameRulesNS;
 
 namespace BackgammonNS
 {
+	enum class castoff_available {
+		unavailable,
+		pending,
+		available
+	};
 	struct PositionStruct {
 		unsigned long long position[2];
 
@@ -46,7 +51,7 @@ namespace BackgammonNS
 	{
 	private:
 		static void render_bar_section(const BackgammonNS::PositionType& position);
-		static void render_board_section(const BackgammonNS::PositionType& position, bool top);
+		static void render_board_section(const BackgammonNS::PositionType& position, bool top, unsigned char casted_off);
 
 	public:
 		static void position_from_string(const std::string str_pos, BackgammonNS::PositionType& position);

@@ -195,7 +195,7 @@ namespace BackgammonNS
 
     }
 
-    bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx)
+    bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_available can_castoff)
     {
         unsigned long long workspace = 0x0;
         const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
@@ -205,6 +205,32 @@ namespace BackgammonNS
 
         auto [bar_0_count, bar_1_count] = get_bar_info(move_list[pos_ndx].result_position);
         auto bar_count = player == 0 ? bar_0_count : bar_1_count;
+
+        if (can_castoff == castoff_available::available)
+        {
+            auto slot = player == 1 ? die - 1 : 24 - die;
+            auto [slot_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, slot);
+            if (slot_player == player && num_checkers > 0)
+            {
+                expanded = true;
+                unsigned char move = (slot << 3) + die;
+
+                move_list[move_list_size] = move_list[pos_ndx];
+                move_list[move_list_size].moves[move_ndx] = move;
+                update_slot(move_list[move_list_size].result_position, player, slot, false);
+
+                auto loc = duplicate_positions.find(move_list[move_list_size].result_position);
+                if (loc == duplicate_positions.end())
+                {
+                    duplicate_positions[move_list[move_list_size].result_position] = 1;
+                    move_list_size++;
+                }
+                else
+                {
+                    loc->second++;
+                }
+            }
+        }
 
         if (bar_count > 0)
         {
@@ -322,17 +348,23 @@ namespace BackgammonNS
         duplicate_positions.clear();
 
         auto max_moves = 0;
+
+        auto can_castoff = castoff_counter == 0 ? castoff_available::available : castoff_available::unavailable;
         if (die1 == die2)
         {
+            if (castoff_counter > 0 && castoff_counter < 4)
+            {
+                can_castoff = castoff_available::available;
+            }
             auto start_move_list = move_list_size;
-            if (gen_moves_for_1_die(0, blocked, player, die1, 0)) max_moves++;
+            if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff)) max_moves++;
             auto end_move_list = move_list_size;
             for (auto turn = 0; turn < 3; turn++)
             {
                 bool expanded = false;
                 for (auto x = start_move_list; x < end_move_list; x++)
                 {
-                    expanded |= gen_moves_for_1_die(x, blocked, player, die2, turn + 1);
+                    expanded |= gen_moves_for_1_die(x, blocked, player, die2, turn + 1, can_castoff);
                 }
                 if (expanded) max_moves++;
                 start_move_list = end_move_list;
@@ -341,25 +373,29 @@ namespace BackgammonNS
         }
         else
         {
+            if (castoff_counter == 1)
+            {
+                can_castoff = castoff_available::available;
+            }
             auto max_moves_die1 = 0;
             auto start_move_list = move_list_size;
-            if (gen_moves_for_1_die(0, blocked, player, die1, 0)) max_moves_die1++;
+            if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff)) max_moves_die1++;
             auto end_move_list = move_list_size;
             bool expanded = false;
             for (auto x = start_move_list; x < end_move_list; x++)
             {
-                expanded |= gen_moves_for_1_die(x, blocked, player, die2, 1);
+                expanded |= gen_moves_for_1_die(x, blocked, player, die2, 1, can_castoff);
             }
             if (expanded) max_moves_die1++;
 
             auto max_moves_die2 = 0;
             start_move_list = move_list_size;
-            if (gen_moves_for_1_die(0, blocked, player, die2, 0)) max_moves_die2++;
+            if (gen_moves_for_1_die(0, blocked, player, die2, 0, can_castoff)) max_moves_die2++;
             end_move_list = move_list_size;
             expanded = false;
             for (auto x = start_move_list; x < end_move_list; x++)
             {
-                expanded |= gen_moves_for_1_die(x, blocked, player, die1, 1);
+                expanded |= gen_moves_for_1_die(x, blocked, player, die1, 1, can_castoff);
             }
             if (expanded) max_moves_die2++;
             max_moves = max_moves_die1 > max_moves_die2 ? max_moves_die1 : max_moves_die2;
@@ -396,7 +432,7 @@ namespace BackgammonNS
         cout << "Total Valid: " << total_valid << endl;
     }
 
-    void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top)
+    void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top, unsigned char casted_off)
     {
         array<unsigned int, 6> top_lines{0, 1, 2, 3, 4, 5};
         array<unsigned int, 6> bot_lines{5, 4, 3, 2, 1, 0};
@@ -451,7 +487,12 @@ namespace BackgammonNS
                     cout << ' ';
                 }
             }
-            cout << '|' << endl;
+            cout << '|';
+            for (auto col = 0; col < 3; col++)
+            {
+                if (casted_off > line * 3 + col) cout << (top ? 'X' : 'O');
+            }
+            cout << endl;
         }
     }
 
@@ -471,19 +512,30 @@ namespace BackgammonNS
     }
     void Backgammon::render(const PositionType& position)
     {
+        array<unsigned char, 2> casted_off = { 15, 15 };
+        for (auto slot = 0; slot < 24; slot++)
+        {
+            auto [player, num_checkers] = get_slot_info(position, slot);
+            casted_off[player] -= num_checkers;
+        }
+        const auto [player_0_bar, player_1_bar] = get_bar_info(position);
+        casted_off[0] -= player_0_bar;
+        casted_off[1] -= player_1_bar;
+
         cout << "                     1 1" << endl;
         cout << " 0 1 2 3 4 5 6 7 8 9 0 1" << endl;
         cout << "+-----------+-----------+" << endl;
-        render_board_section(position, true);
+        render_board_section(position, true, casted_off[1]);
         cout << "+-----------+-----------+" << endl;
         render_bar_section(position);
         cout << "+-----------+-----------+" << endl;
-        render_board_section(position, false);
+        render_board_section(position, false, casted_off[0]);
         cout << "+-----------+-----------+" << endl;
         cout << " 2 2 2 2 1 1 1 1 1 1 1 1" << endl;
         cout << " 3 2 1 0 9 8 7 6 5 4 3 2" << endl;
 
         cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
+        cout << (int)casted_off[0] << " " << (int)casted_off[1] << endl;
     }
 }

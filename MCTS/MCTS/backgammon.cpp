@@ -125,28 +125,35 @@ namespace BackgammonNS
 
         if (increment)
         {
-            // check for single enemy piece
+            // check for single enemy piece.
             auto [slot_player, num_checkers] = get_slot_info(position, slot);
             if (num_checkers == 1 && slot_player != player)
+            // if found, this is a hit, move oponent's piece to bar.
             {
+                // if found, this is a hit, move oponent's piece to bar.
                 position.position[slot_player] += (1ull << 60);
             }
             else
             {
+                // normal move onto empty slot or existing player stack.
                 position.position[position_ndx] += (1ull << shift);
             }
+
+            // update control. (No op for non hit)
             unsigned long long control_mask = ~(1ull << (shift + 4));
             position.position[position_ndx] &= control_mask;
             position.position[position_ndx] |= ((unsigned long long)player << (shift + 4));
         }
         else
         {
+            // moved from bar
             if (slot == bar_indicator)
             {
                 position.position[player] -= (1ull << 60);
             }
             else
             {
+                // normal move from board.
                 position.position[position_ndx] -= (1ull << shift);
             }
         }
@@ -206,8 +213,29 @@ namespace BackgammonNS
         auto [bar_0_count, bar_1_count] = get_bar_info(move_list[pos_ndx].result_position);
         auto bar_count = player == 0 ? bar_0_count : bar_1_count;
 
+        // Initial position wasn't ready for castoff but was close enough that 
+        // it might be after some checkers are moved.
+        if (can_castoff == castoff_available::pending)
+        {
+            auto starting_slot = player == 0 ? 0 : 6;
+            auto ending_slot = player == 0 ? 17 : 23;
+            bool can_castoff_check = true;
+            for (auto slot = starting_slot; slot <= ending_slot; slot++)
+            {
+                auto [slot_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, slot);
+                if (slot_player == player && num_checkers > 0)
+                {
+                    can_castoff_check = false;
+                    break;
+                }
+            }
+            if (can_castoff_check) can_castoff = castoff_available::available;
+        }
+
+        // Position is valid for casting off.
         if (can_castoff == castoff_available::available)
         {
+            // Check if we have a checker on the slot of the die roll.
             auto slot = player == 1 ? die - 1 : 24 - die;
             auto [slot_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, slot);
             if (slot_player == player && num_checkers > 0)
@@ -275,6 +303,7 @@ namespace BackgammonNS
 
         if (bar_count > 0)
         {
+            // Move pieces off the bar.
             char target = player == 0 ? delta : 24 + delta;
             if (target >= 0 && target < 24 && (blocked & (blocked_ndx >> target)) == 0)
             {
@@ -301,6 +330,7 @@ namespace BackgammonNS
         }
         else
         {
+            // Normal move.
             for (auto slot = 0; slot < 24; slot++)
             {
                 auto [position_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, slot);
@@ -390,12 +420,12 @@ namespace BackgammonNS
 
         auto max_moves = 0;
 
-        auto can_castoff = castoff_counter == 0 ? castoff_available::available : castoff_available::unavailable;
+        auto can_castoff = moves_to_castoff == 0 ? castoff_available::available : castoff_available::unavailable;
         if (die1 == die2)
         {
-            if (castoff_counter > 0 && castoff_counter < 4)
+            if (moves_to_castoff > 0 && moves_to_castoff < 4)
             {
-                can_castoff = castoff_available::available;
+                can_castoff = castoff_available::pending;
             }
             auto start_move_list = move_list_size;
             if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff)) max_moves++;
@@ -414,9 +444,9 @@ namespace BackgammonNS
         }
         else
         {
-            if (castoff_counter == 1)
+            if (moves_to_castoff == 1)
             {
-                can_castoff = castoff_available::available;
+                can_castoff = castoff_available::pending;
             }
             auto max_moves_die1 = 0;
             auto start_move_list = move_list_size;
@@ -447,20 +477,23 @@ namespace BackgammonNS
         auto total_valid = 0;
         for (auto x = 0; x < move_list_size; x++)
         {
-            cout << "-----------------------------------------" << endl;
-            cout << "Position " << x << endl;
             bool valid = (max_moves > 0 && move_list[x].moves[max_moves - 1] != 0);
-            for (auto y = 0; y < 4; y++)
+            if (valid)
             {
-                if (move_list[x].moves[y] == 0) continue;
-                auto die = move_list[x].moves[y] & 0b111;
-                auto slot = move_list[x].moves[y] >> 3;
-                if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
-                else cout << "Die " << (int)die << " From " << (int)slot << endl;
+                cout << "-----------------------------------------" << endl;
+                cout << "Position " << x << endl;
+                for (auto y = 0; y < 4; y++)
+                {
+                    if (move_list[x].moves[y] == 0) continue;
+                    auto die = move_list[x].moves[y] & 0b111;
+                    auto slot = move_list[x].moves[y] >> 3;
+                    if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
+                    else cout << "Die " << (int)die << " From " << (int)slot << endl;
+                }
+                render(move_list[x].result_position);
+                total_valid++;
             }
-            render(move_list[x].result_position);
             cout << (valid ? "OK" : "INVALID") << endl;
-            if (valid) total_valid++;
             auto loc = duplicate_positions.find(move_list[x].result_position);
             if (loc != duplicate_positions.end())
             {

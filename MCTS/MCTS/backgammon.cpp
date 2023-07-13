@@ -230,6 +230,47 @@ namespace BackgammonNS
                     loc->second++;
                 }
             }
+            else
+            {
+                // We don't have a piece on the slot of the die roll,
+                // Check if all of the slots above it are also open.
+                auto start_slot = player == 0 ? 18 : 5;
+                auto delta = player == 0 ? 1 : -1;
+                auto first_slot_with_pieces = start_slot;
+                auto slot = player == 1 ? die - 1 : 24 - die;
+
+                for (auto x = 0; x < 6; x++)
+                {
+                    auto [slot_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, first_slot_with_pieces);
+                    if (slot_player == player && num_checkers > 0)
+                    {
+                        break;
+                    }
+                    first_slot_with_pieces += delta;
+                }
+
+                if ((player == 1 && first_slot_with_pieces < slot) ||
+                    (player == 0 && first_slot_with_pieces > slot))
+                {
+                    expanded = true;
+                    unsigned char move = (first_slot_with_pieces << 3) + die;
+
+                    move_list[move_list_size] = move_list[pos_ndx];
+                    move_list[move_list_size].moves[move_ndx] = move;
+                    update_slot(move_list[move_list_size].result_position, player, first_slot_with_pieces, false);
+
+                    auto loc = duplicate_positions.find(move_list[move_list_size].result_position);
+                    if (loc == duplicate_positions.end())
+                    {
+                        duplicate_positions[move_list[move_list_size].result_position] = 1;
+                        move_list_size++;
+                    }
+                    else
+                    {
+                        loc->second++;
+                    }
+                }
+            }
         }
 
         if (bar_count > 0)

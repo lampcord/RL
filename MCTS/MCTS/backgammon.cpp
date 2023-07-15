@@ -3,6 +3,7 @@
 #include <iostream>
 #include <array>
 #include <bitset>
+#include <vector>
 /*
 
 Format for storing a backgammon position:
@@ -304,7 +305,7 @@ namespace BackgammonNS
         if (bar_count > 0)
         {
             // Move pieces off the bar.
-            char target = player == 0 ? delta : 24 + delta;
+            char target = player == 0 ? delta - 1 : 23 + delta;
             if (target >= 0 && target < 24 && (blocked & (blocked_ndx >> target)) == 0)
             {
                 expanded = true;
@@ -475,11 +476,13 @@ namespace BackgammonNS
 
         auto duplicates = 0;
         auto total_valid = 0;
+        vector<string> rolls;
         for (auto x = 0; x < move_list_size; x++)
         {
             bool valid = (max_moves > 0 && move_list[x].moves[max_moves - 1] != 0);
             if (valid)
             {
+                string roll_desc = "";
                 cout << "-----------------------------------------" << endl;
                 cout << "Position " << x << endl;
                 for (auto y = 0; y < 4; y++)
@@ -489,7 +492,12 @@ namespace BackgammonNS
                     auto slot = move_list[x].moves[y] >> 3;
                     if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
                     else cout << "Die " << (int)die << " From " << (int)slot << endl;
+                    roll_desc += to_string(slot);
+                    roll_desc += " to ";
+                    roll_desc += to_string(player == 0 ? slot + die : slot - die);
+                    roll_desc += ", ";
                 }
+                rolls.push_back(roll_desc);
                 render(move_list[x].result_position);
                 total_valid++;
             }
@@ -500,6 +508,10 @@ namespace BackgammonNS
                 cout << "Found " << (int)loc->second << " duplicates. " << endl;
                 duplicates += loc->second;
             }
+        }
+        for (auto s : rolls)
+        {
+            cout << s << endl;
         }
         cout << "Total Moves Generated: " << move_list_size << endl;
         cout << "Total Duplicates: " << duplicates << endl;

@@ -117,13 +117,13 @@ int main()
 	//BackgammonNS::Backgammon::position_from_string("W02  0  0  0  0B05  0B03  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0", bgposition);
 	//BackgammonNS::Backgammon::position_from_string(  "B02B02B02B02B02B04B01  0  0  0  0  0  0  0  0  0  0W01W04W02W02W02W02W02  0  0", bgposition);
 	//BackgammonNS::Backgammon::position_from_string("  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0", bgposition);
-	BackgammonNS::Backgammon::position_from_string("B03  0B04B01  0  0  0  0  0  0B01W01  0  0  0  0  0B01B01B01  0B02W01W12  1  1", bgposition);
+	//BackgammonNS::Backgammon::position_from_string("B03  0B04B01  0  0  0  0  0  0B01W01  0  0  0  0  0B01B01B01  0B02W01W12  1  1", bgposition);
 	
 
 	for (auto roll = 0; roll < 1; roll++)
 	{
 		BackgammonNS::Backgammon::render(bgposition);
-		BackgammonNS::Backgammon::get_legal_moves(bgposition, 0, 10);
+		BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, 2);
 		//BackgammonNS::Backgammon::render(bgposition);
 		//BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
 	}

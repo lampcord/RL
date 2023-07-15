@@ -1,6 +1,7 @@
 #include "backgammon.h"
 #include <tuple>
 #include <iostream>
+#include <iomanip>
 #include <array>
 #include <bitset>
 #include <vector>
@@ -124,10 +125,10 @@ namespace BackgammonNS
         const unsigned char shift = 55 - (slot % 12) * 5;
         const unsigned char position_ndx = slot / 12;
 
+        auto [slot_player, num_checkers] = get_slot_info(position, slot);
         if (increment)
         {
             // check for single enemy piece.
-            auto [slot_player, num_checkers] = get_slot_info(position, slot);
             if (num_checkers == 1 && slot_player != player)
             // if found, this is a hit, move oponent's piece to bar.
             {
@@ -156,6 +157,13 @@ namespace BackgammonNS
             {
                 // normal move from board.
                 position.position[position_ndx] -= (1ull << shift);
+
+                // clear control when no checkers left because it messes up position comparison
+                if (num_checkers == 1)
+                {
+                    unsigned long long control_mask = ~(1ull << (shift + 4));
+                    position.position[position_ndx] &= control_mask;
+                }
             }
         }
     }
@@ -203,7 +211,7 @@ namespace BackgammonNS
 
     }
 
-    bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_available can_castoff)
+    bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff)
     {
         unsigned long long workspace = 0x0;
         const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
@@ -216,7 +224,7 @@ namespace BackgammonNS
 
         // Initial position wasn't ready for castoff but was close enough that 
         // it might be after some checkers are moved.
-        if (can_castoff == castoff_available::pending)
+        if (can_castoff == castoff_availability::pending)
         {
             auto starting_slot = player == 0 ? 0 : 6;
             auto ending_slot = player == 0 ? 17 : 23;
@@ -230,11 +238,11 @@ namespace BackgammonNS
                     break;
                 }
             }
-            if (can_castoff_check) can_castoff = castoff_available::available;
+            if (can_castoff_check) can_castoff = castoff_availability::available;
         }
 
         // Position is valid for casting off.
-        if (can_castoff == castoff_available::available)
+        if (can_castoff == castoff_availability::available)
         {
             // Check if we have a checker on the slot of the die roll.
             auto slot = player == 1 ? die - 1 : 24 - die;
@@ -421,12 +429,12 @@ namespace BackgammonNS
 
         auto max_moves = 0;
 
-        auto can_castoff = moves_to_castoff == 0 ? castoff_available::available : castoff_available::unavailable;
+        auto can_castoff = moves_to_castoff == 0 ? castoff_availability::available : castoff_availability::unavailable;
         if (die1 == die2)
         {
             if (moves_to_castoff > 0 && moves_to_castoff < 4)
             {
-                can_castoff = castoff_available::pending;
+                can_castoff = castoff_availability::pending;
             }
             auto start_move_list = move_list_size;
             if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff)) max_moves++;
@@ -447,7 +455,7 @@ namespace BackgammonNS
         {
             if (moves_to_castoff == 1)
             {
-                can_castoff = castoff_available::pending;
+                can_castoff = castoff_availability::pending;
             }
             auto max_moves_die1 = 0;
             auto start_move_list = move_list_size;
@@ -476,7 +484,7 @@ namespace BackgammonNS
 
         auto duplicates = 0;
         auto total_valid = 0;
-        vector<string> rolls;
+        vector<tuple<string, PositionStruct>> rolls;
         for (auto x = 0; x < move_list_size; x++)
         {
             bool valid = (max_moves > 0 && move_list[x].moves[max_moves - 1] != 0);
@@ -497,7 +505,7 @@ namespace BackgammonNS
                     roll_desc += to_string(player == 0 ? slot + die : slot - die);
                     roll_desc += ", ";
                 }
-                rolls.push_back(roll_desc);
+                rolls.push_back({ roll_desc, move_list[x].result_position });
                 render(move_list[x].result_position);
                 total_valid++;
             }
@@ -511,7 +519,10 @@ namespace BackgammonNS
         }
         for (auto s : rolls)
         {
-            cout << s << endl;
+            cout << setw(40) << get<0>(s);
+            cout << " " << bitset<64>(get<1>(s).position[0]);
+            cout << " " << bitset<64>(get<1>(s).position[1]);
+            cout << endl;
         }
         cout << "Total Moves Generated: " << move_list_size << endl;
         cout << "Total Duplicates: " << duplicates << endl;

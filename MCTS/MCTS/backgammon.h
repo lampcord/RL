@@ -8,7 +8,7 @@ using namespace GameRulesNS;
 
 namespace BackgammonNS
 {
-	enum class castoff_available {
+	enum class castoff_availability {
 		unavailable,
 		pending,
 		available

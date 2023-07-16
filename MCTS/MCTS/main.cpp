@@ -113,21 +113,22 @@ using namespace Connect4NS;
 int main()
 {
 	BackgammonNS::Backgammon::run_position_tests("C:\\GitHub\\RL\\MCTS\\MCTS\\test_games.txt");
-	//return 0;
+	return 0;
 
 	BackgammonNS::PositionType bgposition;
 	BackgammonNS::Backgammon::get_initial_position(bgposition);
 	//BackgammonNS::Backgammon::position_from_string("W02  0  0  0  0B05  0B03  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0", bgposition);
 	//BackgammonNS::Backgammon::position_from_string(  "B02B02B02B02B02B04B01  0  0  0  0  0  0  0  0  0  0W01W04W02W02W02W02W02  0  0", bgposition);
 	//BackgammonNS::Backgammon::position_from_string("  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0", bgposition);
-	BackgammonNS::Backgammon::position_from_string("W02B01  0B02B01B05  0  0B01  0B01W02B02  0  0  0W03W01W06W01  0  0  0B02  0  0", bgposition);
-	
+	BackgammonNS::Backgammon::position_from_string("W02W01  0  0  0B05  0B03  0  0  0W03B05  0  0  0W02W01W06  0  0  0  0B01  0  1", bgposition);
+	bgposition.position[0] = 0b0000100101001000001100010000110010100101000110001000000000000011;
+	bgposition.position[1] = 0b0000100010000000000100010000110001001010000010001000010001100000;
 
 	for (auto roll = 0; roll < 1; roll++)
 	{
 		BackgammonNS::Backgammon::render(bgposition);
-		auto max_moves = BackgammonNS::Backgammon::get_legal_moves(bgposition, 0, 21);
-		BackgammonNS::Backgammon::dump_moves(max_moves, 0);
+		auto max_sub_moves = BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, 0);
+		BackgammonNS::Backgammon::dump_moves(max_sub_moves, 0);
 		//BackgammonNS::Backgammon::render(bgposition);
 		//BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
 	}

@@ -315,7 +315,7 @@ namespace BackgammonNS
         if (bar_count > 0)
         {
             // Move pieces off the bar.
-            char target = player == 0 ? delta - 1 : 23 + delta;
+            char target = player == 0 ? delta - 1 : 24 + delta;
             if (target >= 0 && target < 24 && (blocked & (blocked_ndx >> target)) == 0)
             {
                 expanded = true;
@@ -375,6 +375,7 @@ namespace BackgammonNS
         }
         return expanded;
     }
+
     int Backgammon::get_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll)
     {
         unsigned long long workspace = position.position[0];
@@ -429,7 +430,7 @@ namespace BackgammonNS
         move_list_size = 1;
         duplicate_positions.clear();
 
-        auto max_moves = 0;
+        auto max_sub_moves = 0;
 
         auto can_castoff = moves_to_castoff == 0 ? castoff_availability::available : castoff_availability::unavailable;
         if (die1 == die2)
@@ -439,7 +440,7 @@ namespace BackgammonNS
                 can_castoff = castoff_availability::pending;
             }
             auto start_move_list = move_list_size;
-            if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff)) max_moves++;
+            if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff)) max_sub_moves++;
             auto end_move_list = move_list_size;
             for (auto turn = 0; turn < 3; turn++)
             {
@@ -448,7 +449,7 @@ namespace BackgammonNS
                 {
                     expanded |= gen_moves_for_1_die(x, blocked, player, die2, turn + 1, can_castoff);
                 }
-                if (expanded) max_moves++;
+                if (expanded) max_sub_moves++;
                 start_move_list = end_move_list;
                 end_move_list = move_list_size;
             }
@@ -480,22 +481,22 @@ namespace BackgammonNS
                 expanded |= gen_moves_for_1_die(x, blocked, player, die1, 1, can_castoff);
             }
             if (expanded) max_moves_die2++;
-            max_moves = max_moves_die1 > max_moves_die2 ? max_moves_die1 : max_moves_die2;
+            max_sub_moves = max_moves_die1 > max_moves_die2 ? max_moves_die1 : max_moves_die2;
         }
-        //cout << "Max Moves: " << max_moves << " moves_to_castoff " << (int)moves_to_castoff << endl;
+        //cout << "Max Moves: " << max_sub_moves << " moves_to_castoff " << (int)moves_to_castoff << endl;
 
-        //dump_moves(max_moves, player);
-        return max_moves;
+        //dump_moves(max_sub_moves, player);
+        return max_sub_moves;
     }
 
-    void Backgammon::dump_moves(int max_moves, const unsigned char& player)
+    void Backgammon::dump_moves(int max_sub_moves, const unsigned char& player)
     {
         auto duplicates = 0;
         auto total_valid = 0;
         vector<tuple<string, PositionStruct>> rolls;
         for (auto x = 0; x < move_list_size; x++)
         {
-            bool valid = (max_moves > 0 && move_list[x].moves[max_moves - 1] != 0);
+            bool valid = (max_sub_moves > 0 && move_list[x].moves[max_sub_moves - 1] != 0);
             if (valid)
             {
                 string roll_desc = "";
@@ -649,9 +650,20 @@ namespace BackgammonNS
         ifstream infile(filename);
         string line;
         PositionStruct position;
+        PositionStruct max_move_position;
         auto roll = 0;
+        auto max_move_roll = 0;
         auto player = 0;
+        auto max_move_player = 0;
+        string last_move;
+        auto max_sub_moves = 0;
 
+        auto total_positions = 0;
+        auto total_moves = 0;
+        auto total_errors = 0;
+        auto max_moves = 0;
+        auto moves_for_this_position = 0;
+        
         while (getline(infile, line))
         {
             //cout << line << endl;
@@ -659,6 +671,15 @@ namespace BackgammonNS
             string data = line.substr(4);
             if (token == "POS:")
             {
+                total_positions++;
+                if (moves_for_this_position > max_moves)
+                {
+                    max_moves = moves_for_this_position;
+                    max_move_position = position;
+                    max_move_player = player;
+                    max_move_roll = roll;
+                }
+                moves_for_this_position = 0;
                 cout << "------------------------------------" << endl;
                 cout << "Processing position... " << data << endl;
                 position_from_string(data, position);
@@ -678,7 +699,7 @@ namespace BackgammonNS
                 cout << "Processing player...   ";
                 player = 1 - atoi(data.c_str());
                 cout << data << " => " << player << endl;
-                get_legal_moves(position, player, roll);
+                max_sub_moves =  get_legal_moves(position, player, roll);
             }
             else if (token == "RES:")
             {
@@ -688,16 +709,35 @@ namespace BackgammonNS
                 auto pos = duplicate_positions.find(test_position);
                 if (pos == duplicate_positions.end())
                 {
+                    total_errors++;
                     cout << "MISSING POSITION!!!" << endl;
+                    render(position);
+                    cout << last_move << endl;
+                    cout << line << endl;
+                    render(test_position);
                 }
                 else
                 {
                     cout << "Found" << endl;
                 }
             }
+            else if (token == "MOV:")
+            {
+                total_moves++;
+                moves_for_this_position++;
+                last_move = line;
+            }
 
         }
         infile.close();
+        cout << "total_positions          " << total_positions << endl;
+        cout << "total_moves              " << total_moves << endl;
+        cout << "average moves / position " << (float)total_moves / (float)total_positions << endl;
 
+        cout << "total_errors             " << total_errors << endl;
+        cout << "max_moves                " << max_moves << endl;
+        render(max_move_position);
+        cout << "Player: " << max_move_player << endl;
+        cout << "Roll:   " << max_move_roll << " (" << (max_move_roll / 6) + 1 << ", " << (max_move_roll % 6) + 1 << ")" << endl;
     }
 }

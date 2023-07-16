@@ -1352,8 +1352,8 @@ class Backgammon:
             else:
                 print('  0', end='')
 
-        print(f'{self.bar[WHITE]:>3}', end='')
         print(f'{self.bar[BLACK]:>3}', end='')
+        print(f'{self.bar[WHITE]:>3}', end='')
         print()
 
     def render(self):

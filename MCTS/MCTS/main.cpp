@@ -112,12 +112,15 @@ using namespace Connect4NS;
 
 int main()
 {
+	BackgammonNS::Backgammon::run_position_tests("C:\\GitHub\\RL\\MCTS\\MCTS\\test_games.txt");
+	return 0;
+
 	BackgammonNS::PositionType bgposition;
 	BackgammonNS::Backgammon::get_initial_position(bgposition);
 	//BackgammonNS::Backgammon::position_from_string("W02  0  0  0  0B05  0B03  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0", bgposition);
 	//BackgammonNS::Backgammon::position_from_string(  "B02B02B02B02B02B04B01  0  0  0  0  0  0  0  0  0  0W01W04W02W02W02W02W02  0  0", bgposition);
 	//BackgammonNS::Backgammon::position_from_string("  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0", bgposition);
-	//BackgammonNS::Backgammon::position_from_string("B03  0B04B01  0  0  0  0  0  0B01W01  0  0  0  0  0B01B01B01  0B02W01W12  1  1", bgposition);
+	BackgammonNS::Backgammon::position_from_string("B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0W01  0  0W02W01  0W11  0  0", bgposition);
 	
 
 	for (auto roll = 0; roll < 1; roll++)

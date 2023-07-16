@@ -5,6 +5,8 @@
 #include <array>
 #include <bitset>
 #include <vector>
+#include <fstream>
+
 /*
 
 Format for storing a backgammon position:
@@ -634,5 +636,16 @@ namespace BackgammonNS
         cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
         cout << (int)casted_off[0] << " " << (int)casted_off[1] << endl;
+    }
+
+    void Backgammon::run_position_tests(const string filename)
+    {
+        ifstream infile(filename);
+        string line;
+        while (getline(infile, line))
+        {
+            cout << line << endl;
+        }
+
     }
 }

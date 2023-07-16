@@ -86,11 +86,11 @@ namespace BackgammonNS
 {
     typedef tuple<unsigned char, unsigned char> slot_info;
     
-    const unsigned int max_move_list = 1024;
+    //const unsigned int max_move_list_xxx = 1024;
     const unsigned char bar_indicator = 0b11111000;
 
-    static MoveStruct move_list[max_move_list];
-    static unsigned int move_list_size = 0;
+    //static MoveStruct move_list_xxx[max_move_list_xxx];
+    //static unsigned int move_list_size_xxx = 0;
     static unordered_map<PositionStruct, unsigned char, PositionStructHash> duplicate_positions;
 
     slot_info get_bar_info(const PositionType& position)
@@ -122,7 +122,7 @@ namespace BackgammonNS
         return slot_info{ player, num_checkers };
     }
 
-    void update_slot(PositionType &position, unsigned char player, unsigned char slot, bool increment)
+    void update_slot(PositionType &position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list)
     {
         const unsigned char shift = 55 - (slot % 12) * 5;
         const unsigned char position_ndx = slot / 12;
@@ -213,7 +213,7 @@ namespace BackgammonNS
 
     }
 
-    bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff)
+    bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff, MoveList& move_list)
     {
         unsigned long long workspace = 0x0;
         const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
@@ -221,7 +221,7 @@ namespace BackgammonNS
         char delta = player == 0 ? die : -(char)die;
         bool expanded = false;
 
-        auto [bar_0_count, bar_1_count] = get_bar_info(move_list[pos_ndx].result_position);
+        auto [bar_0_count, bar_1_count] = get_bar_info(move_list.move_list[pos_ndx].result_position);
         auto bar_count = player == 0 ? bar_0_count : bar_1_count;
 
         // Initial position wasn't ready for castoff but was close enough that 
@@ -233,7 +233,7 @@ namespace BackgammonNS
             bool can_castoff_check = true;
             for (auto slot = starting_slot; slot <= ending_slot; slot++)
             {
-                auto [slot_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, slot);
+                auto [slot_player, num_checkers] = get_slot_info(move_list.move_list[pos_ndx].result_position, slot);
                 if (slot_player == player && num_checkers > 0)
                 {
                     can_castoff_check = false;
@@ -248,21 +248,21 @@ namespace BackgammonNS
         {
             // Check if we have a checker on the slot of the die roll.
             auto slot = player == 1 ? die - 1 : 24 - die;
-            auto [slot_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, slot);
+            auto [slot_player, num_checkers] = get_slot_info(move_list.move_list[pos_ndx].result_position, slot);
             if (slot_player == player && num_checkers > 0)
             {
                 expanded = true;
                 unsigned char move = (slot << 3) + die;
 
-                move_list[move_list_size] = move_list[pos_ndx];
-                move_list[move_list_size].moves[move_ndx] = move;
-                update_slot(move_list[move_list_size].result_position, player, slot, false);
+                move_list.move_list[move_list.move_list_size] = move_list.move_list[pos_ndx];
+                move_list.move_list[move_list.move_list_size].moves[move_ndx] = move;
+                update_slot(move_list.move_list[move_list.move_list_size].result_position, player, slot, false, move_list);
 
-                auto loc = duplicate_positions.find(move_list[move_list_size].result_position);
+                auto loc = duplicate_positions.find(move_list.move_list[move_list.move_list_size].result_position);
                 if (loc == duplicate_positions.end())
                 {
-                    duplicate_positions[move_list[move_list_size].result_position] = 1;
-                    move_list_size++;
+                    duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = 1;
+                    move_list.move_list_size++;
                 }
                 else
                 {
@@ -280,7 +280,7 @@ namespace BackgammonNS
 
                 for (auto x = 0; x < 6; x++)
                 {
-                    auto [slot_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, first_slot_with_pieces);
+                    auto [slot_player, num_checkers] = get_slot_info(move_list.move_list[pos_ndx].result_position, first_slot_with_pieces);
                     if (slot_player == player && num_checkers > 0)
                     {
                         break;
@@ -294,15 +294,15 @@ namespace BackgammonNS
                     expanded = true;
                     unsigned char move = (first_slot_with_pieces << 3) + die;
 
-                    move_list[move_list_size] = move_list[pos_ndx];
-                    move_list[move_list_size].moves[move_ndx] = move;
-                    update_slot(move_list[move_list_size].result_position, player, first_slot_with_pieces, false);
+                    move_list.move_list[move_list.move_list_size] = move_list.move_list[pos_ndx];
+                    move_list.move_list[move_list.move_list_size].moves[move_ndx] = move;
+                    update_slot(move_list.move_list[move_list.move_list_size].result_position, player, first_slot_with_pieces, false, move_list);
 
-                    auto loc = duplicate_positions.find(move_list[move_list_size].result_position);
+                    auto loc = duplicate_positions.find(move_list.move_list[move_list.move_list_size].result_position);
                     if (loc == duplicate_positions.end())
                     {
-                        duplicate_positions[move_list[move_list_size].result_position] = 1;
-                        move_list_size++;
+                        duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = 1;
+                        move_list.move_list_size++;
                     }
                     else
                     {
@@ -322,16 +322,16 @@ namespace BackgammonNS
                 //cout << "Die " << (int)die << " From Bar To " << (int)target << endl;
                 unsigned char move = bar_indicator + die;
 
-                move_list[move_list_size] = move_list[pos_ndx];
-                move_list[move_list_size].moves[move_ndx] = move;
-                update_slot(move_list[move_list_size].result_position, player, target, true);
-                update_slot(move_list[move_list_size].result_position, player, bar_indicator, false);
+                move_list.move_list[move_list.move_list_size] = move_list.move_list[pos_ndx];
+                move_list.move_list[move_list.move_list_size].moves[move_ndx] = move;
+                update_slot(move_list.move_list[move_list.move_list_size].result_position, player, target, true, move_list);
+                update_slot(move_list.move_list[move_list.move_list_size].result_position, player, bar_indicator, false, move_list);
 
-                auto loc = duplicate_positions.find(move_list[move_list_size].result_position);
+                auto loc = duplicate_positions.find(move_list.move_list[move_list.move_list_size].result_position);
                 if (loc == duplicate_positions.end())
                 {
-                    duplicate_positions[move_list[move_list_size].result_position] = 1;
-                    move_list_size++;
+                    duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = 1;
+                    move_list.move_list_size++;
                 }
                 else
                 {
@@ -344,7 +344,7 @@ namespace BackgammonNS
             // Normal move.
             for (auto slot = 0; slot < 24; slot++)
             {
-                auto [position_player, num_checkers] = get_slot_info(move_list[pos_ndx].result_position, slot);
+                auto [position_player, num_checkers] = get_slot_info(move_list.move_list[pos_ndx].result_position, slot);
                 if (position_player == player && num_checkers > 0)
                 {
                     char target = slot + delta;
@@ -355,16 +355,16 @@ namespace BackgammonNS
                     //cout << "Die " << (int)die << " From " << (int)slot << " To " << (int)target << endl;
                     unsigned char move = (slot << 3) + die;
 
-                    move_list[move_list_size] = move_list[pos_ndx];
-                    move_list[move_list_size].moves[move_ndx] = move;
-                    update_slot(move_list[move_list_size].result_position, player, target, true);
-                    update_slot(move_list[move_list_size].result_position, player, slot, false);
+                    move_list.move_list[move_list.move_list_size] = move_list.move_list[pos_ndx];
+                    move_list.move_list[move_list.move_list_size].moves[move_ndx] = move;
+                    update_slot(move_list.move_list[move_list.move_list_size].result_position, player, target, true, move_list);
+                    update_slot(move_list.move_list[move_list.move_list_size].result_position, player, slot, false, move_list);
 
-                    auto loc = duplicate_positions.find(move_list[move_list_size].result_position);
+                    auto loc = duplicate_positions.find(move_list.move_list[move_list.move_list_size].result_position);
                     if (loc == duplicate_positions.end())
                     {
-                        duplicate_positions[move_list[move_list_size].result_position] = 1;
-                        move_list_size++;
+                        duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = 1;
+                        move_list.move_list_size++;
                     }
                     else
                     {
@@ -376,7 +376,7 @@ namespace BackgammonNS
         return expanded;
     }
 
-    int Backgammon::get_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll)
+    int Backgammon::generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList& move_list)
     {
         unsigned long long workspace = position.position[0];
         unsigned int blocked = 0x0;
@@ -425,9 +425,9 @@ namespace BackgammonNS
         auto die1 = roll % 6 + 1;
         auto die2 = roll / 6 + 1;
 
-        move_list[0].clear();
-        move_list[0].result_position = position;
-        move_list_size = 1;
+        move_list.move_list[0].clear();
+        move_list.move_list[0].result_position = position;
+        move_list.move_list_size = 1;
         duplicate_positions.clear();
 
         auto max_sub_moves = 0;
@@ -439,19 +439,19 @@ namespace BackgammonNS
             {
                 can_castoff = castoff_availability::pending;
             }
-            auto start_move_list = move_list_size;
-            if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff)) max_sub_moves++;
-            auto end_move_list = move_list_size;
+            auto start_move_list = move_list.move_list_size;
+            if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff, move_list)) max_sub_moves++;
+            auto end_move_list = move_list.move_list_size;
             for (auto turn = 0; turn < 3; turn++)
             {
                 bool expanded = false;
                 for (auto x = start_move_list; x < end_move_list; x++)
                 {
-                    expanded |= gen_moves_for_1_die(x, blocked, player, die2, turn + 1, can_castoff);
+                    expanded |= gen_moves_for_1_die(x, blocked, player, die2, turn + 1, can_castoff, move_list);
                 }
                 if (expanded) max_sub_moves++;
                 start_move_list = end_move_list;
-                end_move_list = move_list_size;
+                end_move_list = move_list.move_list_size;
             }
         }
         else
@@ -461,24 +461,24 @@ namespace BackgammonNS
                 can_castoff = castoff_availability::pending;
             }
             auto max_moves_die1 = 0;
-            auto start_move_list = move_list_size;
-            if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff)) max_moves_die1++;
-            auto end_move_list = move_list_size;
+            auto start_move_list = move_list.move_list_size;
+            if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff, move_list)) max_moves_die1++;
+            auto end_move_list = move_list.move_list_size;
             bool expanded = false;
             for (auto x = start_move_list; x < end_move_list; x++)
             {
-                expanded |= gen_moves_for_1_die(x, blocked, player, die2, 1, can_castoff);
+                expanded |= gen_moves_for_1_die(x, blocked, player, die2, 1, can_castoff, move_list);
             }
             if (expanded) max_moves_die1++;
 
             auto max_moves_die2 = 0;
-            start_move_list = move_list_size;
-            if (gen_moves_for_1_die(0, blocked, player, die2, 0, can_castoff)) max_moves_die2++;
-            end_move_list = move_list_size;
+            start_move_list = move_list.move_list_size;
+            if (gen_moves_for_1_die(0, blocked, player, die2, 0, can_castoff, move_list)) max_moves_die2++;
+            end_move_list = move_list.move_list_size;
             expanded = false;
             for (auto x = start_move_list; x < end_move_list; x++)
             {
-                expanded |= gen_moves_for_1_die(x, blocked, player, die1, 1, can_castoff);
+                expanded |= gen_moves_for_1_die(x, blocked, player, die1, 1, can_castoff, move_list);
             }
             if (expanded) max_moves_die2++;
             max_sub_moves = max_moves_die1 > max_moves_die2 ? max_moves_die1 : max_moves_die2;
@@ -489,14 +489,14 @@ namespace BackgammonNS
         return max_sub_moves;
     }
 
-    void Backgammon::dump_moves(int max_sub_moves, const unsigned char& player)
+    void Backgammon::dump_moves(int max_sub_moves, const unsigned char& player, MoveList& move_list)
     {
         auto duplicates = 0;
         auto total_valid = 0;
         vector<tuple<string, PositionStruct>> rolls;
-        for (auto x = 0; x < move_list_size; x++)
+        for (auto x = 0; x < move_list.move_list_size; x++)
         {
-            bool valid = (max_sub_moves > 0 && move_list[x].moves[max_sub_moves - 1] != 0);
+            bool valid = (max_sub_moves > 0 && move_list.move_list[x].moves[max_sub_moves - 1] != 0);
             if (valid)
             {
                 string roll_desc = "";
@@ -504,9 +504,9 @@ namespace BackgammonNS
                 cout << "Position " << x << endl;
                 for (auto y = 0; y < 4; y++)
                 {
-                    if (move_list[x].moves[y] == 0) continue;
-                    auto die = move_list[x].moves[y] & 0b111;
-                    auto slot = move_list[x].moves[y] >> 3;
+                    if (move_list.move_list[x].moves[y] == 0) continue;
+                    auto die = move_list.move_list[x].moves[y] & 0b111;
+                    auto slot = move_list.move_list[x].moves[y] >> 3;
                     if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
                     else cout << "Die " << (int)die << " From " << (int)slot << endl;
                     roll_desc += to_string(slot);
@@ -514,12 +514,12 @@ namespace BackgammonNS
                     roll_desc += to_string(player == 0 ? slot + die : slot - die);
                     roll_desc += ", ";
                 }
-                rolls.push_back({ roll_desc, move_list[x].result_position });
-                render(move_list[x].result_position);
+                rolls.push_back({ roll_desc, move_list.move_list[x].result_position });
+                render(move_list.move_list[x].result_position);
                 total_valid++;
             }
             cout << (valid ? "OK" : "INVALID") << endl;
-            auto loc = duplicate_positions.find(move_list[x].result_position);
+            auto loc = duplicate_positions.find(move_list.move_list[x].result_position);
             if (loc != duplicate_positions.end())
             {
                 cout << "Found " << (int)loc->second << " duplicates. " << endl;
@@ -533,7 +533,7 @@ namespace BackgammonNS
             cout << " " << bitset<64>(get<1>(s).position[1]);
             cout << endl;
         }
-        cout << "Total Moves Generated: " << move_list_size << endl;
+        cout << "Total Moves Generated: " << move_list.move_list_size << endl;
         cout << "Total Duplicates: " << duplicates << endl;
         cout << "Total Valid: " << total_valid << endl;
     }
@@ -647,6 +647,7 @@ namespace BackgammonNS
 
     void Backgammon::run_position_tests(const string filename)
     {
+        MoveList move_list;
         ifstream infile(filename);
         string line;
         PositionStruct position;
@@ -699,7 +700,7 @@ namespace BackgammonNS
                 cout << "Processing player...   ";
                 player = 1 - atoi(data.c_str());
                 cout << data << " => " << player << endl;
-                max_sub_moves =  get_legal_moves(position, player, roll);
+                max_sub_moves =  generate_legal_moves(position, player, roll, move_list);
             }
             else if (token == "RES:")
             {

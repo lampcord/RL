@@ -3,6 +3,7 @@
 #include <functional>
 #include <unordered_map>
 #include <string>
+#include <optional>
 
 using namespace GameRulesNS;
 
@@ -47,6 +48,14 @@ namespace BackgammonNS
 	typedef PositionStruct PositionType;
 	typedef unsigned int MoveType;
 
+	const unsigned int max_move_list = 1024;
+	struct MoveList
+	{
+		MoveStruct move_list[max_move_list];
+		unsigned int move_list_size = 0;
+		MoveList() {};
+		~MoveList() {};
+	};
 	class Backgammon
 	{
 	private:
@@ -57,8 +66,8 @@ namespace BackgammonNS
 		static void position_from_string(const std::string str_pos, BackgammonNS::PositionType& position);
 		static void move(const PositionType& position, const unsigned char player, const MoveType move, MoveResult<PositionType>& move_result);
 		static void get_initial_position(PositionType& position);
-		static int get_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll);
-		static void dump_moves(int max_sub_moves, const unsigned char& player);
+		static int generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list);
+		static void dump_moves(int max_sub_moves, const unsigned char& player, MoveList& move_list);
 		static void render(const PositionType& position);
 		static MoveType prompt_user(const PositionType& position, const unsigned char player);
 		static void run_position_tests(const std::string filename);

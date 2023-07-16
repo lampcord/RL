@@ -112,6 +112,7 @@ using namespace Connect4NS;
 
 int main()
 {
+	BackgammonNS::MoveList move_list;
 	BackgammonNS::Backgammon::run_position_tests("C:\\GitHub\\RL\\MCTS\\MCTS\\test_games.txt");
 	return 0;
 
@@ -127,8 +128,8 @@ int main()
 	for (auto roll = 0; roll < 1; roll++)
 	{
 		BackgammonNS::Backgammon::render(bgposition);
-		auto max_sub_moves = BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, 0);
-		BackgammonNS::Backgammon::dump_moves(max_sub_moves, 0);
+		auto max_sub_moves = BackgammonNS::Backgammon::generate_legal_moves(bgposition, 1, 0, move_list);
+		BackgammonNS::Backgammon::dump_moves(max_sub_moves, 0, move_list);
 		//BackgammonNS::Backgammon::render(bgposition);
 		//BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
 	}

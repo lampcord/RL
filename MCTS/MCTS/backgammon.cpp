@@ -182,7 +182,7 @@ namespace BackgammonNS
             auto value = atoi(str_value.substr(1, 2).c_str());
             workspace |= (player + value);
         }
-        cout << bitset<64>(workspace) << endl;
+        //cout << bitset<64>(workspace) << endl;
         position.position[0] = workspace;
         workspace = atoi(str_pos.substr(25 * 3, 3).c_str());
         for (auto slot = 0; slot < 12; slot++)
@@ -193,7 +193,7 @@ namespace BackgammonNS
             auto value = atoi(str_value.substr(1, 2).c_str());
             workspace |= (player + value);
         }
-        cout << bitset<64>(workspace) << endl;
+        //cout << bitset<64>(workspace) << endl;
         position.position[1] = workspace;
     }
 
@@ -319,7 +319,7 @@ namespace BackgammonNS
             if (target >= 0 && target < 24 && (blocked & (blocked_ndx >> target)) == 0)
             {
                 expanded = true;
-                cout << "Die " << (int)die << " From Bar To " << (int)target << endl;
+                //cout << "Die " << (int)die << " From Bar To " << (int)target << endl;
                 unsigned char move = bar_indicator + die;
 
                 move_list[move_list_size] = move_list[pos_ndx];
@@ -352,7 +352,7 @@ namespace BackgammonNS
                     if (blocked & (blocked_ndx >> target)) continue;
                     expanded = true;
 
-                    cout << "Die " << (int)die << " From " << (int)slot << " To " << (int)target << endl;
+                    //cout << "Die " << (int)die << " From " << (int)slot << " To " << (int)target << endl;
                     unsigned char move = (slot << 3) + die;
 
                     move_list[move_list_size] = move_list[pos_ndx];
@@ -375,7 +375,7 @@ namespace BackgammonNS
         }
         return expanded;
     }
-    void Backgammon::get_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll)
+    int Backgammon::get_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll)
     {
         unsigned long long workspace = position.position[0];
         unsigned int blocked = 0x0;
@@ -482,8 +482,14 @@ namespace BackgammonNS
             if (expanded) max_moves_die2++;
             max_moves = max_moves_die1 > max_moves_die2 ? max_moves_die1 : max_moves_die2;
         }
-        cout << "Max Moves: " << max_moves << " moves_to_castoff " << (int)moves_to_castoff << endl;
+        //cout << "Max Moves: " << max_moves << " moves_to_castoff " << (int)moves_to_castoff << endl;
 
+        //dump_moves(max_moves, player);
+        return max_moves;
+    }
+
+    void Backgammon::dump_moves(int max_moves, const unsigned char& player)
+    {
         auto duplicates = 0;
         auto total_valid = 0;
         vector<tuple<string, PositionStruct>> rolls;
@@ -642,10 +648,56 @@ namespace BackgammonNS
     {
         ifstream infile(filename);
         string line;
+        PositionStruct position;
+        auto roll = 0;
+        auto player = 0;
+
         while (getline(infile, line))
         {
-            cout << line << endl;
+            //cout << line << endl;
+            string token = line.substr(0, 4);
+            string data = line.substr(4);
+            if (token == "POS:")
+            {
+                cout << "------------------------------------" << endl;
+                cout << "Processing position... " << data << endl;
+                position_from_string(data, position);
+                //render(position);
+                cout << "------------------------------------" << endl;
+            }
+            else if (token == "ROL:")
+            {
+                cout << "Processing roll...     ";
+                auto die1 = atoi(data.substr(0, 3).c_str());
+                auto die2 = atoi(data.substr(3, 3).c_str());
+                roll = (die1 - 1) * 6 + die2 - 1;
+                cout << data << " => " << die1 << ", " << die2 << " " << roll << endl;
+            }
+            else if (token == "PLY:")
+            {
+                cout << "Processing player...   ";
+                player = 1 - atoi(data.c_str());
+                cout << data << " => " << player << endl;
+                get_legal_moves(position, player, roll);
+            }
+            else if (token == "RES:")
+            {
+                cout << "Processing result...   ";
+                PositionStruct test_position;
+                position_from_string(data, test_position);
+                auto pos = duplicate_positions.find(test_position);
+                if (pos == duplicate_positions.end())
+                {
+                    cout << "MISSING POSITION!!!" << endl;
+                }
+                else
+                {
+                    cout << "Found" << endl;
+                }
+            }
+
         }
+        infile.close();
 
     }
 }

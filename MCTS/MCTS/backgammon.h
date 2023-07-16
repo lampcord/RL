@@ -48,7 +48,7 @@ namespace BackgammonNS
 	typedef PositionStruct PositionType;
 	typedef unsigned int MoveType;
 
-	const unsigned int max_move_list = 1024;
+	const unsigned int max_move_list = 2048;
 	struct MoveList
 	{
 		std::unordered_map<PositionStruct, unsigned char, PositionStructHash> duplicate_positions;
@@ -67,6 +67,7 @@ namespace BackgammonNS
 			max_sub_moves = 0;
 		};
 		void dump_moves(const unsigned char& player);
+		std::optional<MoveStruct> get_legal_move(unsigned int& ndx);
 	};
 	class Backgammon
 	{

@@ -121,15 +121,23 @@ int main()
 	//BackgammonNS::Backgammon::position_from_string("W02  0  0  0  0B05  0B03  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0", bgposition);
 	//BackgammonNS::Backgammon::position_from_string(  "B02B02B02B02B02B04B01  0  0  0  0  0  0  0  0  0  0W01W04W02W02W02W02W02  0  0", bgposition);
 	//BackgammonNS::Backgammon::position_from_string("  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0", bgposition);
-	BackgammonNS::Backgammon::position_from_string("W02W01  0  0  0B05  0B03  0  0  0W03B05  0  0  0W02W01W06  0  0  0  0B01  0  1", bgposition);
-	bgposition.position[0] = 0b0000100101001000001100010000110010100101000110001000000000000011;
-	bgposition.position[1] = 0b0000100010000000000100010000110001001010000010001000010001100000;
+	BackgammonNS::Backgammon::position_from_string("B06B03  0  0  0B01B01  0  0B01  0  0  0B01  0  0  0  0  0  0B01  0W01B01  0  0", bgposition);
+	//bgposition.position[0] = 0b0000100101001000001100010000110010100101000110001000000000000011;
+	//bgposition.position[1] = 0b0000100010000000000100010000110001001010000010001000010001100000;
 
 	for (auto roll = 0; roll < 1; roll++)
 	{
 		BackgammonNS::Backgammon::render(bgposition);
-		BackgammonNS::Backgammon::generate_legal_moves(bgposition, 1, 0, move_list);
+		BackgammonNS::Backgammon::generate_legal_moves(bgposition, 0, 4, move_list);
 		move_list.dump_moves(1);
+		//unsigned int ndx = 0;
+		//while (true)
+		//{
+		//	auto move = move_list.get_legal_move(ndx);
+		//	if (!move) break;
+		//	cout << bitset<64>(move.value().result_position.position[0]) << " ";
+		//	cout << bitset<64>(move.value().result_position.position[1]) << " " << endl;
+		//}
 		//BackgammonNS::Backgammon::render(bgposition);
 		//BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
 	}

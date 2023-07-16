@@ -128,8 +128,8 @@ int main()
 	for (auto roll = 0; roll < 1; roll++)
 	{
 		BackgammonNS::Backgammon::render(bgposition);
-		auto max_sub_moves = BackgammonNS::Backgammon::generate_legal_moves(bgposition, 1, 0, move_list);
-		BackgammonNS::Backgammon::dump_moves(max_sub_moves, 0, move_list);
+		BackgammonNS::Backgammon::generate_legal_moves(bgposition, 1, 0, move_list);
+		move_list.dump_moves(1);
 		//BackgammonNS::Backgammon::render(bgposition);
 		//BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
 	}

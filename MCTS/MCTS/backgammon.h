@@ -51,10 +51,22 @@ namespace BackgammonNS
 	const unsigned int max_move_list = 1024;
 	struct MoveList
 	{
+		std::unordered_map<PositionStruct, unsigned char, PositionStructHash> duplicate_positions;
 		MoveStruct move_list[max_move_list];
 		unsigned int move_list_size = 0;
+		unsigned char max_sub_moves = 0;
+
 		MoveList() {};
 		~MoveList() {};
+		void initialize(const PositionType& position) 
+		{
+			move_list[0].clear();
+			move_list[0].result_position = position;
+			move_list_size = 1;
+			duplicate_positions.clear();
+			max_sub_moves = 0;
+		};
+		void dump_moves(const unsigned char& player);
 	};
 	class Backgammon
 	{
@@ -66,8 +78,7 @@ namespace BackgammonNS
 		static void position_from_string(const std::string str_pos, BackgammonNS::PositionType& position);
 		static void move(const PositionType& position, const unsigned char player, const MoveType move, MoveResult<PositionType>& move_result);
 		static void get_initial_position(PositionType& position);
-		static int generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list);
-		static void dump_moves(int max_sub_moves, const unsigned char& player, MoveList& move_list);
+		static void generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list);
 		static void render(const PositionType& position);
 		static MoveType prompt_user(const PositionType& position, const unsigned char player);
 		static void run_position_tests(const std::string filename);

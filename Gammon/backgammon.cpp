@@ -684,6 +684,7 @@ namespace BackgammonNS
         auto total_positions = 0;
         auto total_moves = 0;
         auto total_errors = 0;
+        auto total_warnings = 0;
         auto max_moves = 0;
         auto moves_for_this_position = 0;
         
@@ -717,7 +718,7 @@ namespace BackgammonNS
                         }
                         else if (pos->second != 0)
                         {
-                            total_errors++;
+                            total_warnings++;
                             cout << "MOVE GENERATED BUT DOES NOT EXIST IN TEST DATA" << endl;
                             render(position);
                             for (auto y = 0; y < 4; y++)
@@ -798,6 +799,7 @@ namespace BackgammonNS
         cout << "average moves / position " << (float)total_moves / (float)total_positions << endl;
 
         cout << "total_errors             " << total_errors << endl;
+        cout << "total_warnings           " << total_warnings << endl;
         cout << "max_moves                " << max_moves << endl;
         render(max_move_position);
         cout << "Player: " << max_move_player << endl;

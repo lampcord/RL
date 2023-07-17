@@ -37,3 +37,5 @@ MCTS/MCTS/Intel® VTune™ Profiler Results/
 MCTS/debug.log
 Gammon/.vs/
 Gammon/x64/
+Gammon/test_games.txt
+test_games.txt

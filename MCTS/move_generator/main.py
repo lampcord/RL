@@ -13,6 +13,8 @@ def run_one_game(player):
     num_moves = 0
     while not winner and num_moves < 200:
         # game.render()
+        if game.no_points():
+            break
         print('POS:', end='')
         game.export()
         hold_game = deepcopy(game)
@@ -51,4 +53,4 @@ def run_one_game(player):
 if __name__ == '__main__':
     for x in range(5):
         run_one_game(WHITE)
-        run_one_game(WHITE)
+        run_one_game(BLACK)

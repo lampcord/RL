@@ -1342,6 +1342,13 @@ class Backgammon:
 
         return plays
 
+    def no_points(self):
+        points = [p[0] for p in self.board]
+        for ndx in range(len(points)):
+            if points[ndx] > 0:
+                return False
+        return True
+
     def export(self):
         points = [p[0] for p in self.board]
         colors = [TOKEN[WHITE] if p[1] == WHITE else TOKEN[BLACK] for p in self.board]

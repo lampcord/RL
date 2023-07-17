@@ -112,6 +112,7 @@ using namespace Connect4NS;
 
 int main()
 {
+	PerfTimer pf(true, true, true);
 	BackgammonNS::MoveList move_list;
 	BackgammonNS::Backgammon::run_position_tests("C:\\GitHub\\RL\\MCTS\\MCTS\\test_games.txt");
 	return 0;
@@ -122,25 +123,32 @@ int main()
 	//BackgammonNS::Backgammon::position_from_string(  "B02B02B02B02B02B04B01  0  0  0  0  0  0  0  0  0  0W01W04W02W02W02W02W02  0  0", bgposition);
 	//BackgammonNS::Backgammon::position_from_string("  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0", bgposition);
 	BackgammonNS::Backgammon::position_from_string("B06B03  0  0  0B01B01  0  0B01  0  0  0B01  0  0  0  0  0  0B01  0W01B01  0  0", bgposition);
-	//bgposition.position[0] = 0b0000100101001000001100010000110010100101000110001000000000000011;
-	//bgposition.position[1] = 0b0000100010000000000100010000110001001010000010001000010001100000;
+	bgposition.position[0] = 0b0000110010000110001000010000000001000010000100001000000000100010;
+	bgposition.position[1] = 0b0000000010000000001100010000010001100011001000000000100000000010;
 
-	for (auto roll = 0; roll < 1; roll++)
+	pf.start();
+	for (auto x = 0; x < 1000; x++)
 	{
-		BackgammonNS::Backgammon::render(bgposition);
-		BackgammonNS::Backgammon::generate_legal_moves(bgposition, 0, 4, move_list);
-		move_list.dump_moves(1);
-		//unsigned int ndx = 0;
-		//while (true)
-		//{
-		//	auto move = move_list.get_legal_move(ndx);
-		//	if (!move) break;
-		//	cout << bitset<64>(move.value().result_position.position[0]) << " ";
-		//	cout << bitset<64>(move.value().result_position.position[1]) << " " << endl;
-		//}
-		//BackgammonNS::Backgammon::render(bgposition);
-		//BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
+		for (auto roll = 0; roll < 36; roll++)
+		{
+			//BackgammonNS::Backgammon::render(bgposition);
+
+			BackgammonNS::Backgammon::generate_legal_moves(bgposition, 0, 0, move_list);
+			//move_list.dump_moves(1);
+			//unsigned int ndx = 0;
+			//while (true)
+			//{
+			//	auto move = move_list.get_legal_move(ndx);
+			//	if (!move) break;
+			//	cout << bitset<64>(move.value().result_position.position[0]) << " ";
+			//	cout << bitset<64>(move.value().result_position.position[1]) << " " << endl;
+			//}
+			//BackgammonNS::Backgammon::render(bgposition);
+			//BackgammonNS::Backgammon::get_legal_moves(bgposition, 1, roll);
+		}
 	}
+	pf.stop();
+	pf.print();
 	return 0;
 
 	const unsigned thread_count = std::thread::hardware_concurrency();
@@ -165,7 +173,6 @@ int main()
 	typedef ConsoleAgentNS::ConsoleAgent<Connect4, PositionType, MoveType> ConsoleAgentType;
 	ConsoleAgentType console_agent;
 
-	PerfTimer pf(true, true, true);
 	pf.start();
 	//auto moves = play_games<PositionType, MoveType, Connect4, MCTSRGDAgentType, ConsoleAgentType>(mcts_rgd_agent, console_agent, 10, true);
 	//auto moves = play_games<PositionType, MoveType, Connect4, ConsoleAgentType, MCTSRGDAgentType>(console_agent, mcts_rgd_agent, 10, true);

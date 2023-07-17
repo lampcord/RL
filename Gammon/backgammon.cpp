@@ -188,7 +188,7 @@ namespace BackgammonNS
         auto duplicates = 0;
         auto total_valid = 0;
         vector<tuple<string, PositionStruct>> rolls;
-        for (auto x = 0; x < move_list_size; x++)
+        for (auto x = 0u; x < move_list_size; x++)
         {
             bool valid = (max_sub_moves > 0 && move_list[x].moves[max_sub_moves - 1] != 0);
             if (valid)
@@ -348,8 +348,8 @@ namespace BackgammonNS
 
                 if (first_slot_with_pieces >= 0 && first_slot_with_pieces < 24)
                 {
-                    if ((player == 1 && first_slot_with_pieces < slot) ||
-                        (player == 0 && first_slot_with_pieces > slot))
+                    if ((player == 1 && first_slot_with_pieces < (int)slot) ||
+                        (player == 0 && first_slot_with_pieces > (int)slot))
                     {
                         expanded = true;
                         unsigned char move = (first_slot_with_pieces << 3) + die;
@@ -453,7 +453,7 @@ namespace BackgammonNS
             unsigned char is_oponent = (workspace & 0b10000) == oponent_test;
             blocked |= (blocked_ndx * slot_value * is_oponent);
 
-            moves_to_castoff += (castoff_counter * (workspace & 0b1111) * !is_oponent);
+            moves_to_castoff += (unsigned char)(castoff_counter * (workspace & 0b1111) * !is_oponent);
 
             blocked_ndx <<= 1;
             workspace >>= 5;
@@ -471,7 +471,7 @@ namespace BackgammonNS
             unsigned char is_oponent = (workspace & 0b10000) == oponent_test;
             blocked |= (blocked_ndx * slot_value * is_oponent);
 
-            moves_to_castoff += (castoff_counter * (workspace & 0b1111) * !is_oponent);
+            moves_to_castoff += (unsigned char)(castoff_counter * (workspace & 0b1111) * !is_oponent);
 
             blocked_ndx <<= 1;
             workspace >>= 5;
@@ -543,7 +543,7 @@ namespace BackgammonNS
                 if (max_moves_die1 > 0 && max_moves_die2 > 0)
                 {
                     auto largest_die = die1 > die2 ? die1 : die2;
-                    for (auto x = 0; x < move_list.move_list_size; x++)
+                    for (auto x = 0u; x < move_list.move_list_size; x++)
                     {
                         auto move = move_list.move_list[x].moves[0];
                         auto test_die = move & 0b111;
@@ -668,7 +668,7 @@ namespace BackgammonNS
         cout << (int)casted_off[0] << " " << (int)casted_off[1] << endl;
     }
 
-    void Backgammon::run_position_tests(const string filename)
+    void Backgammon::run_position_tests(const string filename, bool verbose)
     {
         MoveList move_list;
         ifstream infile(filename);
@@ -694,6 +694,14 @@ namespace BackgammonNS
             string data = line.substr(4);
             if (token == "POS:")
             {
+                if (!verbose)
+                {
+                    if (total_positions % 100 == 0)
+                    {
+                        cout << " " << total_positions << endl;
+                    }
+                    cout << ".";
+                }
                 if (move_list.max_sub_moves > 0)
                 {
                     auto ndx = 0u;
@@ -733,30 +741,30 @@ namespace BackgammonNS
                     max_move_roll = roll;
                 }
                 moves_for_this_position = 0;
-                cout << "------------------------------------" << endl;
-                cout << "Processing position... " << data << endl;
+                if (verbose) cout << "------------------------------------" << endl;
+                if (verbose) cout << "Processing position... " << data << endl;
                 position_from_string(data, position);
                 //render(position);
-                cout << "------------------------------------" << endl;
+                if (verbose) cout << "------------------------------------" << endl;
             }
             else if (token == "ROL:")
             {
-                cout << "Processing roll...     ";
+                if (verbose) cout << "Processing roll...     ";
                 auto die1 = atoi(data.substr(0, 3).c_str());
                 auto die2 = atoi(data.substr(3, 3).c_str());
                 roll = (die1 - 1) * 6 + die2 - 1;
-                cout << data << " => " << die1 << ", " << die2 << " " << roll << endl;
+                if (verbose) cout << data << " => " << die1 << ", " << die2 << " " << roll << endl;
             }
             else if (token == "PLY:")
             {
-                cout << "Processing player...   ";
+                if (verbose) cout << "Processing player...   ";
                 player = 1 - atoi(data.c_str());
-                cout << data << " => " << player << endl;
+                if (verbose) cout << data << " => " << player << endl;
                 generate_legal_moves(position, player, roll, move_list);
             }
             else if (token == "RES:")
             {
-                cout << "Processing result...   ";
+                if (verbose) cout << "Processing result...   ";
                 PositionStruct test_position;
                 position_from_string(data, test_position);
                 auto pos = move_list.duplicate_positions.find(test_position);
@@ -772,7 +780,7 @@ namespace BackgammonNS
                 else
                 {
                     pos->second = 0;
-                    cout << "Found" << endl;
+                    if (verbose) cout << "Found" << endl;
                 }
             }
             else if (token == "MOV:")
@@ -784,6 +792,7 @@ namespace BackgammonNS
 
         }
         infile.close();
+        cout << endl;
         cout << "total_positions          " << total_positions << endl;
         cout << "total_moves              " << total_moves << endl;
         cout << "average moves / position " << (float)total_moves / (float)total_positions << endl;

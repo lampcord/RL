@@ -82,6 +82,6 @@ namespace BackgammonNS
 		static void generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list);
 		static void render(const PositionType& position);
 		static MoveType prompt_user(const PositionType& position, const unsigned char player);
-		static void run_position_tests(const std::string filename);
+		static void run_position_tests(const std::string filename, bool verbose);
 	};
 }

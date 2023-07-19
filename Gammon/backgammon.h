@@ -48,7 +48,7 @@ namespace BackgammonNS
 	typedef PositionStruct PositionType;
 	typedef unsigned int MoveType;
 
-	const unsigned int max_move_list = 2048;
+	const unsigned int max_move_list = 4092;
 	struct MoveList
 	{
 		std::unordered_map<PositionStruct, unsigned char, PositionStructHash> duplicate_positions;
@@ -75,7 +75,7 @@ namespace BackgammonNS
 	private:
 		static void render_bar_section(const BackgammonNS::PositionType& position, unsigned char player);
 		static void render_board_section(const BackgammonNS::PositionType& position, bool top, unsigned char casted_off);
-		static bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff, MoveList& move_list);
+		static bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff, MoveList& move_list, bool no_duplicates);
 
 	public:
 		static slot_info get_bar_info(const PositionType& position);
@@ -85,10 +85,10 @@ namespace BackgammonNS
 		static void position_from_string(const std::string str_pos, BackgammonNS::PositionType& position);
 		//static void move(const PositionType& position, const unsigned char player, const MoveType move, MoveResult<PositionType>& move_result);
 		static void get_initial_position(PositionType& position);
-		static void generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list);
+		static void generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list, bool no_duplicates);
 		static void render(const PositionType& position, unsigned char player);
 		static MoveType prompt_user(const PositionType& position, const unsigned char player);
-		static void run_position_tests(const std::string filename, bool verbose);
+		static void run_position_tests(const std::string filename, bool verbose, MoveList& move_list);
 
 	};
 

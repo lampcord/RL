@@ -1,13 +1,13 @@
 #include <iostream>
 #include "backgammon.h"
-#include "Analyzer.h"
+#include "analyzer.h"
 
 using namespace BackgammonNS;
 
 int main()
 {
 	MoveList move_list;
-	Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false);
+	Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, move_list);
 	return 0;
 
 	PositionStruct position;

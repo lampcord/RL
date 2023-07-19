@@ -21,9 +21,15 @@
     <ClCompile Include="backgammon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Analyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="backgammon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Analyzer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -129,10 +129,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Analyzer.cpp" />
     <ClCompile Include="backgammon.cpp" />
     <ClCompile Include="Gammon.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Analyzer.h" />
     <ClInclude Include="backgammon.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

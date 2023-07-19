@@ -1,4 +1,5 @@
 #include "backgammon.h"
+#include "Analyzer.h"
 #include <tuple>
 #include <iostream>
 #include <iomanip>
@@ -205,7 +206,7 @@ namespace BackgammonNS
                     roll_desc += ", ";
                 }
                 rolls.push_back({ roll_desc, move_list[x].result_position });
-                Backgammon::render(move_list[x].result_position);
+                Backgammon::render(move_list[x].result_position, 1 - player);
                 total_valid++;
             }
             cout << (valid ? "OK" : "INVALID") << endl;
@@ -588,31 +589,31 @@ namespace BackgammonNS
                 {
                     if (line >= 5)
                     {
-                        cout << (int)num_checkers - 5;
+                        cout << setw(2) << (int)num_checkers;
                     }
                     else
                     {
-                        cout << (player == 0 ? 'O' : 'X');
+                        cout << (player == 0 ? " O" : " X");
                     }
                 }
                 else
                 {
-                    cout << '.';
+                    cout << " .";
                 }
                 switch (slot)
                 {
                 case 6:
                 case 17:
-                    cout << '|';
+                    cout << " |";
                     break;
                 case 0:
                 case 23:
                     break;
                 default:
-                    cout << ' ';
+                    cout << "  ";
                 }
             }
-            cout << '|';
+            cout << " |";
             for (auto col = 0; col < 3; col++)
             {
                 if (casted_off > line * 3 + col) cout << (top ? 'X' : 'O');
@@ -621,23 +622,27 @@ namespace BackgammonNS
         }
     }
 
-    void Backgammon::render_bar_section(const BackgammonNS::PositionType& position)
+    void Backgammon::render_bar_section(const BackgammonNS::PositionType& position, unsigned char player)
     {
         auto [player_0_pip, player_1_pip] = Analyzer::get_pip_count(position);
         const auto [player_0_bar, player_1_bar] = get_bar_info(position);
-        cout << '|';
+        cout << "|";
         for (auto bar = 0; bar < 8; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "  " << setw(3) << player_1_pip << "  ";
+        cout << "              " << setw(3) << player_1_pip << " X " << (player == 1 ? "*" : " ") << "          ";
         for (auto bar = 0; bar < 8; bar++) cout << (player_1_bar + 1 > (8 - bar) ? 'X' : ' ');
         cout << "|" << endl;
-        cout << '|';
+        cout << "|";
         for (auto bar = 8; bar < 15; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "   " << setw(3) << player_0_pip << "   ";
+        cout << "               " << setw(3) << player_1_pip << " O " << (player == 0 ? "*" : " ") << "           ";
         for (auto bar = 8; bar < 15; bar++) cout << (player_1_bar > (22 - bar) ? 'X' : ' ');
         cout << "|" << endl;
     }
-    void Backgammon::render(const PositionType& position)
+    void Backgammon::render(const PositionType& position, unsigned char player)
     {
+        const string far_numbers = " 13  14  15  16  17  18  19  20  21  22  23  24  ";
+        const string near_numbers = " 12  11  10   9   8   7   6   5   4   3   2   1  ";
+        const string sep = "+-----------------------+-----------------------+";
+
         array<unsigned char, 2> casted_off = { 15, 15 };
         for (auto slot = 0; slot < 24; slot++)
         {
@@ -648,17 +653,15 @@ namespace BackgammonNS
         casted_off[0] -= player_0_bar;
         casted_off[1] -= player_1_bar;
 
-        cout << " 1 1 1 1 1 1 1 2 2 2 2 2" << endl;
-        cout << " 3 4 5 6 7 8 9 0 1 2 3 4" << endl;
-        cout << "+-----------+-----------+" << endl;
+        cout << (player == 0? far_numbers : near_numbers) << endl;
+        cout << sep << endl;
         render_board_section(position, true, casted_off[1]);
-        cout << "+-----------+-----------+" << endl;
-        render_bar_section(position);
-        cout << "+-----------+-----------+" << endl;
+        cout << sep << endl;
+        render_bar_section(position, player);
+        cout << sep << endl;
         render_board_section(position, false, casted_off[0]);
-        cout << "+-----------+-----------+" << endl;
-        cout << " 1 1 1                  " << endl;
-        cout << " 2 1 0 9 8 7 6 5 4 3 2 1" << endl;
+        cout << sep << endl;
+        cout << (player == 1 ? far_numbers : near_numbers) << endl;
 
         cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
@@ -717,7 +720,7 @@ namespace BackgammonNS
                         {
                             total_warnings++;
                             cout << "MOVE GENERATED BUT DOES NOT EXIST IN TEST DATA" << endl;
-                            render(position);
+                            render(position, player);
                             for (auto y = 0; y < 4; y++)
                             {
                                 if (move.value().moves[y] == 0) continue;
@@ -726,7 +729,7 @@ namespace BackgammonNS
                                 if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
                                 else cout << "Die " << (int)die << " From " << (int)slot << endl;
                             }
-                            render(move.value().result_position);
+                            render(move.value().result_position, player);
                         }
                     }
                 }
@@ -770,10 +773,10 @@ namespace BackgammonNS
                 {
                     total_errors++;
                     cout << "MISSING POSITION!!!" << endl;
-                    render(position);
+                    render(position, player);
                     cout << last_move << endl;
                     cout << line << endl;
-                    render(test_position);
+                    render(test_position, player);
                 }
                 else
                 {
@@ -798,33 +801,10 @@ namespace BackgammonNS
         cout << "total_errors             " << total_errors << endl;
         cout << "total_warnings           " << total_warnings << endl;
         cout << "max_moves                " << max_moves << endl;
-        render(max_move_position);
+        render(max_move_position, player);
         cout << "Player: " << max_move_player << endl;
         cout << "Roll:   " << max_move_roll << " (" << (max_move_roll / 6) + 1 << ", " << (max_move_roll % 6) + 1 << ")" << endl;
     }
 
-    tuple<unsigned int, unsigned int> Analyzer::get_pip_count(const PositionType& position)
-    {
-        unsigned int player_total[2] = { 0, 0 };
-
-        auto [player_0_bar, player_1_bar] = Backgammon::get_bar_info(position);
-        player_total[0] += player_0_bar * 25;
-        player_total[1] += player_1_bar * 25;
-
-        for (auto slot = 0u; slot < 24; slot++)
-        {
-            auto [slot_player, num_checkers] = Backgammon::get_slot_info(position, slot);
-            if (num_checkers == 0) continue;
-            player_total[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers: (slot + 1) * num_checkers;
-        }
-        return tuple<unsigned int, unsigned int>(player_total[0], player_total[1]);
-    }
-
-    float Analyzer::analyze(const PositionType& position)
-    {
-        auto [player_0_pip_count, player_1_pip_count] = get_pip_count(position);
-        cout << "Player 0 pip: " << player_0_pip_count << " Player 1 pip: " << player_1_pip_count << endl;
-        return 0.0f;
-    }
 
 }

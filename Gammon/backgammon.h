@@ -1,11 +1,8 @@
 #pragma once
-//#include "game_rules.h"
 #include <functional>
 #include <unordered_map>
 #include <string>
 #include <optional>
-
-//using namespace GameRulesNS;
 
 namespace BackgammonNS
 {
@@ -76,7 +73,7 @@ namespace BackgammonNS
 	class Backgammon
 	{
 	private:
-		static void render_bar_section(const BackgammonNS::PositionType& position);
+		static void render_bar_section(const BackgammonNS::PositionType& position, unsigned char player);
 		static void render_board_section(const BackgammonNS::PositionType& position, bool top, unsigned char casted_off);
 		static bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff, MoveList& move_list);
 
@@ -89,17 +86,10 @@ namespace BackgammonNS
 		//static void move(const PositionType& position, const unsigned char player, const MoveType move, MoveResult<PositionType>& move_result);
 		static void get_initial_position(PositionType& position);
 		static void generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list);
-		static void render(const PositionType& position);
+		static void render(const PositionType& position, unsigned char player);
 		static MoveType prompt_user(const PositionType& position, const unsigned char player);
 		static void run_position_tests(const std::string filename, bool verbose);
 
 	};
 
-	class Analyzer
-	{
-	private:
-	public:
-		static std::tuple<unsigned int, unsigned int> get_pip_count(const PositionType& position);
-		static float analyze(const PositionType& position);
-	};
 }

@@ -84,11 +84,7 @@ using namespace std;
 
 namespace BackgammonNS
 {
-    typedef tuple<unsigned char, unsigned char> slot_info;
-    
-    const unsigned char bar_indicator = 0b11111000;
-
-    slot_info get_bar_info(const PositionType& position)
+    slot_info Backgammon::get_bar_info(const PositionType& position)
     {
         unsigned long long workspace = 0x0;
         const unsigned char shift = 60;
@@ -102,7 +98,7 @@ namespace BackgammonNS
         return slot_info{ player_0_bar, player_1_bar };
     }
 
-    slot_info get_slot_info(const PositionType& position, unsigned char slot)
+    slot_info Backgammon::get_slot_info(const PositionType& position, unsigned char slot)
     {
         unsigned long long workspace = 0x0;
         const unsigned char shift = 55 - (slot % 12) * 5;
@@ -117,7 +113,7 @@ namespace BackgammonNS
         return slot_info{ player, num_checkers };
     }
 
-    void update_slot(PositionType &position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list)
+    void Backgammon::update_slot(PositionType &position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list)
     {
         const unsigned char shift = 55 - (slot % 12) * 5;
         const unsigned char position_ndx = slot / 12;
@@ -275,7 +271,7 @@ namespace BackgammonNS
 
     }
 
-    bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff, MoveList& move_list)
+    bool Backgammon::gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff, MoveList& move_list)
     {
         unsigned long long workspace = 0x0;
         const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
@@ -567,8 +563,8 @@ namespace BackgammonNS
         array<unsigned int, 6> bot_lines{5, 4, 3, 2, 1, 0};
         array<unsigned int, 6>* lines;
 
-        array<unsigned int, 12> top_slots{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-        array<unsigned int, 12> bot_slots{23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12};
+        array<unsigned int, 12> top_slots{11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+        array<unsigned int, 12> bot_slots{12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
         array<unsigned int, 12>* slots;
 
         if (top)
@@ -605,12 +601,12 @@ namespace BackgammonNS
                 }
                 switch (slot)
                 {
-                case 5:
-                case 18:
+                case 6:
+                case 17:
                     cout << '|';
                     break;
-                case 11:
-                case 12:
+                case 0:
+                case 23:
                     break;
                 default:
                     cout << ' ';
@@ -627,17 +623,18 @@ namespace BackgammonNS
 
     void Backgammon::render_bar_section(const BackgammonNS::PositionType& position)
     {
+        auto [player_0_pip, player_1_pip] = Analyzer::get_pip_count(position);
         const auto [player_0_bar, player_1_bar] = get_bar_info(position);
         cout << '|';
-        for (auto bar = 0; bar < 11; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << '|';
-        for (auto bar = 0; bar < 11; bar++) cout << (player_1_bar > bar ? 'X' : ' ');
+        for (auto bar = 0; bar < 8; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
+        cout << "  " << setw(3) << player_1_pip << "  ";
+        for (auto bar = 0; bar < 8; bar++) cout << (player_1_bar + 1 > (8 - bar) ? 'X' : ' ');
         cout << "|" << endl;
         cout << '|';
-        for (auto bar = 11; bar < 15; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "       |";
-        for (auto bar = 11; bar < 15; bar++) cout << (player_1_bar > bar ? 'X' : ' ');
-        cout << "       |" << endl;
+        for (auto bar = 8; bar < 15; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
+        cout << "   " << setw(3) << player_0_pip << "   ";
+        for (auto bar = 8; bar < 15; bar++) cout << (player_1_bar > (22 - bar) ? 'X' : ' ');
+        cout << "|" << endl;
     }
     void Backgammon::render(const PositionType& position)
     {
@@ -651,8 +648,8 @@ namespace BackgammonNS
         casted_off[0] -= player_0_bar;
         casted_off[1] -= player_1_bar;
 
-        cout << "                     1 1" << endl;
-        cout << " 0 1 2 3 4 5 6 7 8 9 0 1" << endl;
+        cout << " 1 1 1 1 1 1 1 2 2 2 2 2" << endl;
+        cout << " 3 4 5 6 7 8 9 0 1 2 3 4" << endl;
         cout << "+-----------+-----------+" << endl;
         render_board_section(position, true, casted_off[1]);
         cout << "+-----------+-----------+" << endl;
@@ -660,8 +657,8 @@ namespace BackgammonNS
         cout << "+-----------+-----------+" << endl;
         render_board_section(position, false, casted_off[0]);
         cout << "+-----------+-----------+" << endl;
-        cout << " 2 2 2 2 1 1 1 1 1 1 1 1" << endl;
-        cout << " 3 2 1 0 9 8 7 6 5 4 3 2" << endl;
+        cout << " 1 1 1                  " << endl;
+        cout << " 2 1 0 9 8 7 6 5 4 3 2 1" << endl;
 
         cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
@@ -805,4 +802,29 @@ namespace BackgammonNS
         cout << "Player: " << max_move_player << endl;
         cout << "Roll:   " << max_move_roll << " (" << (max_move_roll / 6) + 1 << ", " << (max_move_roll % 6) + 1 << ")" << endl;
     }
+
+    tuple<unsigned int, unsigned int> Analyzer::get_pip_count(const PositionType& position)
+    {
+        unsigned int player_total[2] = { 0, 0 };
+
+        auto [player_0_bar, player_1_bar] = Backgammon::get_bar_info(position);
+        player_total[0] += player_0_bar * 25;
+        player_total[1] += player_1_bar * 25;
+
+        for (auto slot = 0u; slot < 24; slot++)
+        {
+            auto [slot_player, num_checkers] = Backgammon::get_slot_info(position, slot);
+            if (num_checkers == 0) continue;
+            player_total[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers: (slot + 1) * num_checkers;
+        }
+        return tuple<unsigned int, unsigned int>(player_total[0], player_total[1]);
+    }
+
+    float Analyzer::analyze(const PositionType& position)
+    {
+        auto [player_0_pip_count, player_1_pip_count] = get_pip_count(position);
+        cout << "Player 0 pip: " << player_0_pip_count << " Player 1 pip: " << player_1_pip_count << endl;
+        return 0.0f;
+    }
+
 }

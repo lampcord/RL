@@ -6,9 +6,9 @@ using namespace BackgammonNS;
 
 int main()
 {
-	MoveList move_list;
-	Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, move_list);
-	return 0;
+	MoveList * move_list = new MoveList;
+	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
+	//return 0;
 
 	PositionStruct position;
 	Backgammon::get_initial_position(position);
@@ -16,6 +16,6 @@ int main()
 	Backgammon::render(position, 0);
 	Backgammon::render(position, 1);
 	Analyzer::analyze(position);
-
+	delete move_list;
 }
 

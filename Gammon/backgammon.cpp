@@ -639,7 +639,7 @@ namespace BackgammonNS
                 case 23:
                     break;
                 default:
-                    cout << "  ";
+                    cout << " ";
                 }
             }
             cout << " |";
@@ -657,20 +657,22 @@ namespace BackgammonNS
         const auto [player_0_bar, player_1_bar] = get_bar_info(position);
         cout << "|";
         for (auto bar = 0; bar < 8; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "              " << setw(3) << player_1_pip << " X " << (player == 1 ? "*" : " ") << "          ";
+        cout << "      | " << setw(3) << player_1_pip << " X" << (player == 1 ? "*" : " ") << "|      ";
         for (auto bar = 0; bar < 8; bar++) cout << (player_1_bar + 1 > (8 - bar) ? 'X' : ' ');
         cout << "|" << endl;
         cout << "|";
         for (auto bar = 8; bar < 15; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "               " << setw(3) << player_1_pip << " O " << (player == 0 ? "*" : " ") << "           ";
+        cout << "       | " << setw(3) << player_1_pip << " O" << (player == 0 ? "*" : " ") << "|       ";
         for (auto bar = 8; bar < 15; bar++) cout << (player_1_bar > (22 - bar) ? 'X' : ' ');
         cout << "|" << endl;
     }
     void Backgammon::render(const PositionType& position, unsigned char player)
     {
-        const string far_numbers = " 13  14  15  16  17  18  19  20  21  22  23  24  ";
-        const string near_numbers = " 12  11  10   9   8   7   6   5   4   3   2   1  ";
-        const string sep = "+-----------------------+-----------------------+";
+        const string far_numbers  = " 13 14 15 16 17 18  19 20 21 22 23 24 ";
+        const string near_numbers = " 12 11 10  9  8  7   6  5  4  3  2  1 ";
+        const string sep          = "+------------------+------------------+";
+        const string sep2         = "+--------------+---+---+--------------+";
+
 
         array<unsigned char, 2> casted_off = { 15, 15 };
         for (auto slot = 0; slot < 24; slot++)
@@ -685,9 +687,9 @@ namespace BackgammonNS
         cout << (player == 0? far_numbers : near_numbers) << endl;
         cout << sep << endl;
         render_board_section(position, true, casted_off[1]);
-        cout << sep << endl;
+        cout << sep2 << endl;
         render_bar_section(position, player);
-        cout << sep << endl;
+        cout << sep2 << endl;
         render_board_section(position, false, casted_off[0]);
         cout << sep << endl;
         cout << (player == 1 ? far_numbers : near_numbers) << endl;

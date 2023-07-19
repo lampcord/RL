@@ -52,7 +52,7 @@ namespace BackgammonNS
 	struct MoveList
 	{
 		std::unordered_map<PositionStruct, unsigned char, PositionStructHash> duplicate_positions;
-		MoveStruct move_list[max_move_list];
+		MoveStruct move_list[max_move_list] = {};
 		unsigned int move_list_size = 0;
 		unsigned char max_sub_moves = 0;
 

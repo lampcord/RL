@@ -1,4 +1,5 @@
 #include "backgammon.h"
+#include "movelist.h"
 #include "analyzer.h"
 #include <tuple>
 #include <iostream>
@@ -162,72 +163,6 @@ namespace BackgammonNS
         }
     }
 
-    optional<MoveStruct> MoveList::get_legal_move(unsigned int& ndx)
-    {
-        auto result = optional<MoveStruct>();
-    
-        while (ndx >= 0 && ndx < move_list_size && max_sub_moves > 0)
-        {
-            // only return moves with maximum number of submoves
-            if (move_list[ndx].moves[max_sub_moves - 1] != 0)
-            {
-                result = move_list[ndx++];
-                break;
-            }
-            ndx++;
-        }
-
-        return result;
-    }
-
-    void MoveList::dump_moves(const unsigned char& player)
-    {
-        auto duplicates = 0;
-        auto total_valid = 0;
-        vector<tuple<string, PositionStruct>> rolls;
-        for (auto x = 0u; x < move_list_size; x++)
-        {
-            bool valid = (max_sub_moves > 0 && move_list[x].moves[max_sub_moves - 1] != 0);
-            if (valid)
-            {
-                string roll_desc = "";
-                cout << "-----------------------------------------" << endl;
-                cout << "Position " << x << endl;
-                for (auto y = 0; y < 4; y++)
-                {
-                    if (move_list[x].moves[y] == 0) continue;
-                    auto die = move_list[x].moves[y] & 0b111;
-                    auto slot = move_list[x].moves[y] >> 3;
-                    if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
-                    else cout << "Die " << (int)die << " From " << (int)slot << endl;
-                    roll_desc += to_string(slot);
-                    roll_desc += " to ";
-                    roll_desc += to_string(player == 0 ? slot + die : slot - die);
-                    roll_desc += ", ";
-                }
-                rolls.push_back({ roll_desc, move_list[x].result_position });
-                Backgammon::render(move_list[x].result_position, 1 - player);
-                total_valid++;
-            }
-            cout << (valid ? "OK" : "INVALID") << endl;
-            auto loc = duplicate_positions.find(move_list[x].result_position);
-            if (loc != duplicate_positions.end())
-            {
-                cout << "Found " << (int)loc->second << " duplicates. " << endl;
-                duplicates += loc->second;
-            }
-        }
-        for (auto s : rolls)
-        {
-            cout << setw(40) << get<0>(s);
-            cout << " " << bitset<64>(get<1>(s).position[0]);
-            cout << " " << bitset<64>(get<1>(s).position[1]);
-            cout << endl;
-        }
-        cout << "Total Moves Generated: " << move_list_size << endl;
-        cout << "Total Duplicates: " << duplicates << endl;
-        cout << "Total Valid: " << total_valid << endl;
-    }
 
     void Backgammon::position_from_string(const string str_pos, BackgammonNS::PositionType& position)
     {
@@ -662,7 +597,7 @@ namespace BackgammonNS
         cout << "|" << endl;
         cout << "|";
         for (auto bar = 8; bar < 15; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "       | " << setw(3) << player_1_pip << " O" << (player == 0 ? "*" : " ") << "|       ";
+        cout << "       | " << setw(3) << player_0_pip << " O" << (player == 0 ? "*" : " ") << "|       ";
         for (auto bar = 8; bar < 15; bar++) cout << (player_1_bar > (22 - bar) ? 'X' : ' ');
         cout << "|" << endl;
     }
@@ -696,7 +631,6 @@ namespace BackgammonNS
 
         cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
-        cout << (int)casted_off[0] << " " << (int)casted_off[1] << endl;
     }
 
     void Backgammon::run_position_tests(const string filename, bool verbose, MoveList &move_list)
@@ -834,6 +768,24 @@ namespace BackgammonNS
         render(max_move_position, player);
         cout << "Player: " << max_move_player << endl;
         cout << "Roll:   " << max_move_roll << " (" << (max_move_roll / 6) + 1 << ", " << (max_move_roll % 6) + 1 << ")" << endl;
+    }
+
+    int Backgammon::get_winner(const PositionType& position)
+    {
+        auto result = 0;
+
+        auto [player_0_pip, player_1_pip] = Analyzer::get_pip_count(position);
+        
+        if (player_0_pip == 0)
+        {
+            result = 1;
+        }
+        else if (player_1_pip == 0)
+        {
+            result = -1;
+        }
+        
+        return result;
     }
 
 

@@ -48,28 +48,8 @@ namespace BackgammonNS
 	typedef PositionStruct PositionType;
 	typedef unsigned int MoveType;
 
-	const unsigned int max_move_list = 4092;
-	struct MoveList
-	{
-		std::unordered_map<PositionStruct, unsigned char, PositionStructHash> duplicate_positions;
-		MoveStruct move_list[max_move_list] = {};
-		unsigned int move_list_size = 0;
-		unsigned char max_sub_moves = 0;
+	struct MoveList;
 
-		MoveList() {};
-		~MoveList() {};
-		void initialize(const PositionType& position) 
-		{
-			move_list[0].clear();
-			move_list[0].result_position = position;
-			move_list_size = 1;
-			duplicate_positions.clear();
-			max_sub_moves = 0;
-		};
-		void dump_moves(const unsigned char& player);
-		std::optional<MoveStruct> get_legal_move(unsigned int& ndx);
-	};
-	
 	class Backgammon
 	{
 	private:
@@ -83,13 +63,11 @@ namespace BackgammonNS
 		static void update_slot(PositionType& position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list);
 
 		static void position_from_string(const std::string str_pos, BackgammonNS::PositionType& position);
-		//static void move(const PositionType& position, const unsigned char player, const MoveType move, MoveResult<PositionType>& move_result);
 		static void get_initial_position(PositionType& position);
 		static void generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list, bool no_duplicates);
 		static void render(const PositionType& position, unsigned char player);
-		static MoveType prompt_user(const PositionType& position, const unsigned char player);
 		static void run_position_tests(const std::string filename, bool verbose, MoveList& move_list);
-
+		static int get_winner(const PositionType& position);
 	};
 
 }

@@ -258,11 +258,23 @@ namespace BackgammonNS
                     if (loc == move_list.duplicate_positions.end() || loc->second != move_ndx + 1)
                     {
                         move_list.duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = move_ndx + 1;
+                        if (move_list.max_sub_moves < move_ndx + 1)
+                        {
+                            move_list.move_list_ndx_size = 0;
+                            move_list.max_sub_moves = move_ndx + 1;
+                        }
+                        move_list.move_list_ndx[move_list.move_list_ndx_size++] = move_list.move_list_size;
                         move_list.move_list_size++;
                     }
                 }
                 else
                 {
+                    if (move_list.max_sub_moves < move_ndx + 1)
+                    {
+                        move_list.move_list_ndx_size = 0;
+                        move_list.max_sub_moves = move_ndx + 1;
+                    }
+                    move_list.move_list_ndx[move_list.move_list_ndx_size++] = move_list.move_list_size;
                     move_list.move_list_size++;
                 }
             }
@@ -303,11 +315,23 @@ namespace BackgammonNS
 							if (loc == move_list.duplicate_positions.end() || loc->second != move_ndx + 1)
 							{
 								move_list.duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = move_ndx + 1;
-								move_list.move_list_size++;
+                                if (move_list.max_sub_moves < move_ndx + 1)
+                                {
+                                    move_list.move_list_ndx_size = 0;
+                                    move_list.max_sub_moves = move_ndx + 1;
+                                }
+                                move_list.move_list_ndx[move_list.move_list_ndx_size++] = move_list.move_list_size;
+                                move_list.move_list_size++;
 							}
                         }
                         else
                         {
+                            if (move_list.max_sub_moves < move_ndx + 1)
+                            {
+                                move_list.move_list_ndx_size = 0;
+                                move_list.max_sub_moves = move_ndx + 1;
+                            }
+                            move_list.move_list_ndx[move_list.move_list_ndx_size++] = move_list.move_list_size;
                             move_list.move_list_size++;
                         }
 
@@ -336,16 +360,24 @@ namespace BackgammonNS
                     auto loc = move_list.duplicate_positions.find(move_list.move_list[move_list.move_list_size].result_position);
                     if (loc == move_list.duplicate_positions.end())
                     {
-                        move_list.duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = 1;
+                        move_list.duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = move_ndx + 1;
+                        if (move_list.max_sub_moves < move_ndx + 1)
+                        {
+                            move_list.move_list_ndx_size = 0;
+                            move_list.max_sub_moves = move_ndx + 1;
+                        }
+                        move_list.move_list_ndx[move_list.move_list_ndx_size++] = move_list.move_list_size;
                         move_list.move_list_size++;
-                    }
-                    else
-                    {
-                        loc->second++;
                     }
                 }
                 else
                 {
+                    if (move_list.max_sub_moves < move_ndx + 1)
+                    {
+                        move_list.move_list_ndx_size = 0;
+                        move_list.max_sub_moves = move_ndx + 1;
+                    }
+                    move_list.move_list_ndx[move_list.move_list_ndx_size++] = move_list.move_list_size;
                     move_list.move_list_size++;
                 }
             }
@@ -376,16 +408,24 @@ namespace BackgammonNS
                         auto loc = move_list.duplicate_positions.find(move_list.move_list[move_list.move_list_size].result_position);
                         if (loc == move_list.duplicate_positions.end())
                         {
-                            move_list.duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = 1;
+                            move_list.duplicate_positions[move_list.move_list[move_list.move_list_size].result_position] = move_ndx + 1;
+                            if (move_list.max_sub_moves < move_ndx + 1)
+                            {
+                                move_list.move_list_ndx_size = 0;
+                                move_list.max_sub_moves = move_ndx + 1;
+                            }
+                            move_list.move_list_ndx[move_list.move_list_ndx_size++] = move_list.move_list_size;
                             move_list.move_list_size++;
-                        }
-                        else
-                        {
-                            loc->second++;
                         }
                     }
                     else
                     {
+                        if (move_list.max_sub_moves < move_ndx + 1)
+                        {
+                            move_list.move_list_ndx_size = 0;
+                            move_list.max_sub_moves = move_ndx + 1;
+                        }
+                        move_list.move_list_ndx[move_list.move_list_ndx_size++] = move_list.move_list_size;
                         move_list.move_list_size++;
                     }
                 }
@@ -445,7 +485,7 @@ namespace BackgammonNS
 
         move_list.initialize(position);
 
-        auto max_sub_moves = 0;
+        //auto max_sub_moves = 0;
 
         auto can_castoff = moves_to_castoff == 0 ? castoff_availability::available : castoff_availability::unavailable;
         if (die1 == die2)
@@ -455,16 +495,14 @@ namespace BackgammonNS
                 can_castoff = castoff_availability::pending;
             }
             auto start_move_list = move_list.move_list_size;
-            if (gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff, move_list, no_duplicates)) max_sub_moves++;
+            gen_moves_for_1_die(0, blocked, player, die1, 0, can_castoff, move_list, no_duplicates);
             auto end_move_list = move_list.move_list_size;
             for (auto turn = 0; turn < 3; turn++)
             {
-                bool expanded = false;
                 for (auto x = start_move_list; x < end_move_list; x++)
                 {
-                    expanded |= gen_moves_for_1_die(x, blocked, player, die2, turn + 1, can_castoff, move_list, no_duplicates);
+                    gen_moves_for_1_die(x, blocked, player, die2, turn + 1, can_castoff, move_list, no_duplicates);
                 }
-                if (expanded) max_sub_moves++;
                 start_move_list = end_move_list;
                 end_move_list = move_list.move_list_size;
             }
@@ -496,10 +534,9 @@ namespace BackgammonNS
                 expanded |= gen_moves_for_1_die(x, blocked, player, die1, 1, can_castoff, move_list, no_duplicates);
             }
             if (expanded) max_moves_die2++;
-            max_sub_moves = max_moves_die1 > max_moves_die2 ? max_moves_die1 : max_moves_die2;
 
             // if you can move either die but not both, you must move larger number
-            if (max_sub_moves == 1)
+            if (move_list.max_sub_moves == 1)
             {
                 if (max_moves_die1 > 0 && max_moves_die2 > 0)
                 {
@@ -519,7 +556,7 @@ namespace BackgammonNS
         //cout << "Max Moves: " << max_sub_moves << " moves_to_castoff " << (int)moves_to_castoff << endl;
 
         //dump_moves(max_sub_moves, player);
-        move_list.max_sub_moves = max_sub_moves;
+        //move_list.max_sub_moves = max_sub_moves;
     }
 
     void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top, unsigned char casted_off)

@@ -553,10 +553,8 @@ namespace BackgammonNS
                 }
             }
         }
-        //cout << "Max Moves: " << max_sub_moves << " moves_to_castoff " << (int)moves_to_castoff << endl;
-
-        //dump_moves(max_sub_moves, player);
-        //move_list.max_sub_moves = max_sub_moves;
+        
+        move_list.build_index();
     }
 
     void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top, unsigned char casted_off)
@@ -670,7 +668,7 @@ namespace BackgammonNS
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
     }
 
-    void Backgammon::run_position_tests(const string filename, bool verbose, MoveList &move_list)
+    void Backgammon::run_position_tests(const string filename, bool verbose, MoveList &move_list, int max_positions)
     {
         ifstream infile(filename);
         string line;
@@ -706,12 +704,10 @@ namespace BackgammonNS
                 }
                 if (move_list.max_sub_moves > 0)
                 {
-                    auto ndx = 0u;
-                    while (true)
+                    for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
                     {
-                        auto move = move_list.get_legal_move(ndx);
-                        if (!move) break;
-                        auto pos = move_list.duplicate_positions.find(move.value().result_position);
+                        auto move = move_list.move_list[move_list.move_list_ndx[ndx]];
+                        auto pos = move_list.duplicate_positions.find(move.result_position);
                         if (pos == move_list.duplicate_positions.end())
                         {
                             total_errors++;
@@ -724,13 +720,13 @@ namespace BackgammonNS
                             render(position, player);
                             for (auto y = 0; y < 4; y++)
                             {
-                                if (move.value().moves[y] == 0) continue;
-                                auto die = move.value().moves[y] & 0b111;
-                                auto slot = move.value().moves[y] >> 3;
+                                if (move.moves[y] == 0) continue;
+                                auto die = move.moves[y] & 0b111;
+                                auto slot = move.moves[y] >> 3;
                                 if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
                                 else cout << "Die " << (int)die << " From " << (int)slot << endl;
                             }
-                            render(move.value().result_position, player);
+                            render(move.result_position, player);
                         }
                     }
                 }
@@ -791,6 +787,8 @@ namespace BackgammonNS
                 moves_for_this_position++;
                 last_move = line;
             }
+
+            if (max_positions > 0 && total_positions >= max_positions) break;
 
         }
         infile.close();

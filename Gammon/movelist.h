@@ -28,8 +28,7 @@ namespace BackgammonNS
 		};
 
 		void dump_moves(const unsigned char& player);
-		std::optional<MoveStruct> get_legal_move(unsigned int& ndx);
-		unsigned int get_number_of_moves();
+		void build_index();
 	};
 
 }

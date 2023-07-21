@@ -8,39 +8,6 @@ using namespace std;
 
 namespace BackgammonNS
 {
-    optional<MoveStruct> MoveList::get_legal_move(unsigned int& ndx)
-    {
-        auto result = optional<MoveStruct>();
-
-        while (ndx >= 0 && ndx < move_list_size && max_sub_moves > 0)
-        {
-            // only return moves with maximum number of submoves
-            if (move_list[ndx].moves[max_sub_moves - 1] != 0)
-            {
-                result = move_list[ndx++];
-                break;
-            }
-            ndx++;
-        }
-
-        return result;
-    }
-
-    unsigned int MoveList::get_number_of_moves()
-    {
-        unsigned int num_moves = 0;
-
-        for (auto ndx = 0u; ndx < move_list_size && max_sub_moves > 0; ndx++)
-        {
-            if (move_list[ndx].moves[max_sub_moves - 1] != 0)
-            {
-                num_moves++;
-            }
-        }
-
-        return num_moves;
-    }
-
     void MoveList::dump_moves(const unsigned char& player)
     {
         auto duplicates = 0;
@@ -88,6 +55,47 @@ namespace BackgammonNS
         cout << "Total Moves Generated: " << move_list_size << endl;
         cout << "Total Duplicates: " << duplicates << endl;
         cout << "Total Valid: " << total_valid << endl;
+
+        rolls.clear();
+        for (auto x = 0u; x < move_list_ndx_size; x++)
+        {
+            string roll_desc = "";
+            for (auto y = 0; y < 4; y++)
+            {
+                if (move_list[move_list_ndx[x]].moves[y] == 0) continue;
+                auto die = move_list[move_list_ndx[x]].moves[y] & 0b111;
+                auto slot = move_list[move_list_ndx[x]].moves[y] >> 3;
+                if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
+                roll_desc += to_string(slot);
+                roll_desc += " to ";
+                roll_desc += to_string(player == 0 ? slot + die : slot - die);
+                roll_desc += ", ";
+            }
+            rolls.push_back({ roll_desc, move_list[move_list_ndx[x]].result_position });
+        }
+        for (auto s : rolls)
+        {
+            cout << setw(40) << get<0>(s);
+            cout << " " << bitset<64>(get<1>(s).position[0]);
+            cout << " " << bitset<64>(get<1>(s).position[1]);
+            cout << endl;
+        }
+
+    }
+
+    void MoveList::build_index()
+    {
+        move_list_ndx_size = 0;
+
+        auto ndx = 0u;
+        while (ndx >= 0 && ndx < move_list_size && max_sub_moves > 0)
+        {
+            if (move_list[ndx].moves[max_sub_moves - 1] != 0)
+            {
+                move_list_ndx[move_list_ndx_size++] = ndx;
+            }
+            ndx++;
+        }
     }
 
 }

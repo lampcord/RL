@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include "analyzer.h"
 
 /*
@@ -29,28 +30,57 @@ using namespace std;
 
 namespace BackgammonNS
 {
-    tuple<unsigned int, unsigned int> Analyzer::get_pip_count(const PositionType& position)
+    void Analyzer::scan_position(const PositionType& position, AnalyzerResult& result)
     {
-        unsigned int player_total[2] = { 0, 0 };
+        result.clear();
 
         auto [player_0_bar, player_1_bar] = Backgammon::get_bar_info(position);
-        player_total[0] += player_0_bar * 25;
-        player_total[1] += player_1_bar * 25;
+        result.pip_count[0] = player_0_bar * 25;
+        result.pip_count[1] = player_1_bar * 25;
 
         for (auto slot = 0u; slot < 24; slot++)
         {
             auto [slot_player, num_checkers] = Backgammon::get_slot_info(position, slot);
             if (num_checkers == 0) continue;
-            player_total[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers : (slot + 1) * num_checkers;
+         
+            // pip count
+            result.pip_count[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers : (slot + 1) * num_checkers;
+
+            // board strength (number of blocks in your home board)
+            if (slot >= 18 && slot < 24 && slot_player == 0 && num_checkers > 1) result.board_strength[0]++;
+            if (slot >= 0 && slot < 6 && slot_player == 1 && num_checkers > 1) result.board_strength[1]++;
+
         }
-        return tuple<unsigned int, unsigned int>(player_total[0], player_total[1]);
     }
 
-    float Analyzer::analyze(const PositionType& position)
+    float Analyzer::analyze(const PositionType& position, unsigned char player)
     {
-        auto [player_0_pip_count, player_1_pip_count] = get_pip_count(position);
-        cout << "Player 0 pip: " << player_0_pip_count << " Player 1 pip: " << player_1_pip_count << endl;
-        return 0.0f;
+        AnalyzerResult result;
+        scan_position(position, result);
+
+        auto pip_lead = player == 0 ? (float)result.pip_count[1] - (float)result.pip_count[0] : (float)result.pip_count[0] - (float)result.pip_count[1];
+        auto score = (float)pip_lead / 100.0f;
+        
+        auto player_0_board_score = (float)(result.board_strength[0] * result.board_strength[0]) / 36.0f;
+        auto player_1_board_score = (float)(result.board_strength[1] * result.board_strength[1]) / 36.0f;
+        score += player == 0 ? player_0_board_score - player_1_board_score : player_1_board_score - player_0_board_score;
+
+        return score / 2.0f;
+    }
+
+    void AnalyzerResult::render()
+    {
+        cout << "Pip Count:      " << setw(4) << pip_count[0] << " " << setw(4) << pip_count[1] << endl;
+        cout << "Board Strength: " << setw(4) << board_strength[0] << " " << setw(4) << board_strength[1] << endl;
+    }
+
+    void AnalyzerResult::clear()
+    {
+        for (auto x = 0u; x < 2; x++)
+        {
+            pip_count[0] = 0;
+            board_strength[0] = 0;
+        }
     }
 
 }

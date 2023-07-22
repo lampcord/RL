@@ -1,3 +1,6 @@
 #pragma once
+#include "backgammon.h"
 
-void play_random_games(Squirrel3& rng, std::unique_ptr<BackgammonNS::MoveList>& move_list, unsigned int& num_games, bool display = true);
+float rollout(BackgammonNS::PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, unsigned int num_games, Squirrel3& rng, bool display);
+
+void print_move_set(BackgammonNS::MoveStruct& move_set, unsigned char rollout_player);

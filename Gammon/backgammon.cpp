@@ -623,16 +623,17 @@ namespace BackgammonNS
 
     void Backgammon::render_bar_section(const BackgammonNS::PositionType& position, unsigned char player)
     {
-        auto [player_0_pip, player_1_pip] = Analyzer::get_pip_count(position);
+        AnalyzerResult result;
+        Analyzer::scan_position(position, result);
         const auto [player_0_bar, player_1_bar] = get_bar_info(position);
         cout << "|";
         for (auto bar = 0; bar < 8; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "      | " << setw(3) << player_1_pip << " X" << (player == 1 ? "*" : " ") << "|      ";
+        cout << "      | " << setw(3) << result.pip_count[1] << " X" << (player == 1 ? "*" : " ") << "|      ";
         for (auto bar = 0; bar < 8; bar++) cout << (player_1_bar + 1 > (8 - bar) ? 'X' : ' ');
         cout << "|" << endl;
         cout << "|";
         for (auto bar = 8; bar < 15; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "       | " << setw(3) << player_0_pip << " O" << (player == 0 ? "*" : " ") << "|       ";
+        cout << "       | " << setw(3) << result.pip_count[0] << " O" << (player == 0 ? "*" : " ") << "|       ";
         for (auto bar = 8; bar < 15; bar++) cout << (player_1_bar > (22 - bar) ? 'X' : ' ');
         cout << "|" << endl;
     }
@@ -663,6 +664,10 @@ namespace BackgammonNS
         render_board_section(position, false, casted_off[0]);
         cout << sep << endl;
         cout << (player == 1 ? far_numbers : near_numbers) << endl;
+
+        AnalyzerResult result;
+        Analyzer::scan_position(position, result);
+        result.render();
 
         cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
@@ -809,13 +814,14 @@ namespace BackgammonNS
     {
         auto result = 0;
 
-        auto [player_0_pip, player_1_pip] = Analyzer::get_pip_count(position);
+        AnalyzerResult analyzer_result;
+        Analyzer::scan_position(position, analyzer_result);
         
-        if (player_0_pip == 0)
+        if (analyzer_result.pip_count[0] == 0)
         {
             result = 1;
         }
-        else if (player_1_pip == 0)
+        else if (analyzer_result.pip_count[1] == 0)
         {
             result = -1;
         }

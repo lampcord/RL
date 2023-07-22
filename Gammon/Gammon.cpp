@@ -19,12 +19,13 @@ int main()
 	cout << "=                                                                                                                                 =" << endl;
 	cout << "===================================================================================================================================" << endl;
 	cout << "===================================================================================================================================" << endl;
+	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
+	
 	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
 	//return 0;
 
 	auto num_games = 20000u;
 	Squirrel3 rng(42);
-	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
 
 
 	play_random_games(rng, move_list, num_games, false);

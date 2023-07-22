@@ -1,12 +1,16 @@
 #pragma once
+#include <unordered_map>
+#include <stdexcept>
 #include "backgammon.h"
+#include "flat_hash_map-master/bytell_hash_map.hpp"
 
 namespace BackgammonNS
 {
-	const unsigned int max_move_list = 4092;
+	const unsigned int max_move_list = 4096;
+
 	struct MoveList
 	{
-		std::unordered_map<PositionStruct, unsigned char, PositionStructHash> duplicate_positions;
+		ska::bytell_hash_map<PositionStruct, unsigned char, PositionStructHash> duplicate_positions;
 		MoveStruct move_list[max_move_list] = {};
 		unsigned int move_list_size = 0;
 

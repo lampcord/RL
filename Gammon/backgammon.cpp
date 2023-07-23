@@ -665,10 +665,6 @@ namespace BackgammonNS
         cout << sep << endl;
         cout << (player == 1 ? far_numbers : near_numbers) << endl;
 
-        AnalyzerResult result;
-        Analyzer::scan_position(position, result);
-        result.render();
-
         cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
     }

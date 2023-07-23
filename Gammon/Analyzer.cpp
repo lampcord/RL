@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <bitset>
 #include "analyzer.h"
 
 /*
@@ -32,72 +33,25 @@ using namespace std;
 
 namespace BackgammonNS
 {
-    bool Analyzer::will_make_point(const PositionType& current_position, const PositionType& future_position, unsigned char point, unsigned char player)
-    {
-        auto [current_player, current_count] = Backgammon::get_slot_info(current_position, point);
-        auto [future_player, future_count] = Backgammon::get_slot_info(future_position, point);
-
-        return (current_count < 2 && future_count >= 2 && future_player == player);
-    }
-    bool Analyzer::will_slot_point(const PositionType& current_position, const PositionType& future_position, unsigned char point, unsigned char player)
-    {
-        auto [current_player, current_count] = Backgammon::get_slot_info(current_position, point);
-        auto [future_player, future_count] = Backgammon::get_slot_info(future_position, point);
-
-        return ((current_count == 0 || (current_player != player && current_count == 1)) && future_count == 1 && future_player == player);
-    }
-    // This will score:
-    // 1.0 if we make a 5 point that wasn't already there.
-    // 0.8 if we make oponent's 5 point that was open.
-    // 0.6 if we slot on our 5 point.
-    // 0.4 if we slot on oponent's 5 point.
-    float Analyzer::the_most_important_point_is_the_five_point(const PositionType& position, MoveStruct& move, unsigned char player)
-    {
-        auto five_point = player == 0 ? 19 : 4;
-        auto golden_point = player == 0 ? 4 : 19;
-
-        if (will_make_point(position, move.result_position, five_point, player)) return 1.0f;
-        if (will_make_point(position, move.result_position, golden_point, player)) return 0.8f;
-        if (will_slot_point(position, move.result_position, five_point, player)) return 0.6f;
-        if (will_slot_point(position, move.result_position, golden_point, player)) return 0.4f;
-
-        return 0.0f;
-    }
-
-    // This will score:
-    // 1.0 if we make the 9 point
-    // 0.7 if we make the 10 point
-    // 0.4 if we make the 11 point
-    float Analyzer::make_an_outfield_point(const PositionType& position, MoveStruct& move, unsigned char player)
-    {
-        auto nine_point = player == 0 ? 15 : 8;
-        auto ten_point = player == 0 ? 14 : 9;
-        auto eleven_point = player == 0 ? 13 : 10;
-
-        if (will_make_point(position, move.result_position, nine_point, player)) return 1.0f;
-        if (will_make_point(position, move.result_position, ten_point, player)) return 0.7f;
-        if (will_make_point(position, move.result_position, eleven_point, player)) return 0.4f;
-
-        return 0.0f;
-    }
     unsigned short Analyzer::get_best_move_index(const PositionType& position, MoveList& move_list, unsigned char player, bool display)
     {
+        const int num_scores = 3;
         auto best_score = -1000.0f;
+        auto best_ndx = 0;
+        float scores[num_scores];
 
-        cout << " 5bst Outf Move" << endl;
         for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
         {
             auto move_set = move_list.move_list[move_list.move_list_ndx[ndx]];
-            auto five_point = the_most_important_point_is_the_five_point(position, move_set, player);
-            auto outfield_point = make_an_outfield_point(position, move_set, player);
-            //Backgammon::render(move_set.result_position, player);
-            cout << setw(5) << five_point;
-            cout << setw(5) << outfield_point;
-            cout << " " << move_list.get_move_desc(move_set, player) << endl;
+            Backgammon::render(move_set.result_position, player);
+            cout << MoveList::get_move_desc(move_set, player) << endl;
+            float score = analyze(move_set.result_position, player);
         }
-
-        return 0;
+        return best_ndx;
     }
+
+
+
     void Analyzer::scan_position(const PositionType& position, AnalyzerResult& result)
     {
         result.clear();
@@ -106,18 +60,23 @@ namespace BackgammonNS
         result.pip_count[0] = player_0_bar * 25;
         result.pip_count[1] = player_1_bar * 25;
 
+        unsigned int player_mask[2] = { 0b000000000000000000000001, 0b100000000000000000000000 };
+
         for (auto slot = 0u; slot < 24; slot++)
         {
             auto [slot_player, num_checkers] = Backgammon::get_slot_info(position, slot);
-            if (num_checkers == 0) continue;
          
-            // pip count
             result.pip_count[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers : (slot + 1) * num_checkers;
+            if (slot_player == 0 && slot > 12) result.in_the_zone[0] += num_checkers;
+            if (slot_player == 1 && slot < 11) result.in_the_zone[1] += num_checkers;
 
-            // board strength (number of blocks in your home board)
-            if (slot >= 18 && slot < 24 && slot_player == 0 && num_checkers > 1) result.board_strength[0]++;
-            if (slot >= 0 && slot < 6 && slot_player == 1 && num_checkers > 1) result.board_strength[1]++;
-
+            if (num_checkers >= 2) result.blocked_points[slot_player] |= player_mask[slot_player];
+            if (num_checkers == 1) result.blots[slot_player] |= player_mask[slot_player];
+            if (num_checkers > 3) result.mountains[slot_player] |= player_mask[slot_player];
+            if (num_checkers == 3) result.triples[slot_player] |= player_mask[slot_player];
+            
+            player_mask[0] <<= 1;
+            player_mask[1] >>= 1;
         }
     }
 
@@ -125,29 +84,62 @@ namespace BackgammonNS
     {
         AnalyzerResult result;
         scan_position(position, result);
+        result.render();
 
         auto pip_lead = player == 0 ? (float)result.pip_count[1] - (float)result.pip_count[0] : (float)result.pip_count[0] - (float)result.pip_count[1];
         auto score = (float)pip_lead / 100.0f;
         
-        auto player_0_board_score = (float)(result.board_strength[0] * result.board_strength[0]) / 36.0f;
-        auto player_1_board_score = (float)(result.board_strength[1] * result.board_strength[1]) / 36.0f;
-        score += player == 0 ? player_0_board_score - player_1_board_score : player_1_board_score - player_0_board_score;
-
         return score / 2.0f;
     }
 
     void AnalyzerResult::render()
     {
         cout << "Pip Count:      " << setw(4) << pip_count[0] << " " << setw(4) << pip_count[1] << endl;
-        cout << "Board Strength: " << setw(4) << board_strength[0] << " " << setw(4) << board_strength[1] << endl;
+        cout << "In the Zone:    " << setw(4) << in_the_zone[0] << " " << setw(4) << in_the_zone[1] << endl;
+
+        cout << "Blocked:        ";
+        print_mask_desc(blocked_points[0]);
+        cout << "   ";
+        print_mask_desc(blocked_points[1]);
+        cout << endl;
+
+        cout << "Blots:          ";
+        print_mask_desc(blots[0]);
+        cout << "   ";
+        print_mask_desc(blots[1]);
+        cout << endl;
+
+        cout << "Mountains:      ";
+        print_mask_desc(mountains[0]);
+        cout << "   ";
+        print_mask_desc(mountains[1]);
+        cout << endl;
+
+        cout << "Triples:        ";
+        print_mask_desc(triples[0]);
+        cout << "   ";
+        print_mask_desc(triples[1]);
+        cout << endl;
+    }
+
+    void AnalyzerResult::print_mask_desc(unsigned int mask)
+    {
+        cout << bitset<6>(mask >> 18) << " ";
+        cout << bitset<6>(mask >> 12) << " ";
+        cout << bitset<6>(mask >> 6) << " ";
+        cout << bitset<6>(mask) << " ";
     }
 
     void AnalyzerResult::clear()
     {
         for (auto x = 0u; x < 2; x++)
         {
-            pip_count[0] = 0;
-            board_strength[0] = 0;
+            pip_count[x] = 0;
+            in_the_zone[x] = 0;
+            blocked_points[x] = 0;
+            blots[x] = 0;
+            mountains[x] = 0;
+            triples[x] = 0;
         }
     }
 

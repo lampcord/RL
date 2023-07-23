@@ -25,11 +25,79 @@ Next we will add a minmax search.
 Next we will add alpha beta pruning.
 
 Next we will add bad move pruning based on chosen strategy.
+
+
 */
 using namespace std;
 
 namespace BackgammonNS
 {
+    bool Analyzer::will_make_point(const PositionType& current_position, const PositionType& future_position, unsigned char point, unsigned char player)
+    {
+        auto [current_player, current_count] = Backgammon::get_slot_info(current_position, point);
+        auto [future_player, future_count] = Backgammon::get_slot_info(future_position, point);
+
+        return (current_count < 2 && future_count >= 2 && future_player == player);
+    }
+    bool Analyzer::will_slot_point(const PositionType& current_position, const PositionType& future_position, unsigned char point, unsigned char player)
+    {
+        auto [current_player, current_count] = Backgammon::get_slot_info(current_position, point);
+        auto [future_player, future_count] = Backgammon::get_slot_info(future_position, point);
+
+        return ((current_count == 0 || (current_player != player && current_count == 1)) && future_count == 1 && future_player == player);
+    }
+    // This will score:
+    // 1.0 if we make a 5 point that wasn't already there.
+    // 0.8 if we make oponent's 5 point that was open.
+    // 0.6 if we slot on our 5 point.
+    // 0.4 if we slot on oponent's 5 point.
+    float Analyzer::the_most_important_point_is_the_five_point(const PositionType& position, MoveStruct& move, unsigned char player)
+    {
+        auto five_point = player == 0 ? 19 : 4;
+        auto golden_point = player == 0 ? 4 : 19;
+
+        if (will_make_point(position, move.result_position, five_point, player)) return 1.0f;
+        if (will_make_point(position, move.result_position, golden_point, player)) return 0.8f;
+        if (will_slot_point(position, move.result_position, five_point, player)) return 0.6f;
+        if (will_slot_point(position, move.result_position, golden_point, player)) return 0.4f;
+
+        return 0.0f;
+    }
+
+    // This will score:
+    // 1.0 if we make the 9 point
+    // 0.7 if we make the 10 point
+    // 0.4 if we make the 11 point
+    float Analyzer::make_an_outfield_point(const PositionType& position, MoveStruct& move, unsigned char player)
+    {
+        auto nine_point = player == 0 ? 15 : 8;
+        auto ten_point = player == 0 ? 14 : 9;
+        auto eleven_point = player == 0 ? 13 : 10;
+
+        if (will_make_point(position, move.result_position, nine_point, player)) return 1.0f;
+        if (will_make_point(position, move.result_position, ten_point, player)) return 0.7f;
+        if (will_make_point(position, move.result_position, eleven_point, player)) return 0.4f;
+
+        return 0.0f;
+    }
+    unsigned short Analyzer::get_best_move_index(const PositionType& position, MoveList& move_list, unsigned char player, bool display)
+    {
+        auto best_score = -1000.0f;
+
+        cout << " 5bst Outf Move" << endl;
+        for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
+        {
+            auto move_set = move_list.move_list[move_list.move_list_ndx[ndx]];
+            auto five_point = the_most_important_point_is_the_five_point(position, move_set, player);
+            auto outfield_point = make_an_outfield_point(position, move_set, player);
+            //Backgammon::render(move_set.result_position, player);
+            cout << setw(5) << five_point;
+            cout << setw(5) << outfield_point;
+            cout << " " << move_list.get_move_desc(move_set, player) << endl;
+        }
+
+        return 0;
+    }
     void Analyzer::scan_position(const PositionType& position, AnalyzerResult& result)
     {
         result.clear();

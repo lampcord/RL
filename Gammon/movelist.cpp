@@ -98,4 +98,25 @@ namespace BackgammonNS
         }
     }
 
+    string MoveList::get_move_desc(MoveStruct& move_set, unsigned char player)
+    {
+        string description;
+
+        for (auto y = 0u; y < 4; y++)
+        {
+            auto move = move_set.moves[y];
+            if (move == 0) break;
+            auto slot = (move & 0b11111000) >> 3;
+            auto display_slot = player == 0 ? 24 - slot : slot + 1;
+            auto die = (move & 0b111);
+            auto slot_desc = slot == (bar_indicator >> 3) ? "bar" : to_string(display_slot);
+            description += "Moved a ";
+            description += to_string(die);
+            description += " from ";
+            description += slot_desc;
+            description += ", ";
+        }
+
+        return description;
+    }
 }

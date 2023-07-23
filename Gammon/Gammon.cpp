@@ -26,14 +26,16 @@ int main()
 	//return 0;
 
 	auto num_games = 10000u;
-	unsigned char player = 0;
+	unsigned char player = 1;
 	Squirrel3 rng(42);
 	PositionStruct position;
 	Backgammon::get_initial_position(position);
 
-	auto roll = 5;
+	auto roll = 14;
 	Backgammon::render(position, player);
 	Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
+	Analyzer::get_best_move_index(position, *move_list, player, true);
+	return 0;
 
 	for (auto ndx = 0u; ndx < move_list->move_list_ndx_size; ndx++)
 	{
@@ -118,16 +120,6 @@ float rollout(PositionStruct &position, unsigned char player, std::unique_ptr<Ba
 
 void print_move_set(BackgammonNS::MoveStruct& move_set, unsigned char rollout_player)
 {
-	for (auto y = 0u; y < 4; y++)
-	{
-		auto move = move_set.moves[y];
-		if (move == 0) break;
-		auto slot = (move & 0b11111000) >> 3;
-		auto display_slot = rollout_player == 0 ? 24 - slot : slot + 1;
-		auto die = (move & 0b111);
-		auto slot_desc = slot == (bar_indicator >> 3) ? "bar" : to_string(display_slot);
-		cout << "Moved a " << die << " from " << slot_desc << ", ";
-	}
-	cout << endl;
+	cout << MoveList::get_move_desc(move_set, rollout_player) << endl;
 }
 

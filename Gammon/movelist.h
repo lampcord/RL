@@ -33,6 +33,7 @@ namespace BackgammonNS
 
 		void dump_moves(const unsigned char& player);
 		void build_index();
+		static std::string get_move_desc(MoveStruct& move_set, unsigned char player);
 	};
 
 }

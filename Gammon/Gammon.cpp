@@ -31,7 +31,7 @@ int main()
 	PositionStruct position;
 	Backgammon::get_initial_position(position);
 
-	auto roll = 5;
+	auto roll = 0;
 	Backgammon::render(position, player);
 	Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
 	Analyzer::get_best_move_index(position, *move_list, player, true);

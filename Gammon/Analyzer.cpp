@@ -80,15 +80,44 @@ namespace BackgammonNS
         }
     }
 
+    /*
+    Te 12 rules:
+    [ ] Break the mountain.
+    [ ] Keep at least 3 checkers on the mid-point.
+    [ ] To double hit is tiger play (weak tiger / strong tiger)
+    [ ] Attacking with 8 checkers is weak.
+    [ ] Attacking with 10 checkers is strong.
+    [ ] Split against the stripped 8 point.
+    [ ] Split against a prime.
+    [ ] Never split facing a blitzing structure.
+    [ ] Hit and split.
+    */
     float Analyzer::analyze(const PositionType& position, unsigned char player)
     {
         AnalyzerResult result;
         scan_position(position, result);
-        result.render();
 
         auto pip_lead = player == 0 ? (float)result.pip_count[1] - (float)result.pip_count[0] : (float)result.pip_count[0] - (float)result.pip_count[1];
         auto score = (float)pip_lead / 100.0f;
         
+        //[] The most important point is the 5 point.
+        //[] Make an outfield point.
+        //[] Fight for a good point.
+        const float raw_value_for_points[11] = { 0.1f, 0.1f, 0.3f, 0.8f, 0.9f, 1.0f, 0.7f, 0.6f, 0.3f, 0.2f, 0.2f };
+        unsigned int mask = 0b100000000000000000000000;
+        
+        for (auto x = 0; x < 11; x++)
+        {
+            if ((mask & result.blocked_points[0]) != 0) result.raw_mask_value[0] += raw_value_for_points[x];
+            if ((mask & result.blocked_points[1]) != 0) result.raw_mask_value[1] += raw_value_for_points[x];
+            if ((mask & result.blots[0]) != 0) result.raw_mask_value[0] += raw_value_for_points[x] / 3.0f;
+            if ((mask & result.blots[1]) != 0) result.raw_mask_value[1] += raw_value_for_points[x] / 3.0f;
+            mask >>= 1;
+        }
+
+
+        result.render();
+
         return score / 2.0f;
     }
 
@@ -96,6 +125,7 @@ namespace BackgammonNS
     {
         cout << "Pip Count:      " << setw(4) << pip_count[0] << " " << setw(4) << pip_count[1] << endl;
         cout << "In the Zone:    " << setw(4) << in_the_zone[0] << " " << setw(4) << in_the_zone[1] << endl;
+        cout << "Raw Mask Value: " << setw(4) << raw_mask_value[0] << " " << setw(4) << raw_mask_value[1] << endl;
 
         cout << "Blocked:        ";
         print_mask_desc(blocked_points[0]);
@@ -136,6 +166,7 @@ namespace BackgammonNS
         {
             pip_count[x] = 0;
             in_the_zone[x] = 0;
+            raw_mask_value[x] = 0.0f;
             blocked_points[x] = 0;
             blots[x] = 0;
             mountains[x] = 0;

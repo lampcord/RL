@@ -2,27 +2,13 @@
 #include "backgammon.h"
 #include "movelist.h"
 
-/*
-Te 12 rules:
-[ ] The most important point is the 5 point.
-[ ] Make an outfield point.
-[ ] Fight for a good point.
-[ ] Break the mountain.
-[ ] Keep at least 3 checkers on the mid-point.
-[ ] To double hit is tiger play (weak tiger / strong tiger)
-[ ] Attacking with 8 checkers is weak.
-[ ] Attacking with 10 checkers is strong.
-[ ] Split against the stripped 8 point.
-[ ] Split against a prime.
-[ ] Never split facing a blitzing structure.
-[ ] Hit and split.
-*/
 namespace BackgammonNS
 {
 	struct AnalyzerResult
 	{
 		unsigned short pip_count[2] = { 0,0 };
 		unsigned short in_the_zone[2] = { 0,0 };
+		float raw_mask_value[2] = { 0,0 };
 		unsigned int blocked_points[2] = { 0,0 };
 		unsigned int blots[2] = { 0,0 };
 		unsigned int mountains[2] = { 0,0 };

@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Agents">
+      <UniqueIdentifier>{6f68cda0-f77e-47ad-89e8-8b6a5c243b3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Gammon.cpp">
@@ -29,6 +32,12 @@
     </ClCompile>
     <ClCompile Include="PerfTimer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="console_agent.cpp">
+      <Filter>Agents</Filter>
+    </ClCompile>
+    <ClCompile Include="random_agent.cpp">
+      <Filter>Agents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +58,12 @@
     </ClInclude>
     <ClInclude Include="PerfTimer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="console_agent.h">
+      <Filter>Agents</Filter>
+    </ClInclude>
+    <ClInclude Include="random_agent.h">
+      <Filter>Agents</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

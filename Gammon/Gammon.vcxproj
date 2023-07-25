@@ -137,16 +137,20 @@
   <ItemGroup>
     <ClCompile Include="analyzer.cpp" />
     <ClCompile Include="backgammon.cpp" />
+    <ClCompile Include="console_agent.cpp" />
     <ClCompile Include="Gammon.cpp" />
     <ClCompile Include="movelist.cpp" />
     <ClCompile Include="PerfTimer.cpp" />
+    <ClCompile Include="random_agent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="analyzer.h" />
     <ClInclude Include="backgammon.h" />
+    <ClInclude Include="console_agent.h" />
     <ClInclude Include="Gammon.h" />
     <ClInclude Include="movelist.h" />
     <ClInclude Include="PerfTimer.h" />
+    <ClInclude Include="random_agent.h" />
     <ClInclude Include="squirrel3.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

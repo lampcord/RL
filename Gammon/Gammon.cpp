@@ -6,9 +6,39 @@
 #include "squirrel3.h"
 #include "Gammon.h"
 #include "PerfTimer.h"
+#include "console_agent.h"
+#include "random_agent.h"
 
 using namespace BackgammonNS;
 using namespace std;
+
+template<typename TAgentType0, typename TAgentType1>
+inline void play_games(BackgammonNS::PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng, TAgentType0& agent_0, TAgentType1& agent_1)
+{
+	auto winner = 0;
+	while (winner == 0)
+	{
+		auto roll = rng() % 36;
+		//roll = 0;
+		BackgammonNS::Backgammon::render(position, player);
+		auto die1 = roll % 6 + 1;
+		auto die2 = roll / 6 + 1;
+		std::cout << "Roll: " << (int)die1 << ", " << (int)die2 << std::endl;
+
+
+		if (player == 0)
+		{
+			agent_0.get_move(position, player, roll, move_list, rng);
+		}
+		else
+		{
+			agent_1.get_move(position, player, roll, move_list, rng);
+		}
+
+		winner = BackgammonNS::Backgammon::get_winner(position);
+		player = 1 - player;
+	}
+}
 
 int main()
 {
@@ -31,7 +61,12 @@ int main()
 	PositionStruct position;
 	Backgammon::get_initial_position(position);
 
-	play_against_engine(position, player, move_list, rng);
+	ConsoleAgentNS::ConsoleAgent console_agent;
+	RandomAgentNS::RandomAgent random_agent;
+
+	//play_games<ConsoleAgentNS::ConsoleAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, console_agent, random_agent);
+	//play_games<RandomAgentNS::RandomAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, random_agent, random_agent);
+	play_games<ConsoleAgentNS::ConsoleAgent, ConsoleAgentNS::ConsoleAgent>(position, player, move_list, rng, console_agent, console_agent);
 	return 0;
 
 	auto roll = 0;
@@ -57,71 +92,39 @@ int main()
 	}
 }
 
-void play_against_engine(PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng)
-{
-	auto winner = 0;
-	while (winner == 0)
-	{
-		auto roll = rng() % 36;
-		//roll = 0;
-		Backgammon::render(position, player);
-		auto die1 = roll % 6 + 1;
-		auto die2 = roll / 6 + 1;
-		cout << "Roll: " << (int)die1 << ", " << (int)die2 << endl;
+//void play_games(PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng)
+//{
+//	auto winner = 0;
+//	while (winner == 0)
+//	{
+//		auto roll = rng() % 36;
+//		//roll = 0;
+//		Backgammon::render(position, player);
+//		auto die1 = roll % 6 + 1;
+//		auto die2 = roll / 6 + 1;
+//		cout << "Roll: " << (int)die1 << ", " << (int)die2 << endl;
+//
+//		Backgammon::generate_legal_moves(position, player, roll, *move_list, false);
+//
+//		if (player == 1)
+//		{
+//			ConsoleAgentNS::ConsoleAgent::get_move(position, player, roll, move_list, rng);
+//		}
+//		else
+//		{
+//			Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
+//			if (move_list->move_list_ndx_size > 0)
+//			{
+//				auto move_set = move_list->move_list[move_list->move_list_ndx[rng() % move_list->move_list_ndx_size]];
+//				position = move_set.result_position;
+//			}
+//		}
+//
+//		winner = Backgammon::get_winner(position);
+//		player = 1 - player;
+//	}
+//}
 
-		PositionStruct display_position = position;
-		if (player == 0)
-		{
-			Backgammon::generate_legal_moves(position, player, roll, *move_list, false);
-			std::vector<unsigned char> moves_so_far;
-			while (true)
-			{
-				auto moves = move_list->get_all_single_moves(position, moves_so_far);
-				if (moves.size() == 0) break;
-				char move_char = 'A';
-				for (auto move : moves)
-				{
-					cout << move_char++ << ") ";
-					auto die = move & 0b111;
-					auto slot = 24 - (move >> 3);
-					if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
-					else cout << "Die " << (int)die << " From " << (int)slot << endl;
-				}
-				unsigned char choice;
-				cin >> choice;
-				int move_ndx = choice - 'A';
-				if (move_ndx >= 0 && move_ndx < moves.size())
-				{
-					cout << "Your move: ";
-					auto move = moves[move_ndx];
-					auto die = move & 0b111;
-					auto slot = 24 - (move >> 3);
-					if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
-					else cout << "Die " << (int)die << " From " << (int)slot << endl;
-					moves_so_far.push_back(move);
-					display_position = move_list->get_position_for_partial_move(moves_so_far);
-					Backgammon::render(display_position, player);
-				}
-				else
-				{
-					cout << "Invalid move." << endl;
-				}
-			}
-			position = display_position;
-		}
-		else
-		{
-			Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
-			if (move_list->move_list_ndx_size > 0)
-			{
-				auto move_set = move_list->move_list[move_list->move_list_ndx[rng() % move_list->move_list_ndx_size]];
-				position = move_set.result_position;
-			}
-		}
-		winner = Backgammon::get_winner(position);
-		player = 1 - player;
-	}
-}
 
 float rollout(PositionStruct &position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, unsigned int num_games, Squirrel3& rng, bool display)
 {

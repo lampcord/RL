@@ -87,7 +87,7 @@ namespace BackgammonNS
         const int num_scores = 3;
         auto best_score = -1000.0f;
         auto best_ndx = 0;
-        float scores[num_scores];
+        float scores[num_scores] = {};
 
         for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
         {

@@ -4,6 +4,12 @@
 
 namespace BackgammonNS
 {
+	enum class Strategy {
+		priming,
+		blitzing,
+		racing,
+		contact
+	};
 	struct AnalyzerResult
 	{
 		unsigned short pip_count[2] = { 0,0 };

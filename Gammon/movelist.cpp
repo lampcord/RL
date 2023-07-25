@@ -3,11 +3,49 @@
 #include <iostream>
 #include <iomanip>
 #include <bitset>
+#include <set>
 
 using namespace std;
 
 namespace BackgammonNS
 {
+    std::vector<unsigned char> MoveList::get_all_single_moves(PositionStruct& position, std::vector<unsigned char>& moves_so_far)
+    {
+        vector<unsigned char> moves;
+        set<unsigned char> found;
+
+        if (moves_so_far.size() < max_sub_moves)
+        {
+            for (auto ndx = 0; ndx < move_list_ndx_size; ndx++)
+            {
+                auto move_ndx = move_list_ndx[ndx];
+                auto move_set = move_list[move_ndx];
+                //cout << get_move_desc(move_set, 0);
+                auto match = true;
+                auto move_set_ndx = 0;
+                for (auto move_so_far : moves_so_far)
+                {
+                    if (move_so_far == 0) break;
+                    if (move_so_far != move_set.moves[move_set_ndx])
+                    {
+                        match = false;
+                        break;
+                    }
+                    if (move_set_ndx >= 3) break;
+                    move_set_ndx++;
+                }
+                //cout << " " << match << endl;
+                if (!match) continue;
+                auto candidate_move = move_set.moves[move_set_ndx];
+                if (candidate_move == 0) continue;
+                found.insert(candidate_move);
+            }
+        }
+
+        for (auto move : found) moves.push_back(move);
+
+        return moves;
+    }
     void MoveList::dump_moves(const unsigned char& player)
     {
         auto duplicates = 0;

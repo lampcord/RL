@@ -7,10 +7,59 @@
 The AI will be heuristic and use the following structure.
 
 At the top end, we attempt to chose the best strategy of these 4:
-1) Priming - building a blocking structure on our home board.
-2) Blitzing - attacking enemy pieces and trying to shut them out and run.
-3) Racing - trying to get around the board without being hit and out running oponent.
-4) Backgame - trying to stay back and play for a turnaround hit.
+1) Priming
+Primary goal is to build a perfect prime.
+Need at least one oponent checker back.
+Purity is important.
+Timing is important.
+Efficiency is important.
+Lead is not important.
+
+2) Blitzing
+Need at least one oponent checker back.
+Primary goal is to shut out oponent.
+Purity is not important.
+Timing is not important.
+Efficiency is not important.
+Should have at least 10 checkers in the zone.
+Lead is good but not critical.
+
+3) Racing
+Contact has been broken and it is just a race to the end.
+Purity is not important.
+Timing is not important.
+Efficiency is not important.
+Lead is critical.
+
+4) Contact
+Primary goal is to maintain contact. While doing so you need to be building a prime.
+Timing is very important.
+Purity is important.
+Timing is important.
+Efficiency is important.
+Lead is detrimental.
+
+Breakdown of 4 possible conditions:
+(You / Oponent)
+Priming / Priming
+Split back checkers for high anchor.
+Try and make a prime.
+Make points in order.
+
+Priming / Blitzing
+Never split your back anchors.
+Low anchors are fine.
+Slot.
+
+Blitzing / Priming
+Attack if possible.
+Escape back checkers if attack is not possible.
+Do Not Slot!
+
+Blitzing / Blitzing
+Attack if possilbe.
+Anchor anywhere you can.
+Don't give up your anchor!
 
 We will calculate a number of primitives for both sides and use those to choose the category and score moves.
 1) Pip count - total number of moves needed to bear out.
@@ -27,7 +76,7 @@ Next we will add alpha beta pruning.
 
 Next we will add bad move pruning based on chosen strategy.
 
-
+4 basic strategies:
 */
 using namespace std;
 

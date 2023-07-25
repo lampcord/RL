@@ -26,10 +26,13 @@ int main()
 	//return 0;
 
 	auto num_games = 10000u;
-	unsigned char player = 1;
+	unsigned char player = 0;
 	Squirrel3 rng(42);
 	PositionStruct position;
 	Backgammon::get_initial_position(position);
+
+	play_against_engine(position, player, move_list, rng);
+	return 0;
 
 	auto roll = 0;
 	Backgammon::render(position, player);
@@ -51,6 +54,56 @@ int main()
 		auto average_score = (-average_rollout_score + score) / 2.0f;
 
 		cout << "Score " << setw(6) << score << " Average rollout score " << setw(6) << average_rollout_score << " Average score " << setw(6) << average_score << endl;
+	}
+}
+
+void play_against_engine(PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng)
+{
+	auto winner = 0;
+	while (winner == 0)
+	{
+		auto roll = rng() % 36;
+		roll = 0;
+		Backgammon::render(position, player);
+		auto die1 = roll % 6 + 1;
+		auto die2 = roll / 6 + 1;
+		cout << "Roll: " << (int)die1 << ", " << (int)die2 << endl;
+
+		Backgammon::generate_legal_moves(position, player, roll, *move_list, player == 1);
+		std::vector<unsigned char> moves_so_far;
+		while (true)
+		{
+			auto moves = move_list->get_all_single_moves(position, moves_so_far);
+			if (moves.size() == 0) break;
+			char move_char = 'A';
+			for (auto move : moves)
+			{
+				cout << move_char++ << ") ";
+				auto die = move & 0b111;
+				auto slot = 24 - (move >> 3);
+				if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
+				else cout << "Die " << (int)die << " From " << (int)slot << endl;
+			}
+			unsigned char choice;
+			cin >> choice;
+			int move_ndx = choice - 'A';
+			if (move_ndx >= 0 && move_ndx < moves.size())
+			{
+				cout << "Your move: ";
+				auto move = moves[move_ndx];
+				auto die = move & 0b111;
+				auto slot = 24 - (move >> 3);
+				if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
+				else cout << "Die " << (int)die << " From " << (int)slot << endl;
+				moves_so_far.push_back(move);
+			}
+			else
+			{
+				cout << "Invalid move." << endl;
+			}
+		}
+
+		break;
 	}
 }
 

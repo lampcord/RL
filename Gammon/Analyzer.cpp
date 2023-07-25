@@ -95,6 +95,11 @@ namespace BackgammonNS
             Backgammon::render(move_set.result_position, player);
             cout << MoveList::get_move_desc(move_set, player) << endl;
             float score = analyze(move_set.result_position, player);
+            if (score > best_score)
+            {
+                best_score = score;
+                best_ndx = ndx;
+            }
         }
         return best_ndx;
     }

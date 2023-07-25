@@ -8,6 +8,7 @@
 #include "PerfTimer.h"
 #include "console_agent.h"
 #include "random_agent.h"
+#include "analyzer_agent.h"
 
 using namespace BackgammonNS;
 using namespace std;
@@ -63,10 +64,12 @@ int main()
 
 	ConsoleAgentNS::ConsoleAgent console_agent;
 	RandomAgentNS::RandomAgent random_agent;
+	AnalyzerAgentNS::AnalyzerAgent analyzer_agent;
 
 	//play_games<ConsoleAgentNS::ConsoleAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, console_agent, random_agent);
 	//play_games<RandomAgentNS::RandomAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, random_agent, random_agent);
-	play_games<ConsoleAgentNS::ConsoleAgent, ConsoleAgentNS::ConsoleAgent>(position, player, move_list, rng, console_agent, console_agent);
+	//play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, console_agent, analyzer_agent);
+	play_games<RandomAgentNS::RandomAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, random_agent, analyzer_agent);
 	return 0;
 
 	auto roll = 0;
@@ -91,39 +94,6 @@ int main()
 		cout << "Score " << setw(6) << score << " Average rollout score " << setw(6) << average_rollout_score << " Average score " << setw(6) << average_score << endl;
 	}
 }
-
-//void play_games(PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng)
-//{
-//	auto winner = 0;
-//	while (winner == 0)
-//	{
-//		auto roll = rng() % 36;
-//		//roll = 0;
-//		Backgammon::render(position, player);
-//		auto die1 = roll % 6 + 1;
-//		auto die2 = roll / 6 + 1;
-//		cout << "Roll: " << (int)die1 << ", " << (int)die2 << endl;
-//
-//		Backgammon::generate_legal_moves(position, player, roll, *move_list, false);
-//
-//		if (player == 1)
-//		{
-//			ConsoleAgentNS::ConsoleAgent::get_move(position, player, roll, move_list, rng);
-//		}
-//		else
-//		{
-//			Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
-//			if (move_list->move_list_ndx_size > 0)
-//			{
-//				auto move_set = move_list->move_list[move_list->move_list_ndx[rng() % move_list->move_list_ndx_size]];
-//				position = move_set.result_position;
-//			}
-//		}
-//
-//		winner = Backgammon::get_winner(position);
-//		player = 1 - player;
-//	}
-//}
 
 
 float rollout(PositionStruct &position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, unsigned int num_games, Squirrel3& rng, bool display)

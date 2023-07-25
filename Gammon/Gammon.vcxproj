@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="analyzer.cpp" />
+    <ClCompile Include="analyzer_agent.cpp" />
     <ClCompile Include="backgammon.cpp" />
     <ClCompile Include="console_agent.cpp" />
     <ClCompile Include="Gammon.cpp" />
@@ -145,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="analyzer.h" />
+    <ClInclude Include="analyzer_agent.h" />
     <ClInclude Include="backgammon.h" />
     <ClInclude Include="console_agent.h" />
     <ClInclude Include="Gammon.h" />

@@ -63,47 +63,63 @@ void play_against_engine(PositionStruct& position, unsigned char player, std::un
 	while (winner == 0)
 	{
 		auto roll = rng() % 36;
-		roll = 0;
+		//roll = 0;
 		Backgammon::render(position, player);
 		auto die1 = roll % 6 + 1;
 		auto die2 = roll / 6 + 1;
 		cout << "Roll: " << (int)die1 << ", " << (int)die2 << endl;
 
-		Backgammon::generate_legal_moves(position, player, roll, *move_list, player == 1);
-		std::vector<unsigned char> moves_so_far;
-		while (true)
+		PositionStruct display_position = position;
+		if (player == 0)
 		{
-			auto moves = move_list->get_all_single_moves(position, moves_so_far);
-			if (moves.size() == 0) break;
-			char move_char = 'A';
-			for (auto move : moves)
+			Backgammon::generate_legal_moves(position, player, roll, *move_list, false);
+			std::vector<unsigned char> moves_so_far;
+			while (true)
 			{
-				cout << move_char++ << ") ";
-				auto die = move & 0b111;
-				auto slot = 24 - (move >> 3);
-				if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
-				else cout << "Die " << (int)die << " From " << (int)slot << endl;
+				auto moves = move_list->get_all_single_moves(position, moves_so_far);
+				if (moves.size() == 0) break;
+				char move_char = 'A';
+				for (auto move : moves)
+				{
+					cout << move_char++ << ") ";
+					auto die = move & 0b111;
+					auto slot = 24 - (move >> 3);
+					if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
+					else cout << "Die " << (int)die << " From " << (int)slot << endl;
+				}
+				unsigned char choice;
+				cin >> choice;
+				int move_ndx = choice - 'A';
+				if (move_ndx >= 0 && move_ndx < moves.size())
+				{
+					cout << "Your move: ";
+					auto move = moves[move_ndx];
+					auto die = move & 0b111;
+					auto slot = 24 - (move >> 3);
+					if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
+					else cout << "Die " << (int)die << " From " << (int)slot << endl;
+					moves_so_far.push_back(move);
+					display_position = move_list->get_position_for_partial_move(moves_so_far);
+					Backgammon::render(display_position, player);
+				}
+				else
+				{
+					cout << "Invalid move." << endl;
+				}
 			}
-			unsigned char choice;
-			cin >> choice;
-			int move_ndx = choice - 'A';
-			if (move_ndx >= 0 && move_ndx < moves.size())
+			position = display_position;
+		}
+		else
+		{
+			Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
+			if (move_list->move_list_ndx_size > 0)
 			{
-				cout << "Your move: ";
-				auto move = moves[move_ndx];
-				auto die = move & 0b111;
-				auto slot = 24 - (move >> 3);
-				if (slot == (bar_indicator >> 3)) cout << "Die " << (int)die << " From Bar " << endl;
-				else cout << "Die " << (int)die << " From " << (int)slot << endl;
-				moves_so_far.push_back(move);
-			}
-			else
-			{
-				cout << "Invalid move." << endl;
+				auto move_set = move_list->move_list[move_list->move_list_ndx[rng() % move_list->move_list_ndx_size]];
+				position = move_set.result_position;
 			}
 		}
-
-		break;
+		winner = Backgammon::get_winner(position);
+		player = 1 - player;
 	}
 }
 

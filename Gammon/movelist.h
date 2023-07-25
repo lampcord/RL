@@ -32,6 +32,7 @@ namespace BackgammonNS
 			move_list_ndx_size = 0;
 		};
 		std::vector<unsigned char> get_all_single_moves(PositionStruct& position, std::vector<unsigned char>& moves_so_far);
+		PositionStruct get_position_for_partial_move(std::vector<unsigned char>& moves_so_far);
 		void dump_moves(const unsigned char& player);
 		void build_index();
 		static std::string get_move_desc(MoveStruct& move_set, unsigned char player);

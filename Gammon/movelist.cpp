@@ -46,6 +46,39 @@ namespace BackgammonNS
 
         return moves;
     }
+    PositionStruct MoveList::get_position_for_partial_move(std::vector<unsigned char>& moves_so_far)
+    {
+        PositionStruct result_position = { 0, 0 };
+
+        for (auto move_ndx = 0; move_ndx < move_list_size; move_ndx++)
+        {
+            auto move_set = move_list[move_ndx];
+            //cout << get_move_desc(move_set, 0);
+            auto match = true;
+            auto move_set_ndx = 0;
+            for (auto move_so_far : moves_so_far)
+            {
+                if (move_so_far == 0) break;
+                if (move_so_far != move_set.moves[move_set_ndx])
+                {
+                    match = false;
+                    break;
+                }
+                if (move_set_ndx >= 3) break;
+                move_set_ndx++;
+            }
+            if (match)
+            {
+                if (move_set_ndx + 1 >= max_sub_moves || move_set.moves[move_set_ndx + 1] == 0)
+                {
+                    result_position = move_set.result_position;
+                    break;
+                }
+            }
+        }
+
+        return result_position;
+    }
     void MoveList::dump_moves(const unsigned char& player)
     {
         auto duplicates = 0;

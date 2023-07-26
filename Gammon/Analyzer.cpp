@@ -39,6 +39,12 @@ Timing is important.
 Efficiency is important.
 Lead is detrimental.
 
+In addition there are two types of structures:
+1) Prime
+2) Blitz
+
+These obviously feed into the above strategies. These can be detected by static analysis of the initial position and used to prioritize different tactics:
+
 Breakdown of 4 possible conditions:
 (You / Oponent)
 Priming / Priming
@@ -82,6 +88,24 @@ using namespace std;
 
 namespace BackgammonNS
 {
+    string Analyzer::get_structure_desc(const Structure& structure)
+    {
+        string result = "";
+
+        switch (structure)
+        {
+        case Structure::blitz:
+            result = "Blitzing Structure";
+            break;
+        case Structure::prime:
+            result = "Priming Structure";
+            break;
+        case Structure::unclear:
+            result = "Undefined Structure";
+            break;
+        }
+        return string();
+    }
     unsigned short Analyzer::get_best_move_index(const PositionType& position, MoveList& move_list, unsigned char player, bool display)
     {
         const int num_scores = 3;
@@ -102,6 +126,12 @@ namespace BackgammonNS
             }
         }
         return best_ndx;
+    }
+
+    std::tuple<Structure, Structure> Analyzer::get_structure(const PositionType& position, const AnalyzerResult& result)
+    {
+        Structure board_structures[2] = { Structure::unclear, Structure::unclear };
+        return std::tuple<Structure, Structure>();
     }
 
 
@@ -150,6 +180,7 @@ namespace BackgammonNS
     {
         AnalyzerResult result;
         scan_position(position, result);
+        auto player_structures = get_structure(position, result);
 
         auto pip_lead = player == 0 ? (float)result.pip_count[1] - (float)result.pip_count[0] : (float)result.pip_count[0] - (float)result.pip_count[1];
         auto score = (float)pip_lead / 100.0f;

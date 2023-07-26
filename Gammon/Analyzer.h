@@ -1,4 +1,6 @@
 #pragma once
+#include <tuple>
+#include <string>
 #include "backgammon.h"
 #include "movelist.h"
 
@@ -9,6 +11,11 @@ namespace BackgammonNS
 		blitzing,
 		racing,
 		contact
+	};
+	enum class Structure {
+		unclear,
+		prime,
+		blitz
 	};
 	struct AnalyzerResult
 	{
@@ -27,8 +34,9 @@ namespace BackgammonNS
 	{
 	private:
 	public:
+		static std::string get_structure_desc(const Structure& structure);
 		static unsigned short get_best_move_index(const PositionType& position, MoveList& move_list, unsigned char player, bool display);
-
+		static std::tuple<Structure, Structure> get_structure(const PositionType& position, const AnalyzerResult& result);
 		static void scan_position(const PositionType& position, AnalyzerResult& result);
 		static float analyze(const PositionType& position, unsigned char player);
 	};

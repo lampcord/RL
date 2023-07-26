@@ -50,6 +50,9 @@ int main()
 	cout << "=                                                                                                                                 =" << endl;
 	cout << "===================================================================================================================================" << endl;
 	cout << "===================================================================================================================================" << endl;
+	Analyzer::test_structure();
+	return 0;
+
 	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();
 	

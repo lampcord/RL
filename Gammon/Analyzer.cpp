@@ -1,6 +1,8 @@
 #include <iostream>
 #include <iomanip>
 #include <bitset>
+#include <array>
+#include <string>
 #include "analyzer.h"
 
 /*
@@ -88,6 +90,24 @@ using namespace std;
 
 namespace BackgammonNS
 {
+    static array<string, 15> blitz_prime_test_data = {
+        "W02B02  0  0  0B04  0B02  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0 U B",
+        "W02  0B02  0  0B05  0B03  0  0  0W05B03  0  0  0W02  0W04  0W02  0  0B02  0  0 P B",
+        "W02  0  0  0B03B03  0B02  0  0B01W03B04  0  0  0W03  0W05  0  0W02  0B02  0  0 B P",
+        "W02  0  0  0  0B05  0B04  0  0B01W05B03  0  0  0W02  0W04W02  0  0  0B02  0  0 P B",
+        "W02  0  0  0  0B04  0B03B02  0B01W05B03  0  0  0W02  0W04  0  0W02B02  0  0  0 B P",
+        "W02  0  0  0B02B05  0B03  0  0  0W05B03  0  0  0W02  0W04W02  0  0  0B02  0  0 P B",
+        "W02B02  0  0  0B05B02B01  0  0  0W04B03  0  0  0W02W02W05  0  0  0  0B02  0  0 P B",
+        "  0W01  0  0B02B05B01B03  0  0  0W04B02  0  0  0W04  0W05  0  0  0  0B02  1  0 P B",
+        "W02B02  0B02  0B04  0B02  0  0  0W05B03  0  0  0W03  0W03W02  0  0  0B02  0  0 P B",
+        "W02  0  0B02B02B03  0B01  0  0  0W03B05W01  0  0W03  0W04W02  0  0  0B02  0  0 P P",
+        "W02  0  0B02B02B04  0B02  0  0  0W03B03  0  0  0W02W02W04W02  0  0  0B02  0  0 P P",
+        "W02  0  0  0  0B05  0B03  0  0B01W04B05  0  0  0W01W02W04  0  0W02  0B01  0  0 B U",
+        "W02  0B02  0  0B04  0B03  0  0  0W02B04  0B01  0W01W02W04W02  0  0W02B01  0  0 B B",
+        "W02  0  0  0  0B05B02B02B01  0  0W03B03  0W01  0W02  0W05W02  0  0B01B01  0  0 B P",
+        "B02  0  0B02  0B03W02B03  0  0  0W03B03  0  0  0W02W02W04B01  0B01W02  0  0  0 B B"
+    };
+
     string Analyzer::get_structure_desc(const Structure& structure)
     {
         string result = "";
@@ -204,6 +224,19 @@ namespace BackgammonNS
         result.render();
 
         return score / 2.0f;
+    }
+
+    bool Analyzer::test_structure()
+    {
+        for (auto s : blitz_prime_test_data)
+        {
+            cout << s << endl;
+            PositionStruct position;
+            Backgammon::position_from_string(s, position);
+            Backgammon::render(position, 0);
+            cout << s[79] << " " << s[81] << endl;
+        }
+        return false;
     }
 
     void AnalyzerResult::render()

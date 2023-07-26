@@ -39,5 +39,6 @@ namespace BackgammonNS
 		static std::tuple<Structure, Structure> get_structure(const PositionType& position, const AnalyzerResult& result);
 		static void scan_position(const PositionType& position, AnalyzerResult& result);
 		static float analyze(const PositionType& position, unsigned char player);
+		static bool test_structure();
 	};
 }

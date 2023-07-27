@@ -166,7 +166,7 @@ namespace BackgammonNS
 
     void Backgammon::position_from_string(const string str_pos, BackgammonNS::PositionType& position)
     {
-        auto player = 0;
+        auto player = 0u;
         unsigned long long workspace = atoi(str_pos.substr(24 * 3, 3).c_str());
         for (auto slot = 0; slot < 12; slot++)
         {
@@ -623,17 +623,17 @@ namespace BackgammonNS
 
     void Backgammon::render_bar_section(const BackgammonNS::PositionType& position, unsigned char player)
     {
-        AnalyzerResult result;
-        Analyzer::scan_position(position, result);
+        AnalyzerScan scan;
+        Analyzer::scan_position(position, scan);
         const auto [player_0_bar, player_1_bar] = get_bar_info(position);
         cout << "|";
         for (auto bar = 0; bar < 8; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "      | " << setw(3) << result.pip_count[1] << " X" << (player == 1 ? "*" : " ") << "|      ";
+        cout << "      | " << setw(3) << scan.pip_count[1] << " X" << (player == 1 ? "*" : " ") << "|      ";
         for (auto bar = 0; bar < 8; bar++) cout << (player_1_bar + 1 > (8 - bar) ? 'X' : ' ');
         cout << "|" << endl;
         cout << "|";
         for (auto bar = 8; bar < 15; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "       | " << setw(3) << result.pip_count[0] << " O" << (player == 0 ? "*" : " ") << "|       ";
+        cout << "       | " << setw(3) << scan.pip_count[0] << " O" << (player == 0 ? "*" : " ") << "|       ";
         for (auto bar = 8; bar < 15; bar++) cout << (player_1_bar > (22 - bar) ? 'X' : ' ');
         cout << "|" << endl;
     }
@@ -673,7 +673,7 @@ namespace BackgammonNS
     {
         ifstream infile(filename);
         string line;
-        PositionStruct position;
+        PositionStruct position = { 0 };
         PositionStruct max_move_position;
         auto roll = 0;
         auto max_move_roll = 0;
@@ -810,14 +810,14 @@ namespace BackgammonNS
     {
         auto result = 0;
 
-        AnalyzerResult analyzer_result;
-        Analyzer::scan_position(position, analyzer_result);
+        AnalyzerScan scan;
+        Analyzer::scan_position(position, scan);
         
-        if (analyzer_result.pip_count[0] == 0)
+        if (scan.pip_count[0] == 0)
         {
             result = 1;
         }
-        else if (analyzer_result.pip_count[1] == 0)
+        else if (scan.pip_count[1] == 0)
         {
             result = -1;
         }

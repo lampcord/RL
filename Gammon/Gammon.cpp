@@ -50,8 +50,8 @@ int main()
 	cout << "=                                                                                                                                 =" << endl;
 	cout << "===================================================================================================================================" << endl;
 	cout << "===================================================================================================================================" << endl;
-	Analyzer::test_board_structure();
-	return 0;
+	//Analyzer::test_board_structure();
+	//return 0;
 
 	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();
@@ -71,8 +71,8 @@ int main()
 
 	//play_games<ConsoleAgentNS::ConsoleAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, console_agent, random_agent);
 	//play_games<RandomAgentNS::RandomAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, random_agent, random_agent);
-	//play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, console_agent, analyzer_agent);
-	play_games<RandomAgentNS::RandomAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, random_agent, analyzer_agent);
+	play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, console_agent, analyzer_agent);
+	//play_games<RandomAgentNS::RandomAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, random_agent, analyzer_agent);
 	return 0;
 
 	auto roll = 0;
@@ -81,25 +81,10 @@ int main()
 	Analyzer::get_best_move_index(position, *move_list, player, true);
 	return 0;
 
-	for (auto ndx = 0u; ndx < move_list->move_list_ndx_size; ndx++)
-	{
-		auto move_set = move_list->move_list[move_list->move_list_ndx[ndx]];
-		print_move_set(move_set, player);
-		
-		auto score = Analyzer::analyze(move_set.result_position, player);
-
-		auto rollout_score = rollout(move_set.result_position, 1 - player, rollout_move_list, num_games, rng, false);
-		
-		auto average_rollout_score = rollout_score / num_games;
-		
-		auto average_score = (-average_rollout_score + score) / 2.0f;
-
-		cout << "Score " << setw(6) << score << " Average rollout score " << setw(6) << average_rollout_score << " Average score " << setw(6) << average_score << endl;
-	}
 }
 
 
-float rollout(PositionStruct &position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, unsigned int num_games, Squirrel3& rng, bool display)
+float rollout(const PositionStruct &position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, unsigned int num_games, Squirrel3& rng, bool display)
 {
 	auto total_moves = 0u;
 	//PerfTimer pf(true, true, true);
@@ -142,7 +127,9 @@ float rollout(PositionStruct &position, unsigned char player, std::unique_ptr<Ba
 		}
 		if (winner == 0)
 		{
-			total_score += Analyzer::analyze(rollout_position, player);
+			AnalyzerScan scan;
+			Analyzer::scan_position(rollout_position, scan);
+			total_score += Analyzer::analyze(scan, player, BoardStructure::unclear, BoardStructure::unclear);
 		}
 		else
 		{

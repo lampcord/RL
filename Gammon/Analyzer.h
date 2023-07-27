@@ -18,7 +18,7 @@ namespace BackgammonNS
 		prime,
 		blitz
 	};
-	struct AnalyzerResult
+	struct AnalyzerScan
 	{
 		unsigned short pip_count[2] = { 0,0 };
 		unsigned short in_the_zone[2] = { 0,0 };
@@ -44,12 +44,12 @@ namespace BackgammonNS
 	public:
 		static void dump_chart(std::string desc, std::map<int, std::vector<char>>& chart_structure);
 		static std::string get_board_structure_desc(const BoardStructure& structure);
-		static std::tuple<BoardStructure, BoardStructure> get_board_structure(const PositionType& position, AnalyzerResult& result);
+		static std::tuple<BoardStructure, BoardStructure> get_board_structure(const AnalyzerScan& scan);
 		static bool test_board_structure();
 
 		
 		static unsigned short get_best_move_index(const PositionType& position, MoveList& move_list, unsigned char player, bool display);
-		static void scan_position(const PositionType& position, AnalyzerResult& result);
-		static float analyze(const PositionType& position, unsigned char player);
+		static void scan_position(const PositionType& position, AnalyzerScan& scan);
+		static float analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure);
 	};
 }

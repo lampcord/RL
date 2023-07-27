@@ -133,13 +133,19 @@ namespace BackgammonNS
         auto best_score = -1000.0f;
         auto best_ndx = 0;
         float scores[num_scores] = {};
+        AnalyzerScan scan;
+        scan_position(position, scan);
+        auto [player_0_structure, player_1_structure] = get_board_structure(scan);
 
         for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
         {
             auto move_set = move_list.move_list[move_list.move_list_ndx[ndx]];
             Backgammon::render(move_set.result_position, player);
             cout << MoveList::get_move_desc(move_set, player) << endl;
-            float score = analyze(move_set.result_position, player);
+
+            scan_position(move_set.result_position, scan);
+            float score = analyze(scan , player, player_0_structure, player_1_structure);
+
             if (score > best_score)
             {
                 best_score = score;
@@ -149,54 +155,34 @@ namespace BackgammonNS
         return best_ndx;
     }
 
-    std::tuple<BoardStructure, BoardStructure> Analyzer::get_board_structure(const PositionType& position, AnalyzerResult& result)
+    std::tuple<BoardStructure, BoardStructure> Analyzer::get_board_structure(const AnalyzerScan& scan)
     {
-        auto mask = 0b100000000000000000000000;
-        for (auto ndx = 0; ndx < 11; ndx++)
-        {
-            for (auto player = 0; player < 2; player++)
-            {
-                if ((result.mountains_mask[player] & mask) != 0) result.mountains[player]++;
-                if ((result.blocked_points_mask[player] & mask) != 0)
-                {
-                    result.structure[player]++;
-                    if (result.first[player] < 0) result.first[player] = ndx;
-                    result.last[player] = ndx;
-                }
-            }
-            mask >>= 1;
-        }
-        result.waste[0] = result.in_the_zone[0] - result.structure[0] * 2;
-        result.waste[1] = result.in_the_zone[1] - result.structure[1] * 2;
-        result.impurity[0] = result.last[0] + 1 - result.first[0] - result.structure[0];
-        result.impurity[1] = result.last[1] + 1 - result.first[1] - result.structure[1];
-
         float total_impurity_pct[2] = { 0.0f, 0.0f };
         float total_first_pct[2] = { 0.0f, 0.0f };
         float total_in_the_zone_pct[2] = { 0.0f, 0.0f };
         float total_lead_pct[2] = { 0.0f, 0.0f };
         float total_blitz_pct[2] = { 0.0f, 0.0f };
-        
+
         for (auto player = 0; player < 2; player++)
         {
-            if (result.impurity[player] == 0)
+            if (scan.impurity[player] == 0)
             {
                 total_impurity_pct[player] += 0.0f;
             }
-            else if (result.impurity[player] == 1)
+            else if (scan.impurity[player] == 1)
             {
                 total_impurity_pct[player] += 0.333f;
             }
-            else if (result.impurity[player] == 2)
+            else if (scan.impurity[player] == 2)
             {
                 total_impurity_pct[player] += 0.667f;
             }
-            else if (result.impurity[player] >= 3)
+            else if (scan.impurity[player] >= 3)
             {
                 total_impurity_pct[player] += 1.0f;
             }
 
-            if (result.first[player] <= 2)
+            if (scan.first[player] <= 2)
             {
                 total_first_pct[player] += 1.0f;
             }
@@ -205,24 +191,24 @@ namespace BackgammonNS
                 total_first_pct[player] += 0.0f;
             }
 
-            if (result.in_the_zone[player] <= 8)
+            if (scan.in_the_zone[player] <= 8)
             {
                 total_in_the_zone_pct[player] += 0.285714f;
             }
-            else if (result.in_the_zone[player] == 9)
+            else if (scan.in_the_zone[player] == 9)
             {
                 total_in_the_zone_pct[player] += 0.4f;
             }
-            else if (result.in_the_zone[player] == 10)
+            else if (scan.in_the_zone[player] == 10)
             {
                 total_in_the_zone_pct[player] += 0.642857f;
             }
-            else if (result.in_the_zone[player] >= 11)
+            else if (scan.in_the_zone[player] >= 11)
             {
                 total_in_the_zone_pct[player] += 1.0f;
             }
 
-            auto lead = result.pip_count[1 - player] - result.pip_count[player];
+            auto lead = scan.pip_count[1 - player] - scan.pip_count[player];
             if (lead >= 12)
             {
                 total_lead_pct[player] += 1.0f;
@@ -243,19 +229,22 @@ namespace BackgammonNS
         cout << "In The Zone PCT " << setw(12) << total_in_the_zone_pct[0] << " " << setw(12) << total_in_the_zone_pct[1] << endl;
         cout << "Lead PCT        " << setw(12) << total_lead_pct[0] << " " << setw(12) << total_lead_pct[1] << endl;
         cout << "Blitz PCT       " << setw(12) << total_blitz_pct[0] << " " << setw(12) << total_blitz_pct[1] << endl;
-        BoardStructure board_structures[2] = { BoardStructure::unclear, BoardStructure::unclear };
-        return std::tuple<BoardStructure, BoardStructure>();
+
+        BoardStructure board_structure_0 = total_blitz_pct[0] > 0.5f ? BoardStructure::blitz : BoardStructure::prime;
+        BoardStructure board_structure_1 = total_blitz_pct[1] > 0.5f ? BoardStructure::blitz : BoardStructure::prime;
+        
+        return {board_structure_0, board_structure_1};
     }
 
 
 
-    void Analyzer::scan_position(const PositionType& position, AnalyzerResult& result)
+    void Analyzer::scan_position(const PositionType& position, AnalyzerScan& scan)
     {
-        result.clear();
+        scan.clear();
 
         auto [player_0_bar, player_1_bar] = Backgammon::get_bar_info(position);
-        result.pip_count[0] = player_0_bar * 25;
-        result.pip_count[1] = player_1_bar * 25;
+        scan.pip_count[0] = player_0_bar * 25;
+        scan.pip_count[1] = player_1_bar * 25;
 
         unsigned int player_mask[2] = { 0b000000000000000000000001, 0b100000000000000000000000 };
 
@@ -263,18 +252,51 @@ namespace BackgammonNS
         {
             auto [slot_player, num_checkers] = Backgammon::get_slot_info(position, slot);
          
-            result.pip_count[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers : (slot + 1) * num_checkers;
-            if (slot_player == 0 && slot > 12) result.in_the_zone[0] += num_checkers;
-            if (slot_player == 1 && slot < 11) result.in_the_zone[1] += num_checkers;
+            scan.pip_count[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers : (slot + 1) * num_checkers;
+            if (slot_player == 0 && slot > 12) scan.in_the_zone[0] += num_checkers;
+            if (slot_player == 1 && slot < 11) scan.in_the_zone[1] += num_checkers;
 
-            if (num_checkers >= 2) result.blocked_points_mask[slot_player] |= player_mask[slot_player];
-            if (num_checkers == 1) result.blots_mask[slot_player] |= player_mask[slot_player];
-            if (num_checkers > 3) result.mountains_mask[slot_player] |= player_mask[slot_player];
-            if (num_checkers == 3) result.triples_mask[slot_player] |= player_mask[slot_player];
+            if (num_checkers >= 2) scan.blocked_points_mask[slot_player] |= player_mask[slot_player];
+            if (num_checkers == 1) scan.blots_mask[slot_player] |= player_mask[slot_player];
+            if (num_checkers > 3) scan.mountains_mask[slot_player] |= player_mask[slot_player];
+            if (num_checkers == 3) scan.triples_mask[slot_player] |= player_mask[slot_player];
             
             player_mask[0] <<= 1;
             player_mask[1] >>= 1;
         }
+
+        const float raw_value_for_points[11] = { 0.1f, 0.1f, 0.3f, 0.8f, 0.9f, 1.0f, 0.7f, 0.6f, 0.3f, 0.2f, 0.2f };
+        unsigned int mask = 0b100000000000000000000000;
+
+        for (auto x = 0; x < 11; x++)
+        {
+            if ((mask & scan.blocked_points_mask[0]) != 0) scan.raw_mask_value[0] += raw_value_for_points[x];
+            if ((mask & scan.blocked_points_mask[1]) != 0) scan.raw_mask_value[1] += raw_value_for_points[x];
+            if ((mask & scan.blots_mask[0]) != 0) scan.raw_mask_value[0] += raw_value_for_points[x] / 3.0f;
+            if ((mask & scan.blots_mask[1]) != 0) scan.raw_mask_value[1] += raw_value_for_points[x] / 3.0f;
+            mask >>= 1;
+        }
+
+        mask = 0b100000000000000000000000;
+        for (auto ndx = 0; ndx < 11; ndx++)
+        {
+            for (auto player = 0; player < 2; player++)
+            {
+                if ((scan.mountains_mask[player] & mask) != 0) scan.mountains[player]++;
+                if ((scan.blocked_points_mask[player] & mask) != 0)
+                {
+                    scan.structure[player]++;
+                    if (scan.first[player] < 0) scan.first[player] = ndx;
+                    scan.last[player] = ndx;
+                }
+            }
+            mask >>= 1;
+        }
+        scan.waste[0] = scan.in_the_zone[0] - scan.structure[0] * 2;
+        scan.waste[1] = scan.in_the_zone[1] - scan.structure[1] * 2;
+        scan.impurity[0] = scan.last[0] + 1 - scan.first[0] - scan.structure[0];
+        scan.impurity[1] = scan.last[1] + 1 - scan.first[1] - scan.structure[1];
+
     }
 
     /*
@@ -289,32 +311,12 @@ namespace BackgammonNS
     [ ] Never split facing a blitzing structure.
     [ ] Hit and split.
     */
-    float Analyzer::analyze(const PositionType& position, unsigned char player)
+    float Analyzer::analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure)
     {
-        AnalyzerResult result;
-        scan_position(position, result);
-        auto player_structures = get_board_structure(position, result);
 
-        auto pip_lead = player == 0 ? (float)result.pip_count[1] - (float)result.pip_count[0] : (float)result.pip_count[0] - (float)result.pip_count[1];
+        auto pip_lead = player == 0 ? (float)scan.pip_count[1] - (float)scan.pip_count[0] : (float)scan.pip_count[0] - (float)scan.pip_count[1];
         auto score = (float)pip_lead / 100.0f;
         
-        //[] The most important point is the 5 point.
-        //[] Make an outfield point.
-        //[] Fight for a good point.
-        const float raw_value_for_points[11] = { 0.1f, 0.1f, 0.3f, 0.8f, 0.9f, 1.0f, 0.7f, 0.6f, 0.3f, 0.2f, 0.2f };
-        unsigned int mask = 0b100000000000000000000000;
-        
-        for (auto x = 0; x < 11; x++)
-        {
-            if ((mask & result.blocked_points_mask[0]) != 0) result.raw_mask_value[0] += raw_value_for_points[x];
-            if ((mask & result.blocked_points_mask[1]) != 0) result.raw_mask_value[1] += raw_value_for_points[x];
-            if ((mask & result.blots_mask[0]) != 0) result.raw_mask_value[0] += raw_value_for_points[x] / 3.0f;
-            if ((mask & result.blots_mask[1]) != 0) result.raw_mask_value[1] += raw_value_for_points[x] / 3.0f;
-            mask >>= 1;
-        }
-
-
-        result.render();
 
         return score / 2.0f;
     }
@@ -330,7 +332,7 @@ namespace BackgammonNS
         map<int, vector<char>> chart_mountains;
 
         auto ndx = 0;
-        for (auto s : blitz_prime_test_data)
+        for (auto &s : blitz_prime_test_data)
         {
             cout << setw(3) << ndx ++ << ") " << s << endl;
             PositionStruct position;
@@ -338,27 +340,27 @@ namespace BackgammonNS
             Backgammon::render(position, 0);
             auto player_0_test_struct = s[79];
             auto player_1_test_struct = s[81];
-            AnalyzerResult result;
-            scan_position(position, result);
-            auto [player_0_structure, player_1_structure] = get_board_structure(position, result);
+            AnalyzerScan scan;
+            scan_position(position, scan);
+            auto [player_0_structure, player_1_structure] = get_board_structure(scan);
 
-            chart_structure[result.structure[0]].push_back(player_0_test_struct);
-            chart_waste[result.waste[0]].push_back(player_0_test_struct);
-            chart_impurity[result.impurity[0]].push_back(player_0_test_struct);
-            chart_first[result.first[0]].push_back(player_0_test_struct);
-            chart_in_the_zone[result.in_the_zone[0]].push_back(player_0_test_struct);
-            chart_mountains[result.mountains[0]].push_back(player_0_test_struct);
-            chart_lead[result.pip_count[1] - result.pip_count[0]].push_back(player_0_test_struct);
+            chart_structure[scan.structure[0]].push_back(player_0_test_struct);
+            chart_waste[scan.waste[0]].push_back(player_0_test_struct);
+            chart_impurity[scan.impurity[0]].push_back(player_0_test_struct);
+            chart_first[scan.first[0]].push_back(player_0_test_struct);
+            chart_in_the_zone[scan.in_the_zone[0]].push_back(player_0_test_struct);
+            chart_mountains[scan.mountains[0]].push_back(player_0_test_struct);
+            chart_lead[scan.pip_count[1] - scan.pip_count[0]].push_back(player_0_test_struct);
             
-            chart_structure[result.structure[1]].push_back(player_1_test_struct);
-            chart_waste[result.waste[1]].push_back(player_1_test_struct);
-            chart_impurity[result.impurity[1]].push_back(player_1_test_struct);
-            chart_first[result.first[1]].push_back(player_1_test_struct);
-            chart_in_the_zone[result.in_the_zone[1]].push_back(player_1_test_struct);
-            chart_mountains[result.mountains[1]].push_back(player_1_test_struct);
-            chart_lead[result.pip_count[0] - result.pip_count[1]].push_back(player_1_test_struct);
+            chart_structure[scan.structure[1]].push_back(player_1_test_struct);
+            chart_waste[scan.waste[1]].push_back(player_1_test_struct);
+            chart_impurity[scan.impurity[1]].push_back(player_1_test_struct);
+            chart_first[scan.first[1]].push_back(player_1_test_struct);
+            chart_in_the_zone[scan.in_the_zone[1]].push_back(player_1_test_struct);
+            chart_mountains[scan.mountains[1]].push_back(player_1_test_struct);
+            chart_lead[scan.pip_count[0] - scan.pip_count[1]].push_back(player_1_test_struct);
 
-            result.render();
+            scan.render();
             cout << player_0_test_struct << " " << player_1_test_struct << endl;
 
         }
@@ -380,7 +382,7 @@ namespace BackgammonNS
     void Analyzer::dump_chart(string desc, std::map<int, std::vector<char>>& chart_structure)
     {
         cout << desc << endl;
-        for (auto p : chart_structure)
+        for (auto &p : chart_structure)
         {
             float total_b = 0.0f;
             float total_p = 0.0f;
@@ -396,7 +398,7 @@ namespace BackgammonNS
         }
     }
 
-    void AnalyzerResult::render()
+    void AnalyzerScan::render()
     {
         cout << "Pip Count:      " << setw(4) << pip_count[0] << " " << setw(4) << pip_count[1] << endl;
         cout << "In the Zone:    " << setw(4) << in_the_zone[0] << " " << setw(4) << in_the_zone[1] << endl;
@@ -433,7 +435,7 @@ namespace BackgammonNS
         cout << endl;
     }
 
-    void AnalyzerResult::print_mask_desc(unsigned int mask)
+    void AnalyzerScan::print_mask_desc(unsigned int mask)
     {
         cout << bitset<6>(mask >> 18) << " ";
         cout << bitset<6>(mask >> 12) << " ";
@@ -441,7 +443,7 @@ namespace BackgammonNS
         cout << bitset<6>(mask) << " ";
     }
 
-    void AnalyzerResult::clear()
+    void AnalyzerScan::clear()
     {
         for (auto x = 0u; x < 2; x++)
         {

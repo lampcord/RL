@@ -52,23 +52,23 @@ namespace BackgammonNS
 	class Backgammon
 	{
 	private:
-		static void render_bar_section(const BackgammonNS::PositionType& position, unsigned char player);
-		static void render_board_section(const BackgammonNS::PositionType& position, bool top, unsigned char casted_off);
+		static void render_bar_section(const BackgammonNS::PositionStruct& position, unsigned char player);
+		static void render_board_section(const BackgammonNS::PositionStruct& position, bool top, unsigned char casted_off);
 		static bool gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff, MoveList& move_list, bool no_duplicates);
 
 	public:
-		static slot_info get_bar_info(const PositionType& position);
-		static slot_info get_slot_info(const PositionType& position, unsigned char slot);
-		static void update_slot(PositionType& position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list);
+		static slot_info get_bar_info(const PositionStruct& position);
+		static slot_info get_slot_info(const PositionStruct& position, unsigned char slot);
+		static void update_slot(PositionStruct& position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list);
 
-		static void position_from_string(const std::string str_pos, BackgammonNS::PositionType& position);
-		static std::string string_from_position(BackgammonNS::PositionType& position);
-		static void get_initial_position(PositionType& position);
-		static void generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list, bool no_duplicates);
+		static void position_from_string(const std::string str_pos, BackgammonNS::PositionStruct& position);
+		static std::string string_from_position(const BackgammonNS::PositionStruct& position);
+		static void get_initial_position(PositionStruct& position);
+		static void generate_legal_moves(const PositionStruct& position, const unsigned char player, const unsigned int roll, MoveList & move_list, bool no_duplicates);
 		static void render_roll(const unsigned char roll);
-		static void render(const PositionType& position, unsigned char player);
+		static void render(const PositionStruct& position, unsigned char player);
 		static void run_position_tests(const std::string filename, bool verbose, MoveList& move_list, int max_positions = -1);
-		static int get_winner(const PositionType& position);
+		static int get_winner(const PositionStruct& position);
 	};
 
 }

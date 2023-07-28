@@ -61,8 +61,8 @@ int main()
 	//Analyzer::test_number_of_rolls_that_hit(*move_list);
 	//return 0;
 
-	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
-	//return 0;
+	Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
+	return 0;
 
 	auto num_games = 10000u;
 	unsigned char player = 0;

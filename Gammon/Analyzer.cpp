@@ -181,7 +181,7 @@ namespace BackgammonNS
         }
         return string();
     }
-    unsigned short Analyzer::get_best_move_index(const PositionType& position, MoveList& move_list, unsigned char player, bool display)
+    unsigned short Analyzer::get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool display)
     {
         const int num_scores = 3;
         auto best_score = -1000.0f;
@@ -291,7 +291,7 @@ namespace BackgammonNS
 
 
 
-    void Analyzer::scan_position(const PositionType& position, AnalyzerScan& scan)
+    void Analyzer::scan_position(const PositionStruct& position, AnalyzerScan& scan)
     {
         scan.clear();
 
@@ -431,7 +431,7 @@ namespace BackgammonNS
         return false;
     }
 
-    unsigned short Analyzer::get_number_of_rolls_that_hit(const PositionType& position, unsigned char player, MoveList& move_list)
+    unsigned short Analyzer::get_number_of_rolls_that_hit(const PositionStruct& position, unsigned char player, MoveList& move_list)
     {
         auto [player_0_hit, player_1_hit] = Backgammon::get_bar_info(position);
         auto player_hit = player == 0 ? player_1_hit : player_0_hit;
@@ -463,7 +463,7 @@ namespace BackgammonNS
     bool Analyzer::test_number_of_rolls_that_hit(MoveList& move_list)
     {
         unsigned char player = 0;
-        PositionType position;
+        PositionStruct position;
         Backgammon::position_from_string("W01W01B01B02B02B02  0B01  0  0  0W03B05W01  0  0W03  0W04W02  0  0  0B02  0  0", position);
         Backgammon::render(position, player);
         auto number_of_hits = get_number_of_rolls_that_hit(position, player, move_list);

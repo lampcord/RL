@@ -100,7 +100,7 @@ namespace BackgammonNS
         return slot_info{ player_0_bar, player_1_bar };
     }
 
-    slot_info Backgammon::get_slot_info(const PositionType& position, unsigned char slot)
+    slot_info Backgammon::get_slot_info(const PositionStruct& position, unsigned char slot)
     {
         unsigned long long workspace = 0x0;
         const unsigned char shift = 55 - (slot % 12) * 5;
@@ -115,7 +115,7 @@ namespace BackgammonNS
         return slot_info{ player, num_checkers };
     }
 
-    void Backgammon::update_slot(PositionType &position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list)
+    void Backgammon::update_slot(PositionStruct&position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list)
     {
         const unsigned char shift = 55 - (slot % 12) * 5;
         const unsigned char position_ndx = slot / 12;
@@ -164,7 +164,7 @@ namespace BackgammonNS
     }
 
 
-    void Backgammon::position_from_string(const string str_pos, BackgammonNS::PositionType& position)
+    void Backgammon::position_from_string(const string str_pos, BackgammonNS::PositionStruct& position)
     {
         auto player = 0u;
         unsigned long long workspace = atoi(str_pos.substr(24 * 3, 3).c_str());
@@ -191,24 +191,18 @@ namespace BackgammonNS
         position.position[1] = workspace;
     }
 
-    std::string Backgammon::string_from_position(BackgammonNS::PositionType& position)
+    std::string Backgammon::string_from_position(const BackgammonNS::PositionStruct& position)
     {
         string pos_string;
 
         for (auto slot = 0u; slot < 24; slot++)
         {
-            auto [player_0_checkers, player_1_checkers] = get_slot_info(position, slot);
-            if (player_0_checkers > 0)
+            auto [player, num_checkers] = get_slot_info(position, slot);
+            if (num_checkers > 0)
             {
-                pos_string += "W";
-                if (player_0_checkers < 10) pos_string += "0";
-                pos_string += to_string(player_0_checkers);
-            }
-            else if (player_1_checkers > 0)
-            {
-                pos_string += "B";
-                if (player_1_checkers < 10) pos_string += "0";
-                pos_string += to_string(player_1_checkers);
+                pos_string += player == 0 ? "W" : "B";
+                if (num_checkers < 10) pos_string += "0";
+                pos_string += to_string(num_checkers);
             }
             else
             {
@@ -226,7 +220,7 @@ namespace BackgammonNS
         return pos_string;
     }
 
-    void Backgammon::get_initial_position(PositionType& position)
+    void Backgammon::get_initial_position(PositionStruct& position)
     {
         //position.position[0] = 0b0000000100000000000000000000010101000001001100000000000000000101;
         //position.position[1] = 0b0000101010000000000000000001100000001010000000000000000000010010;
@@ -469,7 +463,7 @@ namespace BackgammonNS
         return expanded;
     }
 
-    void Backgammon::generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList& move_list, bool no_duplicates)
+    void Backgammon::generate_legal_moves(const PositionStruct& position, const unsigned char player, const unsigned int roll, MoveList& move_list, bool no_duplicates)
     {
         unsigned long long workspace = position.position[0];
         unsigned int blocked = 0x0;
@@ -599,7 +593,7 @@ namespace BackgammonNS
         cout << "(" << (int)die1 << "," << (int)die2 << ")";
     }
 
-    void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top, unsigned char casted_off)
+    void Backgammon::render_board_section(const BackgammonNS::PositionStruct& position, bool top, unsigned char casted_off)
     {
         array<unsigned int, 6> top_lines{0, 1, 2, 3, 4, 5};
         array<unsigned int, 6> bot_lines{5, 4, 3, 2, 1, 0};
@@ -663,7 +657,7 @@ namespace BackgammonNS
         }
     }
 
-    void Backgammon::render_bar_section(const BackgammonNS::PositionType& position, unsigned char player)
+    void Backgammon::render_bar_section(const BackgammonNS::PositionStruct& position, unsigned char player)
     {
         AnalyzerScan scan;
         Analyzer::scan_position(position, scan);
@@ -679,7 +673,7 @@ namespace BackgammonNS
         for (auto bar = 8; bar < 15; bar++) cout << (player_1_bar > (22 - bar) ? 'X' : ' ');
         cout << "|" << endl;
     }
-    void Backgammon::render(const PositionType& position, unsigned char player)
+    void Backgammon::render(const PositionStruct& position, unsigned char player)
     {
         const string far_numbers  = " 13 14 15 16 17 18  19 20 21 22 23 24 ";
         const string near_numbers = " 12 11 10  9  8  7   6  5  4  3  2  1 ";
@@ -709,7 +703,7 @@ namespace BackgammonNS
 
         cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
-        cout << string_from_position(position.position) << endl;
+        cout << string_from_position(position) << endl;
     }
 
     void Backgammon::run_position_tests(const string filename, bool verbose, MoveList &move_list, int max_positions)
@@ -786,6 +780,14 @@ namespace BackgammonNS
                 if (verbose) cout << "------------------------------------" << endl;
                 if (verbose) cout << "Processing position... " << data << endl;
                 position_from_string(data, position);
+                auto test_string = string_from_position(position);
+                if (test_string != data)
+                {
+                    cout << data << endl;
+                    cout << test_string << endl;
+                    return;
+                }
+
                 //render(position);
                 if (verbose) cout << "------------------------------------" << endl;
             }
@@ -809,6 +811,13 @@ namespace BackgammonNS
                 if (verbose) cout << "Processing result...   ";
                 PositionStruct test_position;
                 position_from_string(data, test_position);
+                auto test_string = string_from_position(test_position);
+                if (test_string != data)
+                {
+                    cout << data << endl;
+                    cout << test_string << endl;
+                    return;
+                }
                 auto pos = move_list.duplicate_positions.find(test_position);
                 if (pos == move_list.duplicate_positions.end())
                 {
@@ -849,7 +858,7 @@ namespace BackgammonNS
         cout << "Roll:   " << max_move_roll << " (" << (max_move_roll / 6) + 1 << ", " << (max_move_roll % 6) + 1 << ")" << endl;
     }
 
-    int Backgammon::get_winner(const PositionType& position)
+    int Backgammon::get_winner(const PositionStruct& position)
     {
         auto result = 0;
 

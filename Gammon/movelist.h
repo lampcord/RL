@@ -22,7 +22,7 @@ namespace BackgammonNS
 
 		MoveList() {};
 		~MoveList() {};
-		void initialize(const PositionType& position)
+		void initialize(const PositionStruct& position)
 		{
 			move_list[0].clear();
 			move_list[0].result_position = position;

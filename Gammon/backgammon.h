@@ -44,7 +44,7 @@ namespace BackgammonNS
 			result_position.position[1] = 0;
 		}
 	};
-	typedef PositionStruct PositionType;
+	//typedef PositionStruct PositionType;
 	typedef unsigned int MoveType;
 
 	struct MoveList;
@@ -62,6 +62,7 @@ namespace BackgammonNS
 		static void update_slot(PositionType& position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list);
 
 		static void position_from_string(const std::string str_pos, BackgammonNS::PositionType& position);
+		static std::string string_from_position(BackgammonNS::PositionType& position);
 		static void get_initial_position(PositionType& position);
 		static void generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list, bool no_duplicates);
 		static void render_roll(const unsigned char roll);

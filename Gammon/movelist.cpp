@@ -16,7 +16,7 @@ namespace BackgammonNS
 
         if (moves_so_far.size() < max_sub_moves)
         {
-            for (auto ndx = 0; ndx < move_list_ndx_size; ndx++)
+            for (auto ndx = 0u; ndx < move_list_ndx_size; ndx++)
             {
                 auto move_ndx = move_list_ndx[ndx];
                 auto move_set = move_list[move_ndx];
@@ -50,7 +50,7 @@ namespace BackgammonNS
     {
         PositionStruct result_position = { 0, 0 };
 
-        for (auto move_ndx = 0; move_ndx < move_list_size; move_ndx++)
+        for (auto move_ndx = 0u; move_ndx < move_list_size; move_ndx++)
         {
             auto move_set = move_list[move_ndx];
             //cout << get_move_desc(move_set, 0);

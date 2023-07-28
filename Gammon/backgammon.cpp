@@ -86,7 +86,7 @@ using namespace std;
 
 namespace BackgammonNS
 {
-    slot_info Backgammon::get_bar_info(const PositionType& position)
+    slot_info Backgammon::get_bar_info(const PositionStruct& position)
     {
         unsigned long long workspace = 0x0;
         const unsigned char shift = 60;
@@ -189,6 +189,41 @@ namespace BackgammonNS
         }
         //cout << bitset<64>(workspace) << endl;
         position.position[1] = workspace;
+    }
+
+    std::string Backgammon::string_from_position(BackgammonNS::PositionType& position)
+    {
+        string pos_string;
+
+        for (auto slot = 0u; slot < 24; slot++)
+        {
+            auto [player_0_checkers, player_1_checkers] = get_slot_info(position, slot);
+            if (player_0_checkers > 0)
+            {
+                pos_string += "W";
+                if (player_0_checkers < 10) pos_string += "0";
+                pos_string += to_string(player_0_checkers);
+            }
+            else if (player_1_checkers > 0)
+            {
+                pos_string += "B";
+                if (player_1_checkers < 10) pos_string += "0";
+                pos_string += to_string(player_1_checkers);
+            }
+            else
+            {
+                pos_string += "  0";
+            }
+        }
+        auto [player_0_bar, player_1_bar] = get_bar_info(position);
+        pos_string += " ";
+        if (player_0_bar < 10) pos_string += " ";
+        pos_string += to_string(player_0_bar);
+        pos_string += " ";
+        if (player_1_bar < 10) pos_string += " ";
+        pos_string += to_string(player_1_bar);
+
+        return pos_string;
     }
 
     void Backgammon::get_initial_position(PositionType& position)
@@ -674,6 +709,7 @@ namespace BackgammonNS
 
         cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
         cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
+        cout << string_from_position(position.position) << endl;
     }
 
     void Backgammon::run_position_tests(const string filename, bool verbose, MoveList &move_list, int max_positions)

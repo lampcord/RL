@@ -12,6 +12,7 @@
 
 using namespace BackgammonNS;
 using namespace std;
+static MoveList hit_move_list;
 
 template<typename TAgentType0, typename TAgentType1>
 inline void play_games(BackgammonNS::PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng, TAgentType0& agent_0, TAgentType1& agent_1)
@@ -22,6 +23,7 @@ inline void play_games(BackgammonNS::PositionStruct& position, unsigned char pla
 		auto roll = rng() % 36;
 		//roll = 0;
 		BackgammonNS::Backgammon::render(position, player);
+		Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list);
 		auto die1 = roll % 6 + 1;
 		auto die2 = roll / 6 + 1;
 		std::cout << "Roll: " << (int)die1 << ", " << (int)die2 << std::endl;
@@ -56,8 +58,8 @@ int main()
 	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();
 	
-	Analyzer::test_number_of_rolls_that_hit(*move_list);
-	return 0;
+	//Analyzer::test_number_of_rolls_that_hit(*move_list);
+	//return 0;
 
 	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
 	//return 0;

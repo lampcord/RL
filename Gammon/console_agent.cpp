@@ -1,5 +1,7 @@
 #include <iostream>
 #include "console_agent.h"
+#include "analyzer.h"
+
 namespace ConsoleAgentNS
 {
 	using namespace BackgammonNS;

@@ -433,7 +433,6 @@ namespace BackgammonNS
 
     unsigned short Analyzer::get_number_of_rolls_that_hit(const PositionType& position, unsigned char player, MoveList& move_list)
     {
-        Backgammon::render(position, player);
         auto [player_0_hit, player_1_hit] = Backgammon::get_bar_info(position);
         auto player_hit = player == 0 ? player_1_hit : player_0_hit;
 
@@ -457,6 +456,7 @@ namespace BackgammonNS
             }
         }
         cout << endl;
+        cout << "Number of dice that hit: " << total_hits << " (" << (float)total_hits / 36.0f << ")." << endl;
         return total_hits;
     }
 
@@ -465,8 +465,8 @@ namespace BackgammonNS
         unsigned char player = 0;
         PositionType position;
         Backgammon::position_from_string("W01W01B01B02B02B02  0B01  0  0  0W03B05W01  0  0W03  0W04W02  0  0  0B02  0  0", position);
+        Backgammon::render(position, player);
         auto number_of_hits = get_number_of_rolls_that_hit(position, player, move_list);
-        cout << "Number of dice that hit: " << number_of_hits << " (" << (float)number_of_hits / 36.0f << ")." << endl;
         return false;
     }
 

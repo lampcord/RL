@@ -52,23 +52,77 @@ Breakdown of 4 possible conditions:
 (You / Oponent)
 Priming / Priming
 Split back checkers for high anchor.
+    Number of blots in oponents home board
+    Number of blocks in oponents home board
+    Location of high anchor.
 Try and make a prime.
+    Raw block score
+    Raw slot score
+    Raw checkers in range of slot
 Make points in order.
+    Raw block score
+    Purity
+Implied
+    Number of oponents blots in home board
+    Number of oponents blocks in home board
+    Location of high oponents anchor.
 
 Priming / Blitzing
 Never split your back anchors.
+    Number of blots in oponents home board
+    Number of blocks in oponents home board
 Low anchors are fine.
 Slot.
+    Purity.
+    Raw block score
+    Raw slot score
+    Raw checkers in range of slot
+Implied
+    Oponents on bar
+    Number of oponents blots in home board
+    Number of oponents blocks in home board
+    Location of high oponents anchor.
 
 Blitzing / Priming
 Attack if possible.
+    Oponents on bar
+    Blocks in your home board.
+    Number of oponents blots in home board
+    Number of oponents blocks in home board
+    Location of high oponents anchor.
 Escape back checkers if attack is not possible.
+    Number of checkers in oponents home board
 Do Not Slot!
+    Raw slot score
 
 Blitzing / Blitzing
 Attack if possilbe.
+    Oponents on bar
+    Blocks in your home board.
+    Number of oponents blots in home board
+    Number of oponents blocks in home board
+    Location of high oponents anchor.
 Anchor anywhere you can.
 Don't give up your anchor!
+    Number of blots in oponents home board
+    Number of blocks in oponents home board
+
+Split raw home board score into:
+Raw block score
+Raw slot score
+Raw checkers in range of slot
+
+Consolidates to 
+    Blocks in your home board
+    Location of high anchor
+    Location of high blot
+    Number of blocks in home board
+    Number of blots in home board
+    Checkers on bar
+    Purity
+    Raw block score
+    Raw checkers in range of slot
+    Raw slot score
 
 We will calculate a number of primitives for both sides and use those to choose the category and score moves.
 1) Pip count - total number of moves needed to bear out.
@@ -140,11 +194,10 @@ namespace BackgammonNS
         for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
         {
             auto move_set = move_list.move_list[move_list.move_list_ndx[ndx]];
-            Backgammon::render(move_set.result_position, player);
-            cout << MoveList::get_move_desc(move_set, player) << endl;
 
             scan_position(move_set.result_position, scan);
             float score = analyze(scan , player, player_0_structure, player_1_structure);
+            cout << MoveList::get_move_desc(move_set, player) << " " << score << endl;
 
             if (score > best_score)
             {
@@ -313,10 +366,9 @@ namespace BackgammonNS
     */
     float Analyzer::analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure)
     {
-
         auto pip_lead = player == 0 ? (float)scan.pip_count[1] - (float)scan.pip_count[0] : (float)scan.pip_count[0] - (float)scan.pip_count[1];
         auto score = (float)pip_lead / 100.0f;
-        
+        score += (float)scan.raw_mask_value[player];
 
         return score / 2.0f;
     }

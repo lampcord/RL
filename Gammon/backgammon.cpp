@@ -557,6 +557,13 @@ namespace BackgammonNS
         move_list.build_index();
     }
 
+    void Backgammon::render_roll(const unsigned char roll)
+    {
+        auto die1 = roll % 6 + 1;
+        auto die2 = roll / 6 + 1;
+        cout << "(" << (int)die1 << "," << (int)die2 << ")";
+    }
+
     void Backgammon::render_board_section(const BackgammonNS::PositionType& position, bool top, unsigned char casted_off)
     {
         array<unsigned int, 6> top_lines{0, 1, 2, 3, 4, 5};

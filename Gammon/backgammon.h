@@ -64,6 +64,7 @@ namespace BackgammonNS
 		static void position_from_string(const std::string str_pos, BackgammonNS::PositionType& position);
 		static void get_initial_position(PositionType& position);
 		static void generate_legal_moves(const PositionType& position, const unsigned char player, const unsigned int roll, MoveList & move_list, bool no_duplicates);
+		static void render_roll(const unsigned char roll);
 		static void render(const PositionType& position, unsigned char player);
 		static void run_position_tests(const std::string filename, bool verbose, MoveList& move_list, int max_positions = -1);
 		static int get_winner(const PositionType& position);

@@ -47,7 +47,9 @@ namespace BackgammonNS
 		static std::tuple<BoardStructure, BoardStructure> get_board_structure(const AnalyzerScan& scan);
 		static bool test_board_structure();
 
-		
+		static unsigned short get_number_of_rolls_that_hit(const PositionType& position, unsigned char player, MoveList& move_list);
+		static bool test_number_of_rolls_that_hit(MoveList& move_list);
+
 		static unsigned short get_best_move_index(const PositionType& position, MoveList& move_list, unsigned char player, bool display);
 		static void scan_position(const PositionType& position, AnalyzerScan& scan);
 		static float analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure);

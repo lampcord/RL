@@ -56,6 +56,9 @@ int main()
 	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();
 	
+	Analyzer::test_number_of_rolls_that_hit(*move_list);
+	return 0;
+
 	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
 	//return 0;
 

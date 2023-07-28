@@ -434,12 +434,12 @@ namespace BackgammonNS
         return false;
     }
 
-    unsigned short Analyzer::get_number_of_rolls_that_hit(const PositionStruct& position, unsigned char player, MoveList& move_list)
+    unsigned short Analyzer::get_number_of_rolls_that_hit(const PositionStruct& position, unsigned char player, MoveList& move_list, bool verbose)
     {
         auto [player_0_hit, player_1_hit] = Backgammon::get_bar_info(position);
         auto player_hit = player == 0 ? player_1_hit : player_0_hit;
 
-        cout << "HITS: ";
+        if (verbose) cout << "HITS: ";
         auto total_hits = 0u;
         for (auto roll = 0u; roll < 36; roll++)
         {
@@ -452,14 +452,14 @@ namespace BackgammonNS
                 auto test_player_hit = player == 0 ? test_player_1_hit : test_player_0_hit;
                 if (test_player_hit > player_hit)
                 {
-                    Backgammon::render_roll(roll);
+                    if (verbose) Backgammon::render_roll(roll);
                     total_hits++;
                     break;
                 }
             }
         }
-        cout << endl;
-        cout << "Number of dice that hit: " << total_hits << " (" << (float)total_hits / 36.0f << ")." << endl;
+        if (verbose) cout << endl;
+        if (verbose) cout << "Number of dice that hit: " << total_hits << " (" << (float)total_hits / 36.0f << ")." << endl;
         return total_hits;
     }
 

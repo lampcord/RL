@@ -25,7 +25,6 @@ FastRollout/.vs/FastRollout/v17/
 FastRollout/FastRollout/x64/
 FastRollout/x64/
 FastRollout/TestFastRollout/x64/
-*.7z
 FastRollout/GPUCache/
 FastRollout/TestFastRollout/Intel® VTune™ Profiler Results/
 *.vsidx
@@ -41,3 +40,4 @@ Gammon/test_games.txt
 test_games.txt
 Gammon/Intel® VTune™ Profiler Results/
 Gammon/GPUCache
+AlphaZeroMancala/connect_4/run_5_1.414_beam.7z

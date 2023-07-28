@@ -181,7 +181,7 @@ namespace BackgammonNS
         }
         return string();
     }
-    unsigned short Analyzer::get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool display)
+    unsigned short Analyzer::get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose)
     {
         const int num_scores = 3;
         auto best_score = -1000.0f;
@@ -189,7 +189,7 @@ namespace BackgammonNS
         float scores[num_scores] = {};
         AnalyzerScan scan;
         scan_position(position, scan);
-        auto [player_0_structure, player_1_structure] = get_board_structure(scan);
+        auto [player_0_structure, player_1_structure] = get_board_structure(scan, verbose);
 
         for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
         {
@@ -197,7 +197,7 @@ namespace BackgammonNS
 
             scan_position(move_set.result_position, scan);
             float score = analyze(scan , player, player_0_structure, player_1_structure);
-            cout << MoveList::get_move_desc(move_set, player) << " " << score << endl;
+            if (verbose) cout << MoveList::get_move_desc(move_set, player) << " " << score << endl;
 
             if (score > best_score)
             {
@@ -208,7 +208,7 @@ namespace BackgammonNS
         return best_ndx;
     }
 
-    std::tuple<BoardStructure, BoardStructure> Analyzer::get_board_structure(const AnalyzerScan& scan)
+    std::tuple<BoardStructure, BoardStructure> Analyzer::get_board_structure(const AnalyzerScan& scan, bool verbose)
     {
         float total_impurity_pct[2] = { 0.0f, 0.0f };
         float total_first_pct[2] = { 0.0f, 0.0f };
@@ -277,11 +277,14 @@ namespace BackgammonNS
 
             total_blitz_pct[player] = (total_impurity_pct[player] + total_first_pct[player] + total_in_the_zone_pct[player] + total_lead_pct[player]) / 4.0f;
         }
-        cout << "Impurity PCT    " << setw(12) << total_impurity_pct[0] << " " << setw(12) << total_impurity_pct[1] << endl;
-        cout << "First PCT       " << setw(12) << total_first_pct[0] << " " << setw(12) << total_first_pct[1] << endl;
-        cout << "In The Zone PCT " << setw(12) << total_in_the_zone_pct[0] << " " << setw(12) << total_in_the_zone_pct[1] << endl;
-        cout << "Lead PCT        " << setw(12) << total_lead_pct[0] << " " << setw(12) << total_lead_pct[1] << endl;
-        cout << "Blitz PCT       " << setw(12) << total_blitz_pct[0] << " " << setw(12) << total_blitz_pct[1] << endl;
+        if (verbose)
+        {
+            cout << "Impurity PCT    " << setw(12) << total_impurity_pct[0] << " " << setw(12) << total_impurity_pct[1] << endl;
+            cout << "First PCT       " << setw(12) << total_first_pct[0] << " " << setw(12) << total_first_pct[1] << endl;
+            cout << "In The Zone PCT " << setw(12) << total_in_the_zone_pct[0] << " " << setw(12) << total_in_the_zone_pct[1] << endl;
+            cout << "Lead PCT        " << setw(12) << total_lead_pct[0] << " " << setw(12) << total_lead_pct[1] << endl;
+            cout << "Blitz PCT       " << setw(12) << total_blitz_pct[0] << " " << setw(12) << total_blitz_pct[1] << endl;
+        }
 
         BoardStructure board_structure_0 = total_blitz_pct[0] > 0.5f ? BoardStructure::blitz : BoardStructure::prime;
         BoardStructure board_structure_1 = total_blitz_pct[1] > 0.5f ? BoardStructure::blitz : BoardStructure::prime;

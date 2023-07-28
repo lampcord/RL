@@ -44,13 +44,13 @@ namespace BackgammonNS
 	public:
 		static void dump_chart(std::string desc, std::map<int, std::vector<char>>& chart_structure);
 		static std::string get_board_structure_desc(const BoardStructure& structure);
-		static std::tuple<BoardStructure, BoardStructure> get_board_structure(const AnalyzerScan& scan);
+		static std::tuple<BoardStructure, BoardStructure> get_board_structure(const AnalyzerScan& scan, bool verbose=true);
 		static bool test_board_structure();
 
 		static unsigned short get_number_of_rolls_that_hit(const PositionStruct& position, unsigned char player, MoveList& move_list);
 		static bool test_number_of_rolls_that_hit(MoveList& move_list);
 
-		static unsigned short get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool display);
+		static unsigned short get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose);
 		static void scan_position(const PositionStruct& position, AnalyzerScan& scan);
 		static float analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure);
 	};

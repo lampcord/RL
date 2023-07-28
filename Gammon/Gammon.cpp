@@ -15,43 +15,56 @@ using namespace std;
 static MoveList hit_move_list;
 
 template<typename TAgentType0, typename TAgentType1>
-inline void play_games(BackgammonNS::PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng, TAgentType0& agent_0, TAgentType1& agent_1)
+inline void play_games(BackgammonNS::PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng, TAgentType0& agent_0, TAgentType1& agent_1, bool verbose=true)
 {
 	auto winner = 0;
 	while (winner == 0)
 	{
 		auto roll = rng() % 36;
 		//roll = 0;
-		BackgammonNS::Backgammon::render(position, player);
-		Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list);
-		auto die1 = roll % 6 + 1;
-		auto die2 = roll / 6 + 1;
-		std::cout << "Roll: " << (int)die1 << ", " << (int)die2 << std::endl;
-
+		if (verbose)
+		{
+			BackgammonNS::Backgammon::render(position, player);
+			Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list);
+			auto die1 = roll % 6 + 1;
+			auto die2 = roll / 6 + 1;
+			std::cout << "Roll: " << (int)die1 << ", " << (int)die2 << std::endl;
+		}
 
 		if (player == 0)
 		{
-			agent_0.get_move(position, player, roll, move_list, rng);
+			agent_0.get_move(position, player, roll, move_list, rng, verbose);
 		}
 		else
 		{
-			agent_1.get_move(position, player, roll, move_list, rng);
+			agent_1.get_move(position, player, roll, move_list, rng, verbose);
 		}
 
 		winner = BackgammonNS::Backgammon::get_winner(position);
 		player = 1 - player;
 	}
+	if (verbose)
+	{
+		BackgammonNS::Backgammon::render(position, player);
+		Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list);
+	}
 }
 
 int main()
 {
-	cout << "===================================================================================================================================" << endl;
-	cout << "===================================================================================================================================" << endl;
-	cout << "=                                                                                                                                 =" << endl;
-	cout << "=                                                                                                                                 =" << endl;
-	cout << "=                                                                                                                                 =" << endl;
-	cout << "===================================================================================================================================" << endl;
-	cout << "===================================================================================================================================" << endl;
+	cout << "=============================================================================================================================================" << endl;
+	cout << "=============================================================================================================================================" << endl;
+	cout << "=                                                                                                                                           =" << endl;
+	cout << "=     >=>>=>          >>           >=>    >=>   >=>      >===>          >>       >=>       >=> >=>       >=>     >===>      >==>    >=>     =" << endl;
+	cout << "=     >>   >=>       >>=>       >=>   >=> >=>  >=>     >>    >=>       >>=>      >> >=>   >>=> >> >=>   >>=>   >=>    >=>   >> >=>  >=>     =" << endl;
+	cout << "=     >>    >=>     >> >=>     >=>        >=> >=>     >=>             >> >=>     >=> >=> > >=> >=> >=> > >=> >=>        >=> >=> >=> >=>     =" << endl;
+	cout << "=     >==>>=>      >=>  >=>    >=>        >>=>>       >=>            >=>  >=>    >=>  >=>  >=> >=>  >=>  >=> >=>        >=> >=>  >=>>=>     =" << endl;
+	cout << "=     >>    >=>   >=====>>=>   >=>        >=>  >=>    >=>   >===>   >=====>>=>   >=>   >>  >=> >=>   >>  >=> >=>        >=> >=>   > >=>     =" << endl;
+	cout << "=     >>     >>  >=>      >=>   >=>   >=> >=>   >=>    >=>    >>   >=>      >=>  >=>       >=> >=>       >=>   >=>     >=>  >=>    >>=>     =" << endl;
+	cout << "=     >===>>=>  >=>        >=>    >===>   >=>     >=>   >====>    >=>        >=> >=>       >=> >=>       >=>     >===>      >=>     >=>     =" << endl;
+	cout << "=                                                                                                                                           =" << endl;
+	cout << "=============================================================================================================================================" << endl;
+	cout << "=============================================================================================================================================" << endl;
 	//Analyzer::test_board_structure();
 	//return 0;
 
@@ -61,8 +74,8 @@ int main()
 	//Analyzer::test_number_of_rolls_that_hit(*move_list);
 	//return 0;
 
-	Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
-	return 0;
+	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
+	//return 0;
 
 	auto num_games = 10000u;
 	unsigned char player = 0;
@@ -76,7 +89,8 @@ int main()
 
 	//play_games<ConsoleAgentNS::ConsoleAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, console_agent, random_agent);
 	//play_games<RandomAgentNS::RandomAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, random_agent, random_agent);
-	play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, console_agent, analyzer_agent);
+	//play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, console_agent, analyzer_agent);
+	play_games<AnalyzerAgentNS::AnalyzerAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, analyzer_agent, analyzer_agent, false);
 	//play_games<RandomAgentNS::RandomAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, random_agent, analyzer_agent);
 	return 0;
 

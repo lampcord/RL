@@ -34,6 +34,7 @@ namespace BackgammonNS
 		unsigned int blots_mask[2] = { 0,0 };
 		unsigned int mountains_mask[2] = { 0,0 };
 		unsigned int triples_mask[2] = { 0,0 };
+		unsigned int number_of_hits = 0;
 		void render();
 		void print_mask_desc(unsigned int mask);
 		void clear();

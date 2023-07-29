@@ -147,6 +147,8 @@ using namespace std;
 
 namespace BackgammonNS
 {
+    static MoveList hit_move_list;
+
     static array<string, 15> blitz_prime_test_data = {
         "W02B02  0  0  0B04  0B02  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0 U B",
         "W02  0B02  0  0B05  0B03  0  0  0W05B03  0  0  0W02  0W04  0W02  0  0B02  0  0 P B",
@@ -198,9 +200,12 @@ namespace BackgammonNS
             auto move_set = move_list.move_list[move_list.move_list_ndx[ndx]];
 
             scan_position(move_set.result_position, scan);
+            scan.number_of_hits = get_number_of_rolls_that_hit(move_set.result_position, 1 - player, hit_move_list, false);
             float score = analyze(scan , player, player_0_structure, player_1_structure);
-            if (verbose) cout << MoveList::get_move_desc(move_set, player) << " " << score << endl;
-
+            if (verbose) {
+                cout << MoveList::get_move_desc(move_set, player) << " " << score << endl;
+                scan.render();
+            }
             if (score > best_score)
             {
                 best_score = score;
@@ -374,6 +379,8 @@ namespace BackgammonNS
         auto pip_lead = player == 0 ? (float)scan.pip_count[1] - (float)scan.pip_count[0] : (float)scan.pip_count[0] - (float)scan.pip_count[1];
         auto score = (float)pip_lead / 100.0f;
         score += (float)scan.raw_mask_value[player];
+
+        score -= (float)scan.number_of_hits / 36.0f;
 
         return score / 2.0f;
     }
@@ -550,7 +557,7 @@ namespace BackgammonNS
         cout << "First:          " << setw(4) << first[0] << " " << setw(4) << first[1] << endl;
         cout << "Last:           " << setw(4) << last[0] << " " << setw(4) << last[1] << endl;
         cout << "Mountains:      " << setw(4) << mountains[0] << " " << setw(4) << mountains[1] << endl;
-
+        cout << "Number of Hits  " << setw(4) << number_of_hits << endl;
         cout << "Blocked Mask:        ";
         print_mask_desc(blocked_points_mask[0]);
         cout << "   ";

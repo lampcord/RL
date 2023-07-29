@@ -7,7 +7,7 @@ namespace ConsoleAgentNS
 	using namespace BackgammonNS;
 	using namespace std;
 
-	void ConsoleAgentNS::ConsoleAgent::get_move(BackgammonNS::PositionStruct& position, unsigned char player, unsigned int roll, unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng)
+	void ConsoleAgentNS::ConsoleAgent::get_move(BackgammonNS::PositionStruct& position, unsigned char player, unsigned int roll, unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng, bool verbose)
 	{
 		BackgammonNS::Backgammon::generate_legal_moves(position, player, roll, *move_list, false);
 		PositionStruct display_position = position;

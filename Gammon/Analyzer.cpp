@@ -4,7 +4,9 @@
 #include <array>
 #include <string>
 #include <map>
+#include <fstream>
 #include "analyzer.h"
+#include "PerfTimer.h"
 
 /*
 The AI will be heuristic and use the following structure.
@@ -463,14 +465,59 @@ namespace BackgammonNS
         return total_hits;
     }
 
-    bool Analyzer::test_number_of_rolls_that_hit(MoveList& move_list)
+    bool Analyzer::test_number_of_rolls_that_hit(std::string filename, MoveList& move_list)
     {
-        unsigned char player = 0;
-        PositionStruct position;
-        Backgammon::position_from_string("W01W01B01B02B02B02  0B01  0  0  0W03B05W01  0  0W03  0W04W02  0  0  0B02  0  0", position);
-        Backgammon::render(position, player);
-        auto number_of_hits = get_number_of_rolls_that_hit(position, player, move_list);
-        return false;
+        struct record {
+            PositionStruct position;
+            unsigned char player;
+            unsigned int expected_number_of_hits;
+        };
+        vector<record> records;
+        auto result = true;
+
+        ifstream infile(filename);
+        string line;
+        auto num_tests = 0u;
+        while (getline(infile, line))
+        {
+            //cout << line << endl;
+            //cout << atoi(line.substr(78, 3).c_str()) << endl;
+            //cout << atoi(line.substr(81, 3).c_str()) << endl;
+            unsigned char player = atoi(line.substr(78, 3).c_str());
+            auto expected_number_of_hits = atoi(line.substr(81, 3).c_str());
+            PositionStruct position;
+            Backgammon::position_from_string(line, position);
+            record rec;
+            rec.position = position;
+            rec.player = player;
+            rec.expected_number_of_hits = expected_number_of_hits;
+            records.push_back(rec);
+        }
+        infile.close();
+
+        PerfTimer pf(true, true, true);
+        pf.start();
+        for (auto rec : records)
+        {
+            num_tests++;
+            //cout << '.';
+            //if (num_tests % 100 == 0) cout << endl;
+            auto number_of_hits = get_number_of_rolls_that_hit(rec.position, rec.player, move_list, false);
+            if (number_of_hits != rec.expected_number_of_hits)
+            {
+                cout << "ERROR!! " << number_of_hits << " " << rec.expected_number_of_hits << endl;
+                Backgammon::render(rec.position, rec.player);
+                result = false;
+                break;
+            }
+        }
+        pf.stop();
+        pf.print();
+        auto total_time = pf.GetElapsedProcessTime();
+
+        cout << (float)num_tests * 10000000.0f / (float)pf.GetElapsedThreadTime() << endl;
+        
+        return result;
     }
 
     void Analyzer::dump_chart(string desc, std::map<int, std::vector<char>>& chart_structure)

@@ -48,7 +48,7 @@ namespace BackgammonNS
 		static bool test_board_structure();
 
 		static unsigned short get_number_of_rolls_that_hit(const PositionStruct& position, unsigned char player, MoveList& move_list, bool verbose=true);
-		static bool test_number_of_rolls_that_hit(MoveList& move_list);
+		static bool test_number_of_rolls_that_hit(std::string filename, MoveList& move_list);
 
 		static unsigned short get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose);
 		static void scan_position(const PositionStruct& position, AnalyzerScan& scan);

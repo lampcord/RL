@@ -31,7 +31,7 @@ inline void play_games(BackgammonNS::PositionStruct& position, unsigned char pla
 			std::cout << "Roll: " << (int)die1 << ", " << (int)die2 << std::endl;
 		}
 		auto num_rolls = Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list, false);
-		cout << Backgammon::string_from_position(position) << setw(3) << num_rolls << endl;
+		cout << Backgammon::string_from_position(position) << setw(3) << (int)player << setw(3) << num_rolls << endl;
 
 		if (player == 0)
 		{
@@ -51,7 +51,7 @@ inline void play_games(BackgammonNS::PositionStruct& position, unsigned char pla
 		Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list);
 	}
 	auto num_rolls = Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list, false);
-	cout << Backgammon::string_from_position(position) << setw(3) << num_rolls << endl;
+	cout << Backgammon::string_from_position(position) << setw(3) << (int)player << setw(3) << num_rolls << endl;
 
 }
 
@@ -76,8 +76,8 @@ int main()
 	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();
 	
-	//Analyzer::test_number_of_rolls_that_hit(*move_list);
-	//return 0;
+	Analyzer::test_number_of_rolls_that_hit("C:\\GitHub\\RL\\test_hits.txt" , *move_list);
+	return 0;
 
 	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
 	//return 0;
@@ -95,7 +95,7 @@ int main()
 	//play_games<ConsoleAgentNS::ConsoleAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, console_agent, random_agent);
 	//play_games<RandomAgentNS::RandomAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, random_agent, random_agent);
 	//play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, console_agent, analyzer_agent);
-	for (auto x = 0; x < 10; x++) {
+	for (auto x = 0; x < 1000; x++) {
 		Backgammon::get_initial_position(position);
 		play_games<AnalyzerAgentNS::AnalyzerAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, analyzer_agent, analyzer_agent, false);
 	}

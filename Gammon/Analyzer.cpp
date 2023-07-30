@@ -148,8 +148,41 @@ using namespace std;
 
 namespace BackgammonNS
 {
-    static ska::bytell_hash_map<unsigned short, unsigned long long> block_masks_for_rolls;
-    static bool block_mask_for_rolls_built = false;
+    static ska::bytell_hash_map<unsigned short, unsigned long long> block_masks_for_rolls = {
+        {36, 0b100000000000000000000000},
+        {72, 0b110000000000000000000000},
+        {73, 0b110000000000000000000000},
+        {108, 0b111000000000000000000000},
+        {110, 0b101000000000000000000000},
+        {115, 0b010000000000000000000000},
+        {147, 0b100100000000000000000000},
+        {152, 0b011000000000000000000000},
+        {184, 0b100010000000000000000000},
+        {187, 0b010100000000000000000000},
+        {189, 0b010100000000000000000000},
+        {194, 0b001000000000000000000000},
+        {221, 0b100001000000000000000000},
+        {226, 0b010010000000000000000000},
+        {231, 0b001100000000000000000000},
+        {259, 0b010101000000000000000000},
+        {263, 0b010001000000000000000000},
+        {268, 0b001010000000000000000000},
+        {273, 0b000100000000000000000000},
+        {302, 0b001001000000000000000000},
+        {305, 0b001001000000000000000000},
+        {310, 0b000110000000000000000000},
+        {347, 0b000101000000000000000000},
+        {352, 0b000010000000000000000000},
+        {389, 0b000011000000000000000000},
+        {410, 0b001001001000000000000000},
+        {417, 0b000100010000000000000000},
+        {431, 0b000001000000000000000000},
+        {532, 0b000010000100000000000000},
+        {561, 0b000100010001000000000000},
+        {647, 0b000001000001000000000000},
+        {712, 0b000010000100001000000000},
+        {863, 0b000001000001000001000000}
+    };
 
     static MoveList hit_move_list;
 
@@ -505,8 +538,7 @@ namespace BackgammonNS
 
     unsigned short Analyzer::get_number_of_hits_fast(const PositionStruct& position, unsigned char player, AnalyzerScan& scan, bool verbose)
     {
-        if (!block_mask_for_rolls_built) build_block_mask_for_rolls();
-
+        unsigned long long double_mask = 0b100000010000001000000100000010000001;
         unsigned short total_hits = 0u;
         auto opponent = 1 - player;
 
@@ -520,17 +552,38 @@ namespace BackgammonNS
         AnalyzerScan::print_mask_desc(hitters);
         cout << endl;
 
+        auto blockers = 0u;
+        auto from_bl_mask = 0b1;
+        auto to_bl_mask = 0b100000000000000000000000;
+        for (auto bndx = 0u; bndx < 24; bndx++)
+        {
+            if ((scan.blocked_points_mask[opponent] & from_bl_mask) != 0)
+            {
+                blockers |= to_bl_mask;
+            }
+            from_bl_mask <<= 1;
+            to_bl_mask >>= 1;
+        }
+        cout << "Blockers: ";
+        AnalyzerScan::print_mask_desc(blockers);
+        cout << endl;
+
         unsigned long blot_test_mask = 0b1;
         unsigned long long total_hit_mask = 0u;
-        for (auto ndx = 0; ndx < 24; ndx++)
+        for (auto distance = 0; distance < 24; distance++)
         {
             if ((blot_test_mask & scan.blots_mask[opponent]) != 0)
             {
-                cout << "Blot at position " << ndx << endl;
+                cout << "Blot at position " << distance << endl;
 
-                auto adjusted_hitters = (hitters << (ndx + 1)) & 0b111111111111111111111111;
+                auto adjusted_hitters = (hitters << (distance + 1)) & 0b111111111111111111111111;
                 cout << "Adjusted: ";
                 AnalyzerScan::print_mask_desc(adjusted_hitters);
+                cout << endl;
+
+                auto adjusted_blockers = (blockers << (distance + 1)) & 0b111111111111111111111111;
+                cout << "Adj Blk:  ";
+                AnalyzerScan::print_mask_desc(adjusted_blockers);
                 cout << endl;
 
                 auto hit_test_ndx = 0u;
@@ -547,22 +600,41 @@ namespace BackgammonNS
                         {
                             if ((roll_mask & hit_mask) != 0)
                             {
+                                bool add_roll = true;
+                                auto block_mask_for_rolls_key = (22 -distance) * 36 + roll;
+                                cout << endl << block_mask_for_rolls_key << endl;
+                                auto pos = block_masks_for_rolls.find(block_mask_for_rolls_key);
+                                if (pos != block_masks_for_rolls.end())
+                                {
+                                    cout << bitset<36>(pos->second) << endl;
+                                    if ((roll_mask & double_mask) == 0)
+                                    {
+                                        if ((pos->second & adjusted_blockers) == pos->second) add_roll = false;
+                                    }
+                                    else
+                                    {
+                                        if ((pos->second & adjusted_blockers) != 0) add_roll = false;
+                                    }
+                                }
                                 Backgammon::render_roll(roll);
+                                if (add_roll) total_hit_mask |= roll_mask;
                             }
                             roll_mask >>= 1;
                         }
                         cout << endl;
-                        total_hit_mask |= hit_mask;
+                        //total_hit_mask |= hit_mask;
                     }
                     hit_test_ndx++;
                     adjusted_hitters <<= 1;
                     adjusted_hitters &= 0b111111111111111111111111;
+                    adjusted_blockers <<= 1;
+                    adjusted_blockers &= 0b111111111111111111111111;
                 }
             }
             blot_test_mask <<= 1;
         }
         cout << "Final:    ";
-        AnalyzerScan::print_mask_desc(total_hit_mask);
+        cout << bitset<36>(total_hit_mask);
         cout << endl;
         unsigned long long roll_mask = 0b100000000000000000000000000000000000;
         for (auto roll = 0; roll < 36; roll++)
@@ -576,7 +648,6 @@ namespace BackgammonNS
         cout << endl;
 
         unsigned long long final_roll_mask = 0b1;
-        unsigned long long double_mask = 0b100000010000001000000100000010000001;
         for (auto ndx = 0; ndx < 36; ndx++)
         {
             total_hits += (final_roll_mask & total_hit_mask) != 0;
@@ -608,6 +679,9 @@ namespace BackgammonNS
             auto expected_number_of_hits = atoi(line.substr(81, 3).c_str());
             PositionStruct position;
             Backgammon::position_from_string(line, position);
+            auto [bar_0, bar_1] = Backgammon::get_bar_info(position);
+            auto bar = player == 0 ? bar_0 : bar_1;
+            if (bar > 0) continue;
             record rec;
             rec.position = position;
             rec.player = player;
@@ -661,8 +735,26 @@ namespace BackgammonNS
         return result;
     }
 
-    void Analyzer::build_block_mask_for_rolls()
+    void Analyzer::dump_block_mask_for_rolls()
     {
+        for (auto distance = 0; distance < 24; distance++)
+        {
+            auto roll_mask = distance_roll_table[distance];
+            auto roll_test_mask = 0b100000000000000000000000000000000000;
+
+            for (auto roll = 0; roll < 36; roll++)
+            {
+                if ((roll_mask & roll_test_mask) != 0)
+                {
+                    auto block_mask = 0ull;
+                    cout << setw(3) << distance + 1 << " ";
+                    unsigned short key = distance * 36 + roll;
+                    Backgammon::render_roll(roll);
+                    cout << " " << setw(4) << key << " " << bitset<36>(roll_mask) << endl;
+                }
+                roll_test_mask >>= 1;
+            }
+        }
     }
 
     void Analyzer::dump_chart(string desc, std::map<int, std::vector<char>>& chart_structure)

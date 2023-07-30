@@ -42,7 +42,7 @@ namespace BackgammonNS
 	class Analyzer
 	{
 	private:
-		static void build_block_mask_for_rolls();
+		static void dump_block_mask_for_rolls();
 	public:
 		static void dump_chart(std::string desc, std::map<int, std::vector<char>>& chart_structure);
 		static std::string get_board_structure_desc(const BoardStructure& structure);

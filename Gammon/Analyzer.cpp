@@ -7,6 +7,7 @@
 #include <fstream>
 #include "analyzer.h"
 #include "PerfTimer.h"
+#include "flat_hash_map-master/bytell_hash_map.hpp"
 
 /*
 The AI will be heuristic and use the following structure.
@@ -14,15 +15,15 @@ The AI will be heuristic and use the following structure.
 At the top end, we attempt to chose the best strategy of these 4:
 1) Priming
 Primary goal is to build a perfect prime.
-Need at least one oponent checker back.
+Need at least one opponent checker back.
 Purity is important.
 Timing is important.
 Efficiency is important.
 Lead is not important.
 
 2) Blitzing
-Need at least one oponent checker back.
-Primary goal is to shut out oponent.
+Need at least one opponent checker back.
+Primary goal is to shut out opponent.
 Purity is not important.
 Timing is not important.
 Efficiency is not important.
@@ -51,11 +52,11 @@ In addition there are two types of structures:
 These obviously feed into the above strategies. These can be detected by static analysis of the initial position and used to prioritize different tactics:
 
 Breakdown of 4 possible conditions:
-(You / Oponent)
+(You / opponent)
 Priming / Priming
 Split back checkers for high anchor.
-    Number of blots in oponents home board
-    Number of blocks in oponents home board
+    Number of blots in opponents home board
+    Number of blocks in opponents home board
     Location of high anchor.
 Try and make a prime.
     Raw block score
@@ -65,14 +66,14 @@ Make points in order.
     Raw block score
     Purity
 Implied
-    Number of oponents blots in home board
-    Number of oponents blocks in home board
-    Location of high oponents anchor.
+    Number of opponents blots in home board
+    Number of opponents blocks in home board
+    Location of high opponents anchor.
 
 Priming / Blitzing
 Never split your back anchors.
-    Number of blots in oponents home board
-    Number of blocks in oponents home board
+    Number of blots in opponents home board
+    Number of blocks in opponents home board
 Low anchors are fine.
 Slot.
     Purity.
@@ -80,34 +81,34 @@ Slot.
     Raw slot score
     Raw checkers in range of slot
 Implied
-    Oponents on bar
-    Number of oponents blots in home board
-    Number of oponents blocks in home board
-    Location of high oponents anchor.
+    opponents on bar
+    Number of opponents blots in home board
+    Number of opponents blocks in home board
+    Location of high opponents anchor.
 
 Blitzing / Priming
 Attack if possible.
-    Oponents on bar
+    opponents on bar
     Blocks in your home board.
-    Number of oponents blots in home board
-    Number of oponents blocks in home board
-    Location of high oponents anchor.
+    Number of opponents blots in home board
+    Number of opponents blocks in home board
+    Location of high opponents anchor.
 Escape back checkers if attack is not possible.
-    Number of checkers in oponents home board
+    Number of checkers in opponents home board
 Do Not Slot!
     Raw slot score
 
 Blitzing / Blitzing
 Attack if possilbe.
-    Oponents on bar
+    opponents on bar
     Blocks in your home board.
-    Number of oponents blots in home board
-    Number of oponents blocks in home board
-    Location of high oponents anchor.
+    Number of opponents blots in home board
+    Number of opponents blocks in home board
+    Location of high opponents anchor.
 Anchor anywhere you can.
 Don't give up your anchor!
-    Number of blots in oponents home board
-    Number of blocks in oponents home board
+    Number of blots in opponents home board
+    Number of blocks in opponents home board
 
 Split raw home board score into:
 Raw block score
@@ -128,10 +129,10 @@ Consolidates to
 
 We will calculate a number of primitives for both sides and use those to choose the category and score moves.
 1) Pip count - total number of moves needed to bear out.
-2) Board strength - how difficult will it be for our oponent to get in if hit. Measured in pct of rolls that get in 1-4 checkers.
-3) Containment - what is the average number of rolls it will take for our oponent to escape our prime if we don't move.
+2) Board strength - how difficult will it be for our opponent to get in if hit. Measured in pct of rolls that get in 1-4 checkers.
+3) Containment - what is the average number of rolls it will take for our opponent to escape our prime if we don't move.
 4) Timing - how many moves can we make before having to break our prime.
-5) Safety - how likely is it for you to be hit by oponent.
+5) Safety - how likely is it for you to be hit by opponent.
 
 We will supplement this with rollouts to determine which is the best move for a given strategy.
 
@@ -147,7 +148,37 @@ using namespace std;
 
 namespace BackgammonNS
 {
+    static ska::bytell_hash_map<unsigned short, unsigned long long> block_masks_for_rolls;
+    static bool block_mask_for_rolls_built = false;
+
     static MoveList hit_move_list;
+
+    static array<unsigned long long, 24> distance_roll_table = {
+        0b111111000000000000000000000000000000,
+        0b110000011111000000000000000000000000,
+        0b111000001000001111000000000000000000,
+        0b101100010100000100000111000000000000,
+        0b000110001010000010000010000011000000,
+        0b000011010101001001000001000001000001,
+        0b000001000010000100000000000000000000,
+        0b000000010001000010000100000000000000,
+        0b000000000000001001000010000000000000,
+        0b000000000000000000000001000010000000,
+        0b000000000000000000000000000001000000,
+        0b000000000000001000000100000000000001,
+        0b000000000000000000000000000000000000,
+        0b000000000000000000000000000000000000,
+        0b000000000000000000000000000010000000,
+        0b000000000000000000000100000000000000,
+        0b000000000000000000000000000000000000,
+        0b000000000000000000000000000000000001,
+        0b000000000000000000000000000000000000,
+        0b000000000000000000000000000010000000,
+        0b000000000000000000000000000000000000,
+        0b000000000000000000000000000000000000,
+        0b000000000000000000000000000000000000,
+        0b000000000000000000000000000000000001 
+    };
 
     static array<string, 15> blitz_prime_test_data = {
         "W02B02  0  0  0B04  0B02  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0 U B",
@@ -200,7 +231,7 @@ namespace BackgammonNS
             auto move_set = move_list.move_list[move_list.move_list_ndx[ndx]];
 
             scan_position(move_set.result_position, scan);
-            scan.number_of_hits = get_number_of_rolls_that_hit(move_set.result_position, 1 - player, hit_move_list, false);
+            scan.number_of_hits = get_number_of_hits(move_set.result_position, 1 - player, hit_move_list, false);
             float score = analyze(scan , player, player_0_structure, player_1_structure);
             if (verbose) {
                 cout << MoveList::get_move_desc(move_set, player) << " " << score << endl;
@@ -443,7 +474,7 @@ namespace BackgammonNS
         return false;
     }
 
-    unsigned short Analyzer::get_number_of_rolls_that_hit(const PositionStruct& position, unsigned char player, MoveList& move_list, bool verbose)
+    unsigned short Analyzer::get_number_of_hits(const PositionStruct& position, unsigned char player, MoveList& move_list, bool verbose)
     {
         auto [player_0_hit, player_1_hit] = Backgammon::get_bar_info(position);
         auto player_hit = player == 0 ? player_1_hit : player_0_hit;
@@ -472,7 +503,90 @@ namespace BackgammonNS
         return total_hits;
     }
 
-    bool Analyzer::test_number_of_rolls_that_hit(std::string filename, MoveList& move_list)
+    unsigned short Analyzer::get_number_of_hits_fast(const PositionStruct& position, unsigned char player, AnalyzerScan& scan, bool verbose)
+    {
+        if (!block_mask_for_rolls_built) build_block_mask_for_rolls();
+
+        unsigned short total_hits = 0u;
+        auto opponent = 1 - player;
+
+        if (scan.blots_mask[opponent] == 0) return 0;
+
+        scan.render();
+
+        auto hitters = scan.blocked_points_mask[player];
+        hitters |= scan.blots_mask[player];
+        cout << "Hitters:  ";
+        AnalyzerScan::print_mask_desc(hitters);
+        cout << endl;
+
+        unsigned long blot_test_mask = 0b1;
+        unsigned long long total_hit_mask = 0u;
+        for (auto ndx = 0; ndx < 24; ndx++)
+        {
+            if ((blot_test_mask & scan.blots_mask[opponent]) != 0)
+            {
+                cout << "Blot at position " << ndx << endl;
+
+                auto adjusted_hitters = (hitters << (ndx + 1)) & 0b111111111111111111111111;
+                cout << "Adjusted: ";
+                AnalyzerScan::print_mask_desc(adjusted_hitters);
+                cout << endl;
+
+                auto hit_test_ndx = 0u;
+                while (adjusted_hitters != 0)
+                {
+                    if ((adjusted_hitters & 0b100000000000000000000000) != 0)
+                    {
+                        auto hit_mask = distance_roll_table[hit_test_ndx];
+                        cout << "          ";
+                        AnalyzerScan::print_mask_desc(hit_mask);
+                        cout << endl;
+                        unsigned long long roll_mask = 0b100000000000000000000000000000000000;
+                        for (auto roll = 0; roll < 36; roll++)
+                        {
+                            if ((roll_mask & hit_mask) != 0)
+                            {
+                                Backgammon::render_roll(roll);
+                            }
+                            roll_mask >>= 1;
+                        }
+                        cout << endl;
+                        total_hit_mask |= hit_mask;
+                    }
+                    hit_test_ndx++;
+                    adjusted_hitters <<= 1;
+                    adjusted_hitters &= 0b111111111111111111111111;
+                }
+            }
+            blot_test_mask <<= 1;
+        }
+        cout << "Final:    ";
+        AnalyzerScan::print_mask_desc(total_hit_mask);
+        cout << endl;
+        unsigned long long roll_mask = 0b100000000000000000000000000000000000;
+        for (auto roll = 0; roll < 36; roll++)
+        {
+            if ((roll_mask & total_hit_mask) != 0)
+            {
+                Backgammon::render_roll(roll);
+            }
+            roll_mask >>= 1;
+        }
+        cout << endl;
+
+        unsigned long long final_roll_mask = 0b1;
+        unsigned long long double_mask = 0b100000010000001000000100000010000001;
+        for (auto ndx = 0; ndx < 36; ndx++)
+        {
+            total_hits += (final_roll_mask & total_hit_mask) != 0;
+            total_hits += ((final_roll_mask & total_hit_mask) != 0) && ((final_roll_mask & double_mask) == 0);
+            final_roll_mask <<= 1;
+        }
+        return total_hits;
+    }
+
+    bool Analyzer::test_number_of_hits(std::string filename, MoveList& move_list)
     {
         struct record {
             PositionStruct position;
@@ -506,10 +620,11 @@ namespace BackgammonNS
         pf.start();
         for (auto rec : records)
         {
+            break;
             num_tests++;
             //cout << '.';
             //if (num_tests % 100 == 0) cout << endl;
-            auto number_of_hits = get_number_of_rolls_that_hit(rec.position, rec.player, move_list, false);
+            auto number_of_hits = get_number_of_hits(rec.position, rec.player, move_list, false);
             if (number_of_hits != rec.expected_number_of_hits)
             {
                 cout << "ERROR!! " << number_of_hits << " " << rec.expected_number_of_hits << endl;
@@ -524,7 +639,30 @@ namespace BackgammonNS
 
         cout << (float)num_tests * 10000000.0f / (float)pf.GetElapsedThreadTime() << endl;
         
+        num_tests = 0u;
+        for (auto rec : records)
+        {
+            num_tests++;
+            if (num_tests > 10) break;
+
+            AnalyzerScan scan;
+            scan_position(rec.position, scan);
+            auto number_of_hits = get_number_of_hits_fast(rec.position, rec.player, scan, true);
+            if (number_of_hits != rec.expected_number_of_hits)
+            {
+                cout << "ERROR!! " << number_of_hits << " " << rec.expected_number_of_hits << endl;
+                Backgammon::render(rec.position, rec.player);
+                result = false;
+                break;
+            }
+            
+        }
+
         return result;
+    }
+
+    void Analyzer::build_block_mask_for_rolls()
+    {
     }
 
     void Analyzer::dump_chart(string desc, std::map<int, std::vector<char>>& chart_structure)

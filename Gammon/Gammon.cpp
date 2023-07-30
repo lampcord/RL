@@ -25,7 +25,7 @@ inline void play_games(BackgammonNS::PositionStruct& position, unsigned char pla
 		if (verbose)
 		{
 			BackgammonNS::Backgammon::render(position, player);
-			Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list);
+			Analyzer::get_number_of_hits(position, player, hit_move_list);
 			auto die1 = roll % 6 + 1;
 			auto die2 = roll / 6 + 1;
 			std::cout << "Roll: " << (int)die1 << ", " << (int)die2 << std::endl;
@@ -48,7 +48,7 @@ inline void play_games(BackgammonNS::PositionStruct& position, unsigned char pla
 	if (verbose)
 	{
 		BackgammonNS::Backgammon::render(position, player);
-		Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list);
+		Analyzer::get_number_of_hits(position, player, hit_move_list);
 	}
 	//auto num_rolls = Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list, false);
 	//cout << Backgammon::string_from_position(position) << setw(3) << (int)player << setw(3) << num_rolls << endl;
@@ -76,8 +76,8 @@ int main()
 	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();
 	
-	//Analyzer::test_number_of_rolls_that_hit("C:\\GitHub\\RL\\test_hits.txt" , *move_list);
-	//return 0;
+	Analyzer::test_number_of_hits("C:\\GitHub\\RL\\test_hits.txt" , *move_list);
+	return 0;
 
 	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
 	//return 0;

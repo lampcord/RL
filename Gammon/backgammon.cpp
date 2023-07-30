@@ -125,9 +125,9 @@ namespace BackgammonNS
         {
             // check for single enemy piece.
             if (num_checkers == 1 && slot_player != player)
-            // if found, this is a hit, move oponent's piece to bar.
+            // if found, this is a hit, move opponent's piece to bar.
             {
-                // if found, this is a hit, move oponent's piece to bar.
+                // if found, this is a hit, move opponent's piece to bar.
                 position.position[slot_player] += (1ull << 60);
             }
             else
@@ -239,7 +239,7 @@ namespace BackgammonNS
     bool Backgammon::gen_moves_for_1_die(const unsigned int pos_ndx, const unsigned int& blocked, const unsigned char player, const unsigned int die, unsigned int move_ndx, castoff_availability can_castoff, MoveList& move_list, bool no_duplicates)
     {
         unsigned long long workspace = 0x0;
-        const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
+        const unsigned char opponent_test = player == 0 ? 0b10000 : 0x0;
         unsigned int blocked_ndx = 1 << 23;
         char delta = player == 0 ? die : -(char)die;
         bool expanded = false;
@@ -468,7 +468,7 @@ namespace BackgammonNS
         unsigned long long workspace = position.position[0];
         unsigned int blocked = 0x0;
         unsigned int blocked_ndx = 0x1 << 12;
-        const unsigned char oponent_test = player == 0 ? 0b10000 : 0x0;
+        const unsigned char opponent_test = player == 0 ? 0b10000 : 0x0;
 
         unsigned char moves_to_castoff = 0;
         auto [bar_0_count, bar_1_count] = get_bar_info(position);
@@ -480,10 +480,10 @@ namespace BackgammonNS
         for (auto slot = 0; slot < 12; slot++)
         {
             unsigned char slot_value = (workspace & 0b1110) != 0;
-            unsigned char is_oponent = (workspace & 0b10000) == oponent_test;
-            blocked |= (blocked_ndx * slot_value * is_oponent);
+            unsigned char is_opponent = (workspace & 0b10000) == opponent_test;
+            blocked |= (blocked_ndx * slot_value * is_opponent);
 
-            moves_to_castoff += (unsigned char)(castoff_counter * (workspace & 0b1111) * !is_oponent);
+            moves_to_castoff += (unsigned char)(castoff_counter * (workspace & 0b1111) * !is_opponent);
 
             blocked_ndx <<= 1;
             workspace >>= 5;
@@ -498,10 +498,10 @@ namespace BackgammonNS
         for (auto slot = 0; slot < 12; slot++)
         {
             unsigned char slot_value = (workspace & 0b1110) != 0;
-            unsigned char is_oponent = (workspace & 0b10000) == oponent_test;
-            blocked |= (blocked_ndx * slot_value * is_oponent);
+            unsigned char is_opponent = (workspace & 0b10000) == opponent_test;
+            blocked |= (blocked_ndx * slot_value * is_opponent);
 
-            moves_to_castoff += (unsigned char)(castoff_counter * (workspace & 0b1111) * !is_oponent);
+            moves_to_castoff += (unsigned char)(castoff_counter * (workspace & 0b1111) * !is_opponent);
 
             blocked_ndx <<= 1;
             workspace >>= 5;

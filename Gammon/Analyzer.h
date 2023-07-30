@@ -36,20 +36,22 @@ namespace BackgammonNS
 		unsigned int triples_mask[2] = { 0,0 };
 		unsigned int number_of_hits = 0;
 		void render();
-		void print_mask_desc(unsigned int mask);
+		static void print_mask_desc(unsigned int mask);
 		void clear();
 	};
 	class Analyzer
 	{
 	private:
+		static void build_block_mask_for_rolls();
 	public:
 		static void dump_chart(std::string desc, std::map<int, std::vector<char>>& chart_structure);
 		static std::string get_board_structure_desc(const BoardStructure& structure);
 		static std::tuple<BoardStructure, BoardStructure> get_board_structure(const AnalyzerScan& scan, bool verbose=true);
 		static bool test_board_structure();
 
-		static unsigned short get_number_of_rolls_that_hit(const PositionStruct& position, unsigned char player, MoveList& move_list, bool verbose=true);
-		static bool test_number_of_rolls_that_hit(std::string filename, MoveList& move_list);
+		static unsigned short get_number_of_hits(const PositionStruct& position, unsigned char player, MoveList& move_list, bool verbose = true);
+		static unsigned short get_number_of_hits_fast(const PositionStruct& position, unsigned char player, AnalyzerScan& scan, bool verbose=true);
+		static bool test_number_of_hits(std::string filename, MoveList& move_list);
 
 		static unsigned short get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose);
 		static void scan_position(const PositionStruct& position, AnalyzerScan& scan);

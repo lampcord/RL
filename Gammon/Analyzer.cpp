@@ -544,14 +544,16 @@ namespace BackgammonNS
 
         if (scan.blots_mask[opponent] == 0) return 0;
 
-        scan.render();
+        if (verbose) scan.render();
 
         auto hitters = scan.blocked_points_mask[player];
         hitters |= scan.blots_mask[player];
-        cout << "Hitters:  ";
-        AnalyzerScan::print_mask_desc(hitters);
-        cout << endl;
-
+        if (verbose)
+        {
+            cout << "Hitters:  ";
+            AnalyzerScan::print_mask_desc(hitters);
+            cout << endl;
+        }
         auto blockers = 0u;
         auto from_bl_mask = 0b1;
         auto to_bl_mask = 0b100000000000000000000000;
@@ -564,49 +566,58 @@ namespace BackgammonNS
             from_bl_mask <<= 1;
             to_bl_mask >>= 1;
         }
-        cout << "Blockers: ";
-        AnalyzerScan::print_mask_desc(blockers);
-        cout << endl;
-
+        if (verbose)
+        {
+            cout << "Blockers: ";
+            AnalyzerScan::print_mask_desc(blockers);
+            cout << endl;
+        }
         unsigned long blot_test_mask = 0b1;
         unsigned long long total_hit_mask = 0u;
         for (auto distance = 0; distance < 24; distance++)
         {
             if ((blot_test_mask & scan.blots_mask[opponent]) != 0)
             {
-                cout << "Blot at position " << distance << endl;
+                if (verbose)cout << "Blot at position " << distance << endl;
 
                 auto adjusted_hitters = (hitters << (distance + 1)) & 0b111111111111111111111111;
-                cout << "Adjusted: ";
-                AnalyzerScan::print_mask_desc(adjusted_hitters);
-                cout << endl;
-
                 auto adjusted_blockers = (blockers << (distance + 1)) & 0b111111111111111111111111;
-                cout << "Adj Blk:  ";
-                AnalyzerScan::print_mask_desc(adjusted_blockers);
-                cout << endl;
 
                 auto hit_test_ndx = 0u;
+                auto distance_to_blot = 0;
                 while (adjusted_hitters != 0)
                 {
+                    if (verbose) {
+                        cout << "Adj hit   ";
+                        AnalyzerScan::print_mask_desc(adjusted_hitters);
+                        cout << endl;
+
+                        cout << "Adj Blk:  ";
+                        AnalyzerScan::print_mask_desc(adjusted_blockers);
+                        cout << endl;
+
+                        cout << "Dist2blt:  " << distance_to_blot << endl;
+                    }
                     if ((adjusted_hitters & 0b100000000000000000000000) != 0)
                     {
                         auto hit_mask = distance_roll_table[hit_test_ndx];
-                        cout << "          ";
-                        AnalyzerScan::print_mask_desc(hit_mask);
-                        cout << endl;
+                        if (verbose) {
+                            cout << "          ";
+                            AnalyzerScan::print_mask_desc(hit_mask);
+                            cout << endl;
+                        }
                         unsigned long long roll_mask = 0b100000000000000000000000000000000000;
                         for (auto roll = 0; roll < 36; roll++)
                         {
                             if ((roll_mask & hit_mask) != 0)
                             {
                                 bool add_roll = true;
-                                auto block_mask_for_rolls_key = (22 -distance) * 36 + roll;
-                                cout << endl << block_mask_for_rolls_key << endl;
+                                auto block_mask_for_rolls_key = distance_to_blot * 36 + roll;
+                                if (verbose) cout << endl << block_mask_for_rolls_key << endl;
                                 auto pos = block_masks_for_rolls.find(block_mask_for_rolls_key);
                                 if (pos != block_masks_for_rolls.end())
                                 {
-                                    cout << bitset<36>(pos->second) << endl;
+                                    if (verbose) cout << bitset<24>(pos->second) << endl;
                                     if ((roll_mask & double_mask) == 0)
                                     {
                                         if ((pos->second & adjusted_blockers) == pos->second) add_roll = false;
@@ -616,36 +627,43 @@ namespace BackgammonNS
                                         if ((pos->second & adjusted_blockers) != 0) add_roll = false;
                                     }
                                 }
-                                Backgammon::render_roll(roll);
-                                if (add_roll) total_hit_mask |= roll_mask;
+                                if (verbose) Backgammon::render_roll(roll);
+                                if (add_roll)
+                                {
+                                    total_hit_mask |= roll_mask;
+                                    if (verbose) cout << "Added " << endl;
+                                }
                             }
                             roll_mask >>= 1;
                         }
-                        cout << endl;
+                        if (verbose) cout << endl;
                         //total_hit_mask |= hit_mask;
                     }
                     hit_test_ndx++;
                     adjusted_hitters <<= 1;
                     adjusted_hitters &= 0b111111111111111111111111;
-                    adjusted_blockers <<= 1;
-                    adjusted_blockers &= 0b111111111111111111111111;
+                    //adjusted_blockers <<= 1;
+                    //adjusted_blockers &= 0b111111111111111111111111;
+                    distance_to_blot++;
                 }
             }
             blot_test_mask <<= 1;
-        }
-        cout << "Final:    ";
-        cout << bitset<36>(total_hit_mask);
-        cout << endl;
-        unsigned long long roll_mask = 0b100000000000000000000000000000000000;
-        for (auto roll = 0; roll < 36; roll++)
-        {
-            if ((roll_mask & total_hit_mask) != 0)
-            {
-                Backgammon::render_roll(roll);
-            }
-            roll_mask >>= 1;
-        }
-        cout << endl;
+		}
+		if (verbose) {
+			cout << "Final:    ";
+			cout << bitset<36>(total_hit_mask);
+			cout << endl;
+			unsigned long long roll_mask = 0b100000000000000000000000000000000000;
+			for (auto roll = 0; roll < 36; roll++)
+			{
+				if ((roll_mask & total_hit_mask) != 0)
+				{
+					Backgammon::render_roll(roll);
+				}
+				roll_mask >>= 1;
+			}
+			cout << endl;
+		}
 
         unsigned long long final_roll_mask = 0b1;
         for (auto ndx = 0; ndx < 36; ndx++)
@@ -694,7 +712,6 @@ namespace BackgammonNS
         pf.start();
         for (auto rec : records)
         {
-            break;
             num_tests++;
             //cout << '.';
             //if (num_tests % 100 == 0) cout << endl;
@@ -714,24 +731,32 @@ namespace BackgammonNS
         cout << (float)num_tests * 10000000.0f / (float)pf.GetElapsedThreadTime() << endl;
         
         num_tests = 0u;
+        auto total_misses = 0u;
+        auto total_miscount = 0u;
+        pf.start();
         for (auto rec : records)
         {
             num_tests++;
-            if (num_tests > 10) break;
+            //if (num_tests > 1000) break;
 
             AnalyzerScan scan;
             scan_position(rec.position, scan);
-            auto number_of_hits = get_number_of_hits_fast(rec.position, rec.player, scan, true);
+            auto number_of_hits = get_number_of_hits_fast(rec.position, rec.player, scan, false);
             if (number_of_hits != rec.expected_number_of_hits)
             {
-                cout << "ERROR!! " << number_of_hits << " " << rec.expected_number_of_hits << endl;
-                Backgammon::render(rec.position, rec.player);
+                //cout << "ERROR!! " << number_of_hits << " " << rec.expected_number_of_hits << endl;
+                //Backgammon::render(rec.position, rec.player);
                 result = false;
-                break;
+                total_miscount += number_of_hits - rec.expected_number_of_hits;
+                total_misses++;
             }
             
         }
-
+        pf.stop();
+        pf.print();
+        total_time = pf.GetElapsedProcessTime();
+        cout << (float)num_tests * 10000000.0f / (float)pf.GetElapsedThreadTime() << endl;
+        cout << "Total misses " << total_misses << "/" << num_tests << " " << total_miscount << endl;
         return result;
     }
 

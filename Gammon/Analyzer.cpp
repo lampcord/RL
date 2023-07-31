@@ -249,14 +249,15 @@ namespace BackgammonNS
         }
         return string();
     }
-    unsigned short Analyzer::get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose)
+    short Analyzer::get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose)
     {
         const int num_scores = 3;
         auto best_score = -1000.0f;
-        auto best_ndx = 0;
+        short best_ndx = -1;
         float scores[num_scores] = {};
         AnalyzerScan scan;
         scan_position(position, scan);
+        scan.render();
         auto [player_0_structure, player_1_structure] = get_board_structure(scan, verbose);
 
         for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
@@ -268,7 +269,7 @@ namespace BackgammonNS
             float score = analyze(scan , player, player_0_structure, player_1_structure);
             if (verbose) {
                 cout << MoveList::get_move_desc(move_set, player) << " " << score << endl;
-                scan.render();
+                //scan.render();
             }
             if (score > best_score)
             {
@@ -377,17 +378,49 @@ namespace BackgammonNS
 
         for (auto slot = 0u; slot < 24; slot++)
         {
+            bool in_player_1_home_board = slot >= 0 && slot < 6;
+            bool in_player_0_home_board = slot >= 18 && slot < 24;
+            short player_0_position = (short)(slot + 1);
+            short player_1_position = (short)(24 - slot);
+
             auto [slot_player, num_checkers] = Backgammon::get_slot_info(position, slot);
          
             scan.pip_count[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers : (slot + 1) * num_checkers;
             if (slot_player == 0 && slot > 12) scan.in_the_zone[0] += num_checkers;
             if (slot_player == 1 && slot < 11) scan.in_the_zone[1] += num_checkers;
 
-            if (num_checkers >= 2) scan.blocked_points_mask[slot_player] |= player_mask[slot_player];
-            if (num_checkers == 1) scan.blots_mask[slot_player] |= player_mask[slot_player];
+            if (num_checkers >= 2) {
+                scan.blocked_points_mask[slot_player] |= player_mask[slot_player];
+                if (slot_player == 0 && in_player_0_home_board) scan.blocks_in_home_board[0]++;
+                if (slot_player == 1 && in_player_1_home_board) scan.blocks_in_home_board[1]++;
+                if (slot_player == 0 && in_player_1_home_board)
+                {
+                    scan.anchors_in_home_board[0]++;
+                    if (player_0_position > scan.location_of_high_anchor[0]) scan.location_of_high_anchor[0] = player_0_position;
+                }
+                if (slot_player == 1 && in_player_0_home_board)
+                {
+                    scan.anchors_in_home_board[1]++;
+                    if (player_1_position > scan.location_of_high_anchor[1]) scan.location_of_high_anchor[1] = player_1_position;
+                }
+            }
+            if (num_checkers == 1) 
+            {
+                scan.blots_mask[slot_player] |= player_mask[slot_player];
+                if (slot_player == 0 && in_player_0_home_board) scan.blots_in_home_board[0]++;
+                if (slot_player == 1 && in_player_1_home_board) scan.blots_in_home_board[1]++;
+                if (slot_player == 0 && in_player_1_home_board)
+                {
+                    if (player_0_position > scan.location_of_high_blot[0]) scan.location_of_high_blot[0] = player_0_position;
+                }
+                if (slot_player == 1 && in_player_0_home_board)
+                {
+                    if (player_1_position > scan.location_of_high_blot[1]) scan.location_of_high_blot[1] = player_1_position;
+                }
+            }
             if (num_checkers > 3) scan.mountains_mask[slot_player] |= player_mask[slot_player];
             if (num_checkers == 3) scan.triples_mask[slot_player] |= player_mask[slot_player];
-            
+               
             player_mask[0] <<= 1;
             player_mask[1] >>= 1;
         }
@@ -397,10 +430,10 @@ namespace BackgammonNS
 
         for (auto x = 0; x < 11; x++)
         {
-            if ((mask & scan.blocked_points_mask[0]) != 0) scan.raw_mask_value[0] += raw_value_for_points[x];
-            if ((mask & scan.blocked_points_mask[1]) != 0) scan.raw_mask_value[1] += raw_value_for_points[x];
-            if ((mask & scan.blots_mask[0]) != 0) scan.raw_mask_value[0] += raw_value_for_points[x] / 3.0f;
-            if ((mask & scan.blots_mask[1]) != 0) scan.raw_mask_value[1] += raw_value_for_points[x] / 3.0f;
+            if ((mask & scan.blocked_points_mask[0]) != 0) scan.raw_block_value[0] += raw_value_for_points[x];
+            if ((mask & scan.blocked_points_mask[1]) != 0) scan.raw_block_value[1] += raw_value_for_points[x];
+            if ((mask & scan.blots_mask[0]) != 0) scan.raw_slot_value[0] += raw_value_for_points[x];
+            if ((mask & scan.blots_mask[1]) != 0) scan.raw_slot_value[1] += raw_value_for_points[x];
             mask >>= 1;
         }
 
@@ -442,7 +475,8 @@ namespace BackgammonNS
     {
         auto pip_lead = player == 0 ? (float)scan.pip_count[1] - (float)scan.pip_count[0] : (float)scan.pip_count[0] - (float)scan.pip_count[1];
         auto score = (float)pip_lead / 100.0f;
-        score += (float)scan.raw_mask_value[player];
+        score += (float)scan.raw_block_value[player];
+        score += (float)scan.raw_slot_value[player] / 3.0f;
 
         score -= (float)scan.number_of_hits / 36.0f;
 
@@ -805,13 +839,21 @@ namespace BackgammonNS
     {
         cout << "Pip Count:      " << setw(4) << pip_count[0] << " " << setw(4) << pip_count[1] << endl;
         cout << "In the Zone:    " << setw(4) << in_the_zone[0] << " " << setw(4) << in_the_zone[1] << endl;
-        cout << "Raw Mask Value: " << setw(4) << raw_mask_value[0] << " " << setw(4) << raw_mask_value[1] << endl;
+        cout << "Raw Blk Value:  " << setw(4) << raw_block_value[0] << " " << setw(4) << raw_block_value[1] << endl;
+        cout << "Raw Slot Value: " << setw(4) << raw_slot_value[0] << " " << setw(4) << raw_slot_value[1] << endl;
+        cout << "Raw Rng Value:  " << setw(4) << raw_range_value[0] << " " << setw(4) << raw_range_value[1] << endl;
         cout << "Structure:      " << setw(4) << structure[0] << " " << setw(4) << structure[1] << endl;
         cout << "Impurity:       " << setw(4) << impurity[0] << " " << setw(4) << impurity[1] << endl;
         cout << "Waste:          " << setw(4) << waste[0] << " " << setw(4) << waste[1] << endl;
         cout << "First:          " << setw(4) << first[0] << " " << setw(4) << first[1] << endl;
         cout << "Last:           " << setw(4) << last[0] << " " << setw(4) << last[1] << endl;
         cout << "Mountains:      " << setw(4) << mountains[0] << " " << setw(4) << mountains[1] << endl;
+        cout << "Anchors:        " << setw(4) << anchors_in_home_board[0] << " " << setw(4) << anchors_in_home_board[1] << endl;
+        cout << "High Anchor P:  " << setw(4) << location_of_high_anchor[0] << " " << setw(4) << location_of_high_anchor[1] << endl;
+        cout << "High blot:      " << setw(4) << location_of_high_blot[0] << " " << setw(4) << location_of_high_blot[1] << endl;
+        cout << "Blocks in HB:   " << setw(4) << blocks_in_home_board[0] << " " << setw(4) << blocks_in_home_board[1] << endl;
+        cout << "Blots in HB:    " << setw(4) << blots_in_home_board[0] << " " << setw(4) << blots_in_home_board[1] << endl;
+        
         cout << "Number of Hits  " << setw(4) << number_of_hits << endl;
         cout << "Blocked Mask:        ";
         print_mask_desc(blocked_points_mask[0]);
@@ -852,7 +894,16 @@ namespace BackgammonNS
         {
             pip_count[x] = 0;
             in_the_zone[x] = 0;
-            raw_mask_value[x] = 0.0f;
+            anchors_in_home_board[x] = 0;
+            location_of_high_anchor[x] = -1;
+            location_of_high_blot[x] = -1;
+            blocks_in_home_board[x] = 0;
+            blots_in_home_board[x] = 0;
+
+            raw_block_value[x] = 0.0f;
+            raw_slot_value[x] = 0.0f;
+            raw_range_value[x] = 0.0f;
+
             structure[x] = 0;
             impurity[x] = 0;
             waste[x] = 0;

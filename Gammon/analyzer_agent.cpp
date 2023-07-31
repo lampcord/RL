@@ -10,8 +10,15 @@ namespace AnalyzerAgentNS
 	{
 		Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
 		auto best_ndx = Analyzer::get_best_move_index(position, *move_list, player, verbose);
-		auto best_move_set = move_list->move_list[move_list->move_list_ndx[best_ndx]];
-		if (verbose) cout << "Best Move: " << MoveList::get_move_desc(best_move_set, player) << endl;
-		position = best_move_set.result_position;
+		if (best_ndx >= 0)
+		{
+			auto best_move_set = move_list->move_list[move_list->move_list_ndx[best_ndx]];
+			if (verbose) cout << "Best Move: " << MoveList::get_move_desc(best_move_set, player) << endl;
+			position = best_move_set.result_position;
+		}
+		else
+		{
+			if (verbose) cout << "No Moves." << endl;
+		}
 	}
 }

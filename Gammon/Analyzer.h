@@ -18,10 +18,31 @@ namespace BackgammonNS
 		prime,
 		blitz
 	};
+	/*
+	[X] Blocks in your home board
+    [X] Location of high anchor
+    [X] Location of high blot
+    [X] Number of blocks in home board
+    [X] Number of blots in home board
+    [X] Checkers on bar
+    [X] Purity
+    [X] Raw block score
+    [X] Raw checkers in range of slot
+    [/] Raw slot score
+	*/
+	
 	struct AnalyzerScan
 	{
 		unsigned short pip_count[2] = { 0,0 };
 		unsigned short in_the_zone[2] = { 0,0 };
+		
+		unsigned short anchors_in_home_board[2] = { 0,0 };
+		short location_of_high_anchor[2] = { -1, -1 };
+		short location_of_high_blot[2] = { -1, -1 };
+
+		unsigned short blocks_in_home_board[2] = { 0,0 };
+		unsigned short blots_in_home_board[2] = { 0,0 };
+
 		unsigned int structure[2] = { 0,0 };
 		unsigned int impurity[2] = { 0,0 };
 		unsigned int waste[2] = { 0, 0 };
@@ -29,7 +50,9 @@ namespace BackgammonNS
 		unsigned int last[2] = { 0, 0 };
 		unsigned int mountains[2] = { 0, 0 };
 
-		float raw_mask_value[2] = { 0,0 };
+		float raw_block_value[2] = { 0,0 };
+		float raw_slot_value[2] = { 0,0 };
+		float raw_range_value[2] = { 0,0 };
 		unsigned int blocked_points_mask[2] = { 0,0 };
 		unsigned int blots_mask[2] = { 0,0 };
 		unsigned int mountains_mask[2] = { 0,0 };
@@ -53,7 +76,7 @@ namespace BackgammonNS
 		static unsigned short get_number_of_hits_fast(const PositionStruct& position, unsigned char player, AnalyzerScan& scan, bool verbose=true);
 		static bool test_number_of_hits(std::string filename, MoveList& move_list);
 
-		static unsigned short get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose);
+		static short get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose);
 		static void scan_position(const PositionStruct& position, AnalyzerScan& scan);
 		static float analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure);
 	};

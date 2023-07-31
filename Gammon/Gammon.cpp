@@ -76,8 +76,8 @@ int main()
 	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();
 	
-	Analyzer::test_number_of_hits("C:\\GitHub\\RL\\test_hits.txt" , *move_list);
-	return 0;
+	//Analyzer::test_number_of_hits("C:\\GitHub\\RL\\test_hits.txt" , *move_list);
+	//return 0;
 
 	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
 	//return 0;
@@ -94,10 +94,10 @@ int main()
 
 	//play_games<ConsoleAgentNS::ConsoleAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, console_agent, random_agent);
 	//play_games<RandomAgentNS::RandomAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, random_agent, random_agent);
-	play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, console_agent, analyzer_agent, true);
+	//play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, console_agent, analyzer_agent, true);
 	//for (auto x = 0; x < 1000; x++) {
 	//	Backgammon::get_initial_position(position);
-	//	play_games<AnalyzerAgentNS::AnalyzerAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, analyzer_agent, analyzer_agent, false);
+		play_games<AnalyzerAgentNS::AnalyzerAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, analyzer_agent, analyzer_agent, true);
 	//}
 	//play_games<RandomAgentNS::RandomAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, random_agent, analyzer_agent);
 	return 0;

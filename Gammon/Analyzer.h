@@ -28,7 +28,7 @@ namespace BackgammonNS
     [X] Purity
     [X] Raw block score
     [X] Raw checkers in range of slot
-    [/] Raw slot score
+    [X] Raw slot score
 	*/
 	
 	struct AnalyzerScan

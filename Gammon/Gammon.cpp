@@ -88,6 +88,13 @@ int main()
 	PositionStruct position;
 	Backgammon::get_initial_position(position);
 
+	//Backgammon::position_from_string("W02  0  0  0B01B05B01B03  0  0  0W03B03  0  0  0W03  0W05  0W02  0  0B02  0  0", position);
+	//AnalyzerScan scan;
+	//Analyzer::scan_position(position, scan);
+	//Backgammon::render(position, 0);
+	//scan.render();
+	//return(0);
+	
 	ConsoleAgentNS::ConsoleAgent console_agent;
 	RandomAgentNS::RandomAgent random_agent;
 	AnalyzerAgentNS::AnalyzerAgent analyzer_agent;

@@ -425,19 +425,33 @@ namespace BackgammonNS
             player_mask[1] >>= 1;
         }
 
-        const float raw_value_for_points[11] = { 0.1f, 0.1f, 0.3f, 0.8f, 0.9f, 1.0f, 0.7f, 0.6f, 0.3f, 0.2f, 0.2f };
+        //                                         1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16
+        const float raw_value_for_points[16] = { 0.1f, 0.1f, 0.3f, 0.8f, 0.9f, 1.0f, 0.7f, 0.6f, 0.3f, 0.2f, 0.2f, 0.1f, 0.3f, 0.1f, 0.1f, 0.1f};
         unsigned int mask = 0b100000000000000000000000;
 
-        for (auto x = 0; x < 11; x++)
+        for (auto x = 0; x < 16; x++)
         {
-            if ((mask & scan.blocked_points_mask[0]) != 0) scan.raw_block_value[0] += raw_value_for_points[x];
-            if ((mask & scan.blocked_points_mask[1]) != 0) scan.raw_block_value[1] += raw_value_for_points[x];
-            if ((mask & scan.blots_mask[0]) != 0) scan.raw_slot_value[0] += raw_value_for_points[x];
-            if ((mask & scan.blots_mask[1]) != 0) scan.raw_slot_value[1] += raw_value_for_points[x];
+            if (x < 10)
+            {
+                if ((mask & scan.triples_mask[0]) != 0) scan.raw_block_value[0] += raw_value_for_points[x] * 0.4;
+                if ((mask & scan.triples_mask[1]) != 0) scan.raw_block_value[1] += raw_value_for_points[x] * 0.4;
+                if ((mask & scan.blocked_points_mask[0]) != 0) scan.raw_block_value[0] += raw_value_for_points[x];
+                if ((mask & scan.blocked_points_mask[1]) != 0) scan.raw_block_value[1] += raw_value_for_points[x];
+                if ((mask & scan.blots_mask[0]) != 0) scan.raw_slot_value[0] += raw_value_for_points[x];
+                if ((mask & scan.blots_mask[1]) != 0) scan.raw_slot_value[1] += raw_value_for_points[x];
+            }
+            else
+            {
+                if ((mask & scan.triples_mask[0]) != 0) scan.raw_range_value[0] += raw_value_for_points[x] * 0.4;
+                if ((mask & scan.triples_mask[1]) != 0) scan.raw_range_value[1] += raw_value_for_points[x] * 0.4;
+                if ((mask & scan.blocked_points_mask[0]) != 0) scan.raw_range_value[0] += raw_value_for_points[x];
+                if ((mask & scan.blocked_points_mask[1]) != 0) scan.raw_range_value[1] += raw_value_for_points[x];
+                if ((mask & scan.blots_mask[0]) != 0) scan.raw_range_value[0] += raw_value_for_points[x] * 0.4;
+                if ((mask & scan.blots_mask[1]) != 0) scan.raw_range_value[1] += raw_value_for_points[x] * 0.4;
+            }
             mask >>= 1;
         }
 
-        mask = 0b100000000000000000000000;
         for (auto ndx = 0; ndx < 11; ndx++)
         {
             for (auto player = 0; player < 2; player++)

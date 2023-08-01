@@ -36,7 +36,9 @@ namespace BackgammonNS
 		unsigned short pip_count[2] = { 0,0 };
 		unsigned short in_the_zone[2] = { 0,0 };
 		
-		unsigned short anchors_in_home_board[2] = { 0,0 };
+		unsigned short anchors_in_opp_board[2] = { 0,0 };
+		unsigned short blots_in_opp_board[2] = { 0,0 };
+		unsigned short checkers_on_bar[2] = { 0, 0 };
 		short location_of_high_anchor[2] = { -1, -1 };
 		short location_of_high_blot[2] = { -1, -1 };
 

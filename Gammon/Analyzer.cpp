@@ -247,7 +247,7 @@ namespace BackgammonNS
             result = "Undefined Structure";
             break;
         }
-        return string();
+        return result;
     }
     short Analyzer::get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose)
     {
@@ -384,6 +384,9 @@ namespace BackgammonNS
             short player_1_position = (short)(24 - slot);
 
             auto [slot_player, num_checkers] = Backgammon::get_slot_info(position, slot);
+            auto [player_0_bar, player_1_bar] = Backgammon::get_bar_info(position);
+            scan.checkers_on_bar[0] = player_0_bar;
+            scan.checkers_on_bar[1] = player_1_bar;
          
             scan.pip_count[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers : (slot + 1) * num_checkers;
             if (slot_player == 0 && slot > 12) scan.in_the_zone[0] += num_checkers;
@@ -395,12 +398,12 @@ namespace BackgammonNS
                 if (slot_player == 1 && in_player_1_home_board) scan.blocks_in_home_board[1]++;
                 if (slot_player == 0 && in_player_1_home_board)
                 {
-                    scan.anchors_in_home_board[0]++;
+                    scan.anchors_in_opp_board[0]++;
                     if (player_0_position > scan.location_of_high_anchor[0]) scan.location_of_high_anchor[0] = player_0_position;
                 }
                 if (slot_player == 1 && in_player_0_home_board)
                 {
-                    scan.anchors_in_home_board[1]++;
+                    scan.anchors_in_opp_board[1]++;
                     if (player_1_position > scan.location_of_high_anchor[1]) scan.location_of_high_anchor[1] = player_1_position;
                 }
             }
@@ -411,10 +414,12 @@ namespace BackgammonNS
                 if (slot_player == 1 && in_player_1_home_board) scan.blots_in_home_board[1]++;
                 if (slot_player == 0 && in_player_1_home_board)
                 {
+                    scan.blots_in_opp_board[0]++;
                     if (player_0_position > scan.location_of_high_blot[0]) scan.location_of_high_blot[0] = player_0_position;
                 }
                 if (slot_player == 1 && in_player_0_home_board)
                 {
+                    scan.blots_in_opp_board[1]++;
                     if (player_1_position > scan.location_of_high_blot[1]) scan.location_of_high_blot[1] = player_1_position;
                 }
             }
@@ -452,6 +457,7 @@ namespace BackgammonNS
             mask >>= 1;
         }
 
+        mask = 0b100000000000000000000000;
         for (auto ndx = 0; ndx < 11; ndx++)
         {
             for (auto player = 0; player < 2; player++)
@@ -474,25 +480,119 @@ namespace BackgammonNS
     }
 
     /*
-    Te 12 rules:
-    [ ] Break the mountain.
-    [ ] Keep at least 3 checkers on the mid-point.
-    [ ] To double hit is tiger play (weak tiger / strong tiger)
-    [ ] Attacking with 8 checkers is weak.
-    [ ] Attacking with 10 checkers is strong.
-    [ ] Split against the stripped 8 point.
-    [ ] Split against a prime.
-    [ ] Never split facing a blitzing structure.
-    [ ] Hit and split.
+
+
     */
     float Analyzer::analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure)
     {
+        cout << "Board Structures: " << get_board_structure_desc(player_0_structure) << " " << get_board_structure_desc(player_1_structure) << endl;
         auto pip_lead = player == 0 ? (float)scan.pip_count[1] - (float)scan.pip_count[0] : (float)scan.pip_count[0] - (float)scan.pip_count[1];
-        auto score = (float)pip_lead / 100.0f;
-        score += (float)scan.raw_block_value[player];
-        score += (float)scan.raw_slot_value[player] / 3.0f;
+        auto score = 0.0f; 
+        auto opponent = 1 - player;
 
-        score -= (float)scan.number_of_hits / 36.0f;
+        auto player_board_structure = player == 0 ? player_0_structure : player_1_structure;
+        auto opponent_board_structure = player == 1 ? player_0_structure : player_1_structure;
+        //(float)pip_lead / 100.0f;
+        //score += (float)scan.raw_block_value[player];
+        //score += (float)scan.raw_slot_value[player] / 3.0f;
+
+        if (player_board_structure == BoardStructure::prime && opponent_board_structure == BoardStructure::prime)
+        {
+            /*
+            Priming / Priming
+            Split back checkers for high anchor.
+                Number of blots in opponents home board
+                Number of blocks in opponents home board
+                Location of high anchor.
+            Try and make a prime.
+                Raw block score
+                Raw slot score
+                Raw checkers in range of slot
+            Make points in order.
+                Raw block score
+                Purity
+            Implied
+                Number of opponents blots in home board
+                Number of opponents blocks in home board
+                Location of high opponents anchor.
+            */
+            score += scan.location_of_high_anchor[player] / 5.0;
+            score += scan.location_of_high_blot[player] / 15.0;
+
+            score += (float)scan.raw_block_value[player];
+            score += (float)scan.raw_slot_value[player] / 3.0f;
+            score += (float)scan.raw_range_value[player] / 3.0f;
+            score -= pip_lead / 16.0f;
+        }
+        else if (player_board_structure == BoardStructure::prime && opponent_board_structure == BoardStructure::blitz)
+        {
+            /*
+            Priming / Blitzing
+            Never split your back anchors.
+                Number of blots in opponents home board
+                Number of blocks in opponents home board
+            Low anchors are fine.
+            Slot.
+                Purity.
+                Raw block score
+                Raw slot score
+                Raw checkers in range of slot
+            Implied
+                opponents on bar
+                Number of opponents blots in home board
+                Number of opponents blocks in home board
+                Location of high opponents anchor.
+            */
+            score -= scan.blots_in_opp_board[player];
+            
+            score += (float)scan.raw_block_value[player];
+            score += (float)scan.raw_slot_value[player] / 3.0f;
+            score += (float)scan.raw_range_value[player] / 3.0f;
+            score -= pip_lead / 16.0f;
+        }
+        else if (player_board_structure == BoardStructure::blitz && opponent_board_structure == BoardStructure::prime)
+        {
+            /*
+            Blitzing / Priming
+            Attack if possible.
+                opponents on bar
+                Blocks in your home board.
+                Number of opponents blots in home board
+                Number of opponents blocks in home board
+                Location of high opponents anchor.
+            Escape back checkers if attack is not possible.
+                Number of checkers in opponents home board
+            Do Not Slot!
+                Raw slot score
+            */
+            score += scan.checkers_on_bar[opponent];
+            score += scan.blocks_in_home_board[player];
+            score -= scan.blots_in_opp_board[player] / 2.0f;
+            score -= scan.anchors_in_opp_board[player] / 2.0f;
+            score += pip_lead / 8.0f;
+        }
+        else if (player_board_structure == BoardStructure::blitz && opponent_board_structure == BoardStructure::blitz)
+        {
+            /*
+            Blitzing / Blitzing
+            Attack if possilbe.
+                opponents on bar
+                Blocks in your home board.
+                Number of opponents blots in home board
+                Number of opponents blocks in home board
+                Location of high opponents anchor.
+            Anchor anywhere you can.
+            Don't give up your anchor!
+                Number of blots in opponents home board
+                Number of blocks in opponents home board
+            */
+            score += scan.checkers_on_bar[opponent];
+            score += scan.blocks_in_home_board[player];
+            score -= scan.blots_in_opp_board[player];
+            score += pip_lead / 8.0f;
+        }
+
+        //score -= (float)scan.number_of_hits / 36.0f;
 
         return score / 2.0f;
     }
@@ -862,7 +962,9 @@ namespace BackgammonNS
         cout << "First:          " << setw(4) << first[0] << " " << setw(4) << first[1] << endl;
         cout << "Last:           " << setw(4) << last[0] << " " << setw(4) << last[1] << endl;
         cout << "Mountains:      " << setw(4) << mountains[0] << " " << setw(4) << mountains[1] << endl;
-        cout << "Anchors:        " << setw(4) << anchors_in_home_board[0] << " " << setw(4) << anchors_in_home_board[1] << endl;
+        cout << "Anchors:        " << setw(4) << anchors_in_opp_board[0] << " " << setw(4) << anchors_in_opp_board[1] << endl;
+        cout << "Blots OP HB:    " << setw(4) << blots_in_opp_board[0] << " " << setw(4) << blots_in_opp_board[1] << endl;
+        cout << "On Bar:         " << setw(4) << checkers_on_bar[0] << " " << setw(4) << checkers_on_bar[1] << endl;
         cout << "High Anchor P:  " << setw(4) << location_of_high_anchor[0] << " " << setw(4) << location_of_high_anchor[1] << endl;
         cout << "High blot:      " << setw(4) << location_of_high_blot[0] << " " << setw(4) << location_of_high_blot[1] << endl;
         cout << "Blocks in HB:   " << setw(4) << blocks_in_home_board[0] << " " << setw(4) << blocks_in_home_board[1] << endl;
@@ -908,7 +1010,9 @@ namespace BackgammonNS
         {
             pip_count[x] = 0;
             in_the_zone[x] = 0;
-            anchors_in_home_board[x] = 0;
+            anchors_in_opp_board[x] = 0;
+            checkers_on_bar[x] = 0;
+            blots_in_opp_board[x] = 0;
             location_of_high_anchor[x] = -1;
             location_of_high_blot[x] = -1;
             blocks_in_home_board[x] = 0;

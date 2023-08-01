@@ -88,7 +88,7 @@ int main()
 	PositionStruct position;
 	Backgammon::get_initial_position(position);
 
-	//Backgammon::position_from_string("W02  0  0  0B01B05B01B03  0  0  0W03B03  0  0  0W03  0W05  0W02  0  0B02  0  0", position);
+	//Backgammon::position_from_string("W02  0B01  0B03B03B03B02  0B01  0  0  0  0  0  0W02W01W03W01W02W02W02B02  0  0", position);
 	//AnalyzerScan scan;
 	//Analyzer::scan_position(position, scan);
 	//Backgammon::render(position, 0);

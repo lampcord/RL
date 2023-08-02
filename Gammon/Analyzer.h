@@ -30,31 +30,34 @@ namespace BackgammonNS
     [X] Raw checkers in range of slot
     [X] Raw slot score
 	*/
-	
+	const unsigned int AC_pip_count = 0;
+	const unsigned int AC_in_the_zone = 1;
+	const unsigned int AC_anchors_in_opp_board = 2;
+	const unsigned int AC_blots_in_opp_board = 3;
+	const unsigned int AC_checkers_on_bar = 4;
+	const unsigned int AC_location_of_high_anchor = 5;
+	const unsigned int AC_location_of_high_blot = 6;
+	const unsigned int AC_blocks_in_home_board = 7;
+	const unsigned int AC_blots_in_home_board = 8;
+	const unsigned int AC_structure = 9;
+	const unsigned int AC_impurity = 10;
+	const unsigned int AC_waste = 11;
+	const unsigned int AC_first = 12;
+	const unsigned int AC_last = 13;
+	const unsigned int AC_mountains = 14;
+	const unsigned int AC_raw_block_value = 15;
+	const unsigned int AC_raw_slot_value = 16;
+	const unsigned int AC_raw_range_value = 17;
+	const unsigned int AC_max_value = 17;
+
+	struct AnalysisStat
+	{
+		float element[2];
+	};
 	struct AnalyzerScan
 	{
-		unsigned short pip_count[2] = { 0,0 };
-		unsigned short in_the_zone[2] = { 0,0 };
-		
-		unsigned short anchors_in_opp_board[2] = { 0,0 };
-		unsigned short blots_in_opp_board[2] = { 0,0 };
-		unsigned short checkers_on_bar[2] = { 0, 0 };
-		short location_of_high_anchor[2] = { -1, -1 };
-		short location_of_high_blot[2] = { -1, -1 };
+		AnalysisStat stat[AC_max_value];
 
-		unsigned short blocks_in_home_board[2] = { 0,0 };
-		unsigned short blots_in_home_board[2] = { 0,0 };
-
-		unsigned int structure[2] = { 0,0 };
-		unsigned int impurity[2] = { 0,0 };
-		unsigned int waste[2] = { 0, 0 };
-		int first[2] = { -1, -1 };
-		unsigned int last[2] = { 0, 0 };
-		unsigned int mountains[2] = { 0, 0 };
-
-		float raw_block_value[2] = { 0,0 };
-		float raw_slot_value[2] = { 0,0 };
-		float raw_range_value[2] = { 0,0 };
 		unsigned int blocked_points_mask[2] = { 0,0 };
 		unsigned int blots_mask[2] = { 0,0 };
 		unsigned int mountains_mask[2] = { 0,0 };

@@ -290,24 +290,24 @@ namespace BackgammonNS
 
         for (auto player = 0; player < 2; player++)
         {
-            if (scan.impurity[player] == 0)
+            if (scan.stat[AC_impurity].element[player] == 0)
             {
                 total_impurity_pct[player] += 0.0f;
             }
-            else if (scan.impurity[player] == 1)
+            else if (scan.stat[AC_impurity].element[player] == 1)
             {
                 total_impurity_pct[player] += 0.333f;
             }
-            else if (scan.impurity[player] == 2)
+            else if (scan.stat[AC_impurity].element[player] == 2)
             {
                 total_impurity_pct[player] += 0.667f;
             }
-            else if (scan.impurity[player] >= 3)
+            else if (scan.stat[AC_impurity].element[player] >= 3)
             {
                 total_impurity_pct[player] += 1.0f;
             }
 
-            if (scan.first[player] <= 2)
+            if (scan.stat[AC_first].element[player] <= 2)
             {
                 total_first_pct[player] += 1.0f;
             }
@@ -316,24 +316,24 @@ namespace BackgammonNS
                 total_first_pct[player] += 0.0f;
             }
 
-            if (scan.in_the_zone[player] <= 8)
+            if (scan.stat[AC_in_the_zone].element[player] <= 8)
             {
                 total_in_the_zone_pct[player] += 0.285714f;
             }
-            else if (scan.in_the_zone[player] == 9)
+            else if (scan.stat[AC_in_the_zone].element[player] == 9)
             {
                 total_in_the_zone_pct[player] += 0.4f;
             }
-            else if (scan.in_the_zone[player] == 10)
+            else if (scan.stat[AC_in_the_zone].element[player] == 10)
             {
                 total_in_the_zone_pct[player] += 0.642857f;
             }
-            else if (scan.in_the_zone[player] >= 11)
+            else if (scan.stat[AC_in_the_zone].element[player] >= 11)
             {
                 total_in_the_zone_pct[player] += 1.0f;
             }
 
-            auto lead = scan.pip_count[1 - player] - scan.pip_count[player];
+            auto lead = scan.stat[AC_pip_count].element[1 - player] - scan.stat[AC_pip_count].element[player];
             if (lead >= 12)
             {
                 total_lead_pct[player] += 1.0f;
@@ -371,8 +371,8 @@ namespace BackgammonNS
         scan.clear();
 
         auto [player_0_bar, player_1_bar] = Backgammon::get_bar_info(position);
-        scan.pip_count[0] = player_0_bar * 25;
-        scan.pip_count[1] = player_1_bar * 25;
+        scan.stat[AC_pip_count].element[0] = player_0_bar * 25;
+        scan.stat[AC_pip_count].element[1] = player_1_bar * 25;
 
         unsigned int player_mask[2] = { 0b000000000000000000000001, 0b100000000000000000000000 };
 
@@ -385,42 +385,42 @@ namespace BackgammonNS
 
             auto [slot_player, num_checkers] = Backgammon::get_slot_info(position, slot);
             auto [player_0_bar, player_1_bar] = Backgammon::get_bar_info(position);
-            scan.checkers_on_bar[0] = player_0_bar;
-            scan.checkers_on_bar[1] = player_1_bar;
+            scan.stat[AC_checkers_on_bar].element[0] = player_0_bar;
+            scan.stat[AC_checkers_on_bar].element[1] = player_1_bar;
          
-            scan.pip_count[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers : (slot + 1) * num_checkers;
-            if (slot_player == 0 && slot > 12) scan.in_the_zone[0] += num_checkers;
-            if (slot_player == 1 && slot < 11) scan.in_the_zone[1] += num_checkers;
+            scan.stat[AC_pip_count].element[slot_player] += slot_player == 0 ? (24 - slot) * num_checkers : (slot + 1) * num_checkers;
+            if (slot_player == 0 && slot > 12) scan.stat[AC_in_the_zone].element[0] += num_checkers;
+            if (slot_player == 1 && slot < 11) scan.stat[AC_in_the_zone].element[1] += num_checkers;
 
             if (num_checkers >= 2) {
                 scan.blocked_points_mask[slot_player] |= player_mask[slot_player];
-                if (slot_player == 0 && in_player_0_home_board) scan.blocks_in_home_board[0]++;
-                if (slot_player == 1 && in_player_1_home_board) scan.blocks_in_home_board[1]++;
+                if (slot_player == 0 && in_player_0_home_board) scan.stat[AC_blocks_in_home_board].element[0]++;
+                if (slot_player == 1 && in_player_1_home_board) scan.stat[AC_blocks_in_home_board].element[1]++;
                 if (slot_player == 0 && in_player_1_home_board)
                 {
-                    scan.anchors_in_opp_board[0]++;
-                    if (player_0_position > scan.location_of_high_anchor[0]) scan.location_of_high_anchor[0] = player_0_position;
+                    scan.stat[AC_anchors_in_opp_board].element[0]++;
+                    if (player_0_position > scan.stat[AC_location_of_high_anchor].element[0]) scan.stat[AC_location_of_high_anchor].element[0] = player_0_position;
                 }
                 if (slot_player == 1 && in_player_0_home_board)
                 {
-                    scan.anchors_in_opp_board[1]++;
-                    if (player_1_position > scan.location_of_high_anchor[1]) scan.location_of_high_anchor[1] = player_1_position;
+                    scan.stat[AC_anchors_in_opp_board].element[1]++;
+                    if (player_1_position > scan.stat[AC_location_of_high_anchor].element[1]) scan.stat[AC_location_of_high_anchor].element[1] = player_1_position;
                 }
             }
             if (num_checkers == 1) 
             {
                 scan.blots_mask[slot_player] |= player_mask[slot_player];
-                if (slot_player == 0 && in_player_0_home_board) scan.blots_in_home_board[0]++;
-                if (slot_player == 1 && in_player_1_home_board) scan.blots_in_home_board[1]++;
+                if (slot_player == 0 && in_player_0_home_board) scan.stat[AC_blots_in_home_board].element[0]++;
+                if (slot_player == 1 && in_player_1_home_board) scan.stat[AC_blots_in_home_board].element[1]++;
                 if (slot_player == 0 && in_player_1_home_board)
                 {
-                    scan.blots_in_opp_board[0]++;
-                    if (player_0_position > scan.location_of_high_blot[0]) scan.location_of_high_blot[0] = player_0_position;
+                    scan.stat[AC_blots_in_opp_board].element[0]++;
+                    if (player_0_position > scan.stat[AC_location_of_high_blot].element[0]) scan.stat[AC_location_of_high_blot].element[0] = player_0_position;
                 }
                 if (slot_player == 1 && in_player_0_home_board)
                 {
-                    scan.blots_in_opp_board[1]++;
-                    if (player_1_position > scan.location_of_high_blot[1]) scan.location_of_high_blot[1] = player_1_position;
+                    scan.stat[AC_blots_in_opp_board].element[1]++;
+                    if (player_1_position > scan.stat[AC_location_of_high_blot].element[1]) scan.stat[AC_location_of_high_blot].element[1] = player_1_position;
                 }
             }
             if (num_checkers > 3) scan.mountains_mask[slot_player] |= player_mask[slot_player];
@@ -438,21 +438,21 @@ namespace BackgammonNS
         {
             if (x < 10)
             {
-                if ((mask & scan.triples_mask[0]) != 0) scan.raw_block_value[0] += raw_value_for_points[x] * 0.4;
-                if ((mask & scan.triples_mask[1]) != 0) scan.raw_block_value[1] += raw_value_for_points[x] * 0.4;
-                if ((mask & scan.blocked_points_mask[0]) != 0) scan.raw_block_value[0] += raw_value_for_points[x];
-                if ((mask & scan.blocked_points_mask[1]) != 0) scan.raw_block_value[1] += raw_value_for_points[x];
-                if ((mask & scan.blots_mask[0]) != 0) scan.raw_slot_value[0] += raw_value_for_points[x];
-                if ((mask & scan.blots_mask[1]) != 0) scan.raw_slot_value[1] += raw_value_for_points[x];
+                if ((mask & scan.triples_mask[0]) != 0) scan.stat[AC_raw_block_value].element[0] += raw_value_for_points[x] * 0.4f;
+                if ((mask & scan.triples_mask[1]) != 0) scan.stat[AC_raw_block_value].element[1] += raw_value_for_points[x] * 0.4f;
+                if ((mask & scan.blocked_points_mask[0]) != 0) scan.stat[AC_raw_block_value].element[0] += raw_value_for_points[x];
+                if ((mask & scan.blocked_points_mask[1]) != 0) scan.stat[AC_raw_block_value].element[1] += raw_value_for_points[x];
+                if ((mask & scan.blots_mask[0]) != 0) scan.stat[AC_raw_slot_value].element[0] += raw_value_for_points[x];
+                if ((mask & scan.blots_mask[1]) != 0) scan.stat[AC_raw_slot_value].element[1] += raw_value_for_points[x];
             }
             else
             {
-                if ((mask & scan.triples_mask[0]) != 0) scan.raw_range_value[0] += raw_value_for_points[x] * 0.4;
-                if ((mask & scan.triples_mask[1]) != 0) scan.raw_range_value[1] += raw_value_for_points[x] * 0.4;
-                if ((mask & scan.blocked_points_mask[0]) != 0) scan.raw_range_value[0] += raw_value_for_points[x];
-                if ((mask & scan.blocked_points_mask[1]) != 0) scan.raw_range_value[1] += raw_value_for_points[x];
-                if ((mask & scan.blots_mask[0]) != 0) scan.raw_range_value[0] += raw_value_for_points[x] * 0.4;
-                if ((mask & scan.blots_mask[1]) != 0) scan.raw_range_value[1] += raw_value_for_points[x] * 0.4;
+                if ((mask & scan.triples_mask[0]) != 0) scan.stat[AC_raw_range_value].element[0] += raw_value_for_points[x] * 0.4f;
+                if ((mask & scan.triples_mask[1]) != 0) scan.stat[AC_raw_range_value].element[1] += raw_value_for_points[x] * 0.4f;
+                if ((mask & scan.blocked_points_mask[0]) != 0) scan.stat[AC_raw_range_value].element[0] += raw_value_for_points[x];
+                if ((mask & scan.blocked_points_mask[1]) != 0) scan.stat[AC_raw_range_value].element[1] += raw_value_for_points[x];
+                if ((mask & scan.blots_mask[0]) != 0) scan.stat[AC_raw_range_value].element[0] += raw_value_for_points[x] * 0.4f;
+                if ((mask & scan.blots_mask[1]) != 0) scan.stat[AC_raw_range_value].element[1] += raw_value_for_points[x] * 0.4f;
             }
             mask >>= 1;
         }
@@ -462,20 +462,20 @@ namespace BackgammonNS
         {
             for (auto player = 0; player < 2; player++)
             {
-                if ((scan.mountains_mask[player] & mask) != 0) scan.mountains[player]++;
+                if ((scan.mountains_mask[player] & mask) != 0) scan.stat[AC_mountains].element[player]++;
                 if ((scan.blocked_points_mask[player] & mask) != 0)
                 {
-                    scan.structure[player]++;
-                    if (scan.first[player] < 0) scan.first[player] = ndx;
-                    scan.last[player] = ndx;
+                    scan.stat[AC_structure].element[player]++;
+                    if (scan.stat[AC_first].element[player] < 0) scan.stat[AC_first].element[player] = ndx;
+                    scan.stat[AC_last].element[player] = ndx;
                 }
             }
             mask >>= 1;
         }
-        scan.waste[0] = scan.in_the_zone[0] - scan.structure[0] * 2;
-        scan.waste[1] = scan.in_the_zone[1] - scan.structure[1] * 2;
-        scan.impurity[0] = scan.last[0] + 1 - scan.first[0] - scan.structure[0];
-        scan.impurity[1] = scan.last[1] + 1 - scan.first[1] - scan.structure[1];
+        scan.stat[AC_waste].element[0] = scan.stat[AC_in_the_zone].element[0] - scan.stat[AC_structure].element[0] * 2;
+        scan.stat[AC_waste].element[1] = scan.stat[AC_in_the_zone].element[1] - scan.stat[AC_structure].element[1] * 2;
+        scan.stat[AC_impurity].element[0] = scan.stat[AC_last].element[0] + 1 - scan.stat[AC_first].element[0] - scan.stat[AC_structure].element[0];
+        scan.stat[AC_impurity].element[1] = scan.stat[AC_last].element[1] + 1 - scan.stat[AC_first].element[1] - scan.stat[AC_structure].element[1];
 
     }
 
@@ -486,9 +486,10 @@ namespace BackgammonNS
     float Analyzer::analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure)
     {
         cout << "Board Structures: " << get_board_structure_desc(player_0_structure) << " " << get_board_structure_desc(player_1_structure) << endl;
-        auto pip_lead = player == 0 ? (float)scan.pip_count[1] - (float)scan.pip_count[0] : (float)scan.pip_count[0] - (float)scan.pip_count[1];
+        auto pip_lead = player == 0 ? (float)scan.stat[AC_pip_count].element[1] - (float)scan.stat[AC_pip_count].element[0] : (float)scan.stat[AC_pip_count].element[0] - (float)scan.stat[AC_pip_count].element[1];
         auto score = 0.0f; 
         auto opponent = 1 - player;
+        auto hit_pct = (float)scan.number_of_hits / 36.0f;
 
         auto player_board_structure = player == 0 ? player_0_structure : player_1_structure;
         auto opponent_board_structure = player == 1 ? player_0_structure : player_1_structure;
@@ -516,13 +517,16 @@ namespace BackgammonNS
                 Number of opponents blocks in home board
                 Location of high opponents anchor.
             */
-            score += scan.location_of_high_anchor[player] / 5.0;
-            score += scan.location_of_high_blot[player] / 15.0;
+            score += scan.stat[AC_location_of_high_anchor].element[player] / 5.0f;
+            score += scan.stat[AC_location_of_high_blot].element[player] / 15.0f;
+            score -= scan.stat[AC_anchors_in_opp_board].element[player];
+            score -= scan.stat[AC_blots_in_opp_board].element[player];
 
-            score += (float)scan.raw_block_value[player];
-            score += (float)scan.raw_slot_value[player] / 3.0f;
-            score += (float)scan.raw_range_value[player] / 3.0f;
+            score += (float)scan.stat[AC_raw_block_value].element[player];
+            score += (float)scan.stat[AC_raw_slot_value].element[player] / 3.0f;
+            score += (float)scan.stat[AC_raw_range_value].element[player] / 3.0f;
             score -= pip_lead / 16.0f;
+            score -= hit_pct / 3.0;
         }
         else if (player_board_structure == BoardStructure::prime && opponent_board_structure == BoardStructure::blitz)
         {
@@ -543,12 +547,13 @@ namespace BackgammonNS
                 Number of opponents blocks in home board
                 Location of high opponents anchor.
             */
-            score -= scan.blots_in_opp_board[player];
+            score -= scan.stat[AC_blots_in_opp_board].element[player];
             
-            score += (float)scan.raw_block_value[player];
-            score += (float)scan.raw_slot_value[player] / 3.0f;
-            score += (float)scan.raw_range_value[player] / 3.0f;
+            score += (float)scan.stat[AC_raw_block_value].element[player];
+            score += (float)scan.stat[AC_raw_slot_value].element[player] / 3.0f;
+            score += (float)scan.stat[AC_raw_range_value].element[player] / 3.0f;
             score -= pip_lead / 16.0f;
+            score -= hit_pct / 3.0;
         }
         else if (player_board_structure == BoardStructure::blitz && opponent_board_structure == BoardStructure::prime)
         {
@@ -565,10 +570,10 @@ namespace BackgammonNS
             Do Not Slot!
                 Raw slot score
             */
-            score += scan.checkers_on_bar[opponent];
-            score += scan.blocks_in_home_board[player];
-            score -= scan.blots_in_opp_board[player] / 2.0f;
-            score -= scan.anchors_in_opp_board[player] / 2.0f;
+            score += scan.stat[AC_checkers_on_bar].element[opponent];
+            score += scan.stat[AC_blocks_in_home_board].element[player];
+            score -= scan.stat[AC_blots_in_opp_board].element[player] / 2.0f;
+            score -= scan.stat[AC_anchors_in_opp_board].element[player] / 2.0f;
             score += pip_lead / 8.0f;
         }
         else if (player_board_structure == BoardStructure::blitz && opponent_board_structure == BoardStructure::blitz)
@@ -586,13 +591,12 @@ namespace BackgammonNS
                 Number of blots in opponents home board
                 Number of blocks in opponents home board
             */
-            score += scan.checkers_on_bar[opponent];
-            score += scan.blocks_in_home_board[player];
-            score -= scan.blots_in_opp_board[player];
+            score += scan.stat[AC_checkers_on_bar].element[opponent];
+            score += scan.stat[AC_blocks_in_home_board].element[player];
+            score -= scan.stat[AC_blots_in_opp_board].element[player];
             score += pip_lead / 8.0f;
         }
 
-        //score -= (float)scan.number_of_hits / 36.0f;
 
         return score / 2.0f;
     }
@@ -620,21 +624,21 @@ namespace BackgammonNS
             scan_position(position, scan);
             auto [player_0_structure, player_1_structure] = get_board_structure(scan);
 
-            chart_structure[scan.structure[0]].push_back(player_0_test_struct);
-            chart_waste[scan.waste[0]].push_back(player_0_test_struct);
-            chart_impurity[scan.impurity[0]].push_back(player_0_test_struct);
-            chart_first[scan.first[0]].push_back(player_0_test_struct);
-            chart_in_the_zone[scan.in_the_zone[0]].push_back(player_0_test_struct);
-            chart_mountains[scan.mountains[0]].push_back(player_0_test_struct);
-            chart_lead[scan.pip_count[1] - scan.pip_count[0]].push_back(player_0_test_struct);
+            chart_structure[scan.stat[AC_structure].element[0]].push_back(player_0_test_struct);
+            chart_waste[scan.stat[AC_waste].element[0]].push_back(player_0_test_struct);
+            chart_impurity[scan.stat[AC_impurity].element[0]].push_back(player_0_test_struct);
+            chart_first[scan.stat[AC_first].element[0]].push_back(player_0_test_struct);
+            chart_in_the_zone[scan.stat[AC_in_the_zone].element[0]].push_back(player_0_test_struct);
+            chart_mountains[scan.stat[AC_mountains].element[0]].push_back(player_0_test_struct);
+            chart_lead[scan.stat[AC_pip_count].element[1] - scan.stat[AC_pip_count].element[0]].push_back(player_0_test_struct);
             
-            chart_structure[scan.structure[1]].push_back(player_1_test_struct);
-            chart_waste[scan.waste[1]].push_back(player_1_test_struct);
-            chart_impurity[scan.impurity[1]].push_back(player_1_test_struct);
-            chart_first[scan.first[1]].push_back(player_1_test_struct);
-            chart_in_the_zone[scan.in_the_zone[1]].push_back(player_1_test_struct);
-            chart_mountains[scan.mountains[1]].push_back(player_1_test_struct);
-            chart_lead[scan.pip_count[0] - scan.pip_count[1]].push_back(player_1_test_struct);
+            chart_structure[scan.stat[AC_structure].element[1]].push_back(player_1_test_struct);
+            chart_waste[scan.stat[AC_waste].element[1]].push_back(player_1_test_struct);
+            chart_impurity[scan.stat[AC_impurity].element[1]].push_back(player_1_test_struct);
+            chart_first[scan.stat[AC_first].element[1]].push_back(player_1_test_struct);
+            chart_in_the_zone[scan.stat[AC_in_the_zone].element[1]].push_back(player_1_test_struct);
+            chart_mountains[scan.stat[AC_mountains].element[1]].push_back(player_1_test_struct);
+            chart_lead[scan.stat[AC_pip_count].element[0] - scan.stat[AC_pip_count].element[1]].push_back(player_1_test_struct);
 
             scan.render();
             cout << player_0_test_struct << " " << player_1_test_struct << endl;
@@ -951,24 +955,24 @@ namespace BackgammonNS
 
     void AnalyzerScan::render()
     {
-        cout << "Pip Count:      " << setw(4) << pip_count[0] << " " << setw(4) << pip_count[1] << endl;
-        cout << "In the Zone:    " << setw(4) << in_the_zone[0] << " " << setw(4) << in_the_zone[1] << endl;
-        cout << "Raw Blk Value:  " << setw(4) << raw_block_value[0] << " " << setw(4) << raw_block_value[1] << endl;
-        cout << "Raw Slot Value: " << setw(4) << raw_slot_value[0] << " " << setw(4) << raw_slot_value[1] << endl;
-        cout << "Raw Rng Value:  " << setw(4) << raw_range_value[0] << " " << setw(4) << raw_range_value[1] << endl;
-        cout << "Structure:      " << setw(4) << structure[0] << " " << setw(4) << structure[1] << endl;
-        cout << "Impurity:       " << setw(4) << impurity[0] << " " << setw(4) << impurity[1] << endl;
-        cout << "Waste:          " << setw(4) << waste[0] << " " << setw(4) << waste[1] << endl;
-        cout << "First:          " << setw(4) << first[0] << " " << setw(4) << first[1] << endl;
-        cout << "Last:           " << setw(4) << last[0] << " " << setw(4) << last[1] << endl;
-        cout << "Mountains:      " << setw(4) << mountains[0] << " " << setw(4) << mountains[1] << endl;
-        cout << "Anchors:        " << setw(4) << anchors_in_opp_board[0] << " " << setw(4) << anchors_in_opp_board[1] << endl;
-        cout << "Blots OP HB:    " << setw(4) << blots_in_opp_board[0] << " " << setw(4) << blots_in_opp_board[1] << endl;
-        cout << "On Bar:         " << setw(4) << checkers_on_bar[0] << " " << setw(4) << checkers_on_bar[1] << endl;
-        cout << "High Anchor P:  " << setw(4) << location_of_high_anchor[0] << " " << setw(4) << location_of_high_anchor[1] << endl;
-        cout << "High blot:      " << setw(4) << location_of_high_blot[0] << " " << setw(4) << location_of_high_blot[1] << endl;
-        cout << "Blocks in HB:   " << setw(4) << blocks_in_home_board[0] << " " << setw(4) << blocks_in_home_board[1] << endl;
-        cout << "Blots in HB:    " << setw(4) << blots_in_home_board[0] << " " << setw(4) << blots_in_home_board[1] << endl;
+        cout << "Pip Count:      " << setw(4) << stat[AC_pip_count].element[0] << " " << setw(4) << stat[AC_pip_count].element[1] << endl;
+        cout << "In the Zone:    " << setw(4) << stat[AC_in_the_zone].element[0] << " " << setw(4) << stat[AC_in_the_zone].element[1] << endl;
+        cout << "Raw Blk Value:  " << setw(4) << stat[AC_raw_block_value].element[0] << " " << setw(4) << stat[AC_raw_block_value].element[1] << endl;
+        cout << "Raw Slot Value: " << setw(4) << stat[AC_raw_slot_value].element[0] << " " << setw(4) << stat[AC_raw_slot_value].element[1] << endl;
+        cout << "Raw Rng Value:  " << setw(4) << stat[AC_raw_range_value].element[0] << " " << setw(4) << stat[AC_raw_range_value].element[1] << endl;
+        cout << "Structure:      " << setw(4) << stat[AC_structure].element[0] << " " << setw(4) << stat[AC_structure].element[1] << endl;
+        cout << "Impurity:       " << setw(4) << stat[AC_impurity].element[0] << " " << setw(4) << stat[AC_impurity].element[1] << endl;
+        cout << "Waste:          " << setw(4) << stat[AC_waste].element[0] << " " << setw(4) << stat[AC_waste].element[1] << endl;
+        cout << "First:          " << setw(4) << stat[AC_first].element[0] << " " << setw(4) << stat[AC_first].element[1] << endl;
+        cout << "Last:           " << setw(4) << stat[AC_last].element[0] << " " << setw(4) << stat[AC_last].element[1] << endl;
+        cout << "Mountains:      " << setw(4) << stat[AC_mountains].element[0] << " " << setw(4) << stat[AC_mountains].element[1] << endl;
+        cout << "Anchors:        " << setw(4) << stat[AC_anchors_in_opp_board].element[0] << " " << setw(4) << stat[AC_anchors_in_opp_board].element[1] << endl;
+        cout << "Blots OP HB:    " << setw(4) << stat[AC_blots_in_opp_board].element[0] << " " << setw(4) << stat[AC_blots_in_opp_board].element[1] << endl;
+        cout << "On Bar:         " << setw(4) << stat[AC_checkers_on_bar].element[0] << " " << setw(4) << stat[AC_checkers_on_bar].element[1] << endl;
+        cout << "High Anchor P:  " << setw(4) << stat[AC_location_of_high_anchor].element[0] << " " << setw(4) << stat[AC_location_of_high_anchor].element[1] << endl;
+        cout << "High blot:      " << setw(4) << stat[AC_location_of_high_blot].element[0] << " " << setw(4) << stat[AC_location_of_high_blot].element[1] << endl;
+        cout << "Blocks in HB:   " << setw(4) << stat[AC_blocks_in_home_board].element[0] << " " << setw(4) << stat[AC_blocks_in_home_board].element[1] << endl;
+        cout << "Blots in HB:    " << setw(4) << stat[AC_blots_in_home_board].element[0] << " " << setw(4) << stat[AC_blots_in_home_board].element[1] << endl;
         
         cout << "Number of Hits  " << setw(4) << number_of_hits << endl;
         cout << "Blocked Mask:        ";
@@ -1008,26 +1012,26 @@ namespace BackgammonNS
     {
         for (auto x = 0u; x < 2; x++)
         {
-            pip_count[x] = 0;
-            in_the_zone[x] = 0;
-            anchors_in_opp_board[x] = 0;
-            checkers_on_bar[x] = 0;
-            blots_in_opp_board[x] = 0;
-            location_of_high_anchor[x] = -1;
-            location_of_high_blot[x] = -1;
-            blocks_in_home_board[x] = 0;
-            blots_in_home_board[x] = 0;
+            stat[AC_pip_count].element[x] = 0;
+            stat[AC_in_the_zone].element[x] = 0;
+            stat[AC_anchors_in_opp_board].element[x] = 0;
+            stat[AC_checkers_on_bar].element[x] = 0;
+            stat[AC_blots_in_opp_board].element[x] = 0;
+            stat[AC_location_of_high_anchor].element[x] = -1;
+            stat[AC_location_of_high_blot].element[x] = -1;
+            stat[AC_blocks_in_home_board].element[x] = 0;
+            stat[AC_blots_in_home_board].element[x] = 0;
 
-            raw_block_value[x] = 0.0f;
-            raw_slot_value[x] = 0.0f;
-            raw_range_value[x] = 0.0f;
+            stat[AC_raw_block_value].element[x] = 0.0f;
+            stat[AC_raw_slot_value].element[x] = 0.0f;
+            stat[AC_raw_range_value].element[x] = 0.0f;
 
-            structure[x] = 0;
-            impurity[x] = 0;
-            waste[x] = 0;
-            first[x] = -1;
-            last[x] = 0;
-            mountains[x] = 0;
+            stat[AC_structure].element[x] = 0;
+            stat[AC_impurity].element[x] = 0;
+            stat[AC_waste].element[x] = 0;
+            stat[AC_first].element[x] = -1;
+            stat[AC_last].element[x] = 0;
+            stat[AC_mountains].element[x] = 0;
             blocked_points_mask[x] = 0;
             blots_mask[x] = 0;
             mountains_mask[x] = 0;

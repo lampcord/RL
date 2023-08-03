@@ -9,6 +9,7 @@
 #include "console_agent.h"
 #include "random_agent.h"
 #include "analyzer_agent.h"
+#include "evaluation_vector.h"
 
 using namespace BackgammonNS;
 using namespace std;
@@ -70,6 +71,62 @@ int main()
 	cout << "=                                                                                                                                           =" << endl;
 	cout << "=============================================================================================================================================" << endl;
 	cout << "=============================================================================================================================================" << endl;
+	Squirrel3 rng(42);
+
+
+	EvaluationVector<10> u;
+	EvaluationVector<10> v;
+	EvaluationVector<10> w;
+
+	for (auto ndx = 0u; ndx < 10; ndx++)
+	{
+		if (ndx % 2 == 0) u.data[ndx] = (float)ndx;
+		v.data[ndx] = (float)ndx + 1.0f;
+		w.data[ndx] = ((float)(rng() % 501) - 237.0f) / 257.0f;
+	}
+	u.dump();
+	cout << endl;
+	v.dump();
+	cout << endl;
+	w.dump();
+	cout << endl;
+	cout << "u x w " << w.evaluate(u) << endl;
+	cout << "v x w " << w.evaluate(v) << endl;
+	w.promote(u);
+	w.dump();
+	cout << endl;
+	cout << "u x w " << w.evaluate(u) << endl;
+	w.demote(u);
+	w.dump();
+	cout << endl;
+	cout << "u x w " << w.evaluate(u) << endl;
+
+	for (auto x = 0u; x < 100; x++)
+	{
+		auto test = w.evaluate(u);
+		if (test > 10.0f) w.demote(u);
+		else if (test < 10.0f) w.promote(u);
+		auto test2 = w.evaluate(v);
+		if (test2 > 20.0f) w.demote(v);
+		else if (test2 < 20.f) w.promote(v);
+		w.dump();
+		cout << " " << test << " " << test2 << endl;
+	}
+	cout << "Before save ";
+	w.dump();
+	cout << endl;
+	w.save("test.vec");
+	w.clear();
+	cout << "After clear ";
+	w.dump();
+	cout << endl;
+	w.load("test.vec");
+	cout << "After load ";
+	w.dump();
+	cout << endl;
+
+	return 0;
+
 	//Analyzer::test_board_structure();
 	//return 0;
 
@@ -84,7 +141,6 @@ int main()
 
 	auto num_games = 10000u;
 	unsigned char player = 0;
-	Squirrel3 rng(42);
 	PositionStruct position;
 	Backgammon::get_initial_position(position);
 

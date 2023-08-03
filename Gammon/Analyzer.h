@@ -51,7 +51,6 @@ namespace BackgammonNS
 	const unsigned int AC_hit_pct = 18;
 	const unsigned int AC_max_value = 19;
 
-
 	struct AnalysisStat
 	{
 		float element[2];

@@ -71,5 +71,8 @@
     <ClInclude Include="analyzer_agent.h">
       <Filter>Agents</Filter>
     </ClInclude>
+    <ClInclude Include="evaluation_vector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

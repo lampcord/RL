@@ -1,0 +1,123 @@
+#pragma once
+#include <string>
+#include <array>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+
+template <unsigned int TLength>
+class EvaluationVector
+{
+public:
+	EvaluationVector() {
+		clear();
+	};
+
+	std::array<float, TLength> data;
+
+	void dump();
+	void clear();
+
+	bool load(std::string filename);
+	bool save(std::string filename);
+	float evaluate(const EvaluationVector<TLength>&v);
+	void promote(const EvaluationVector<TLength>& v);
+	void demote(const EvaluationVector<TLength>& v);
+};
+
+
+template<unsigned int TLength>
+inline void EvaluationVector<TLength>::dump()
+{
+	using namespace std;
+	
+	for (auto ndx = 0u; ndx < data.size(); ndx++)
+	{
+		cout << fixed << setprecision(2) << setw(6) << data[ndx] << "|";
+	}
+}
+
+template<unsigned int TLength>
+inline void EvaluationVector<TLength>::clear()
+{
+	for (auto ndx = 0u; ndx < data.size(); ndx++)
+	{
+		data[ndx] = 0.0f;
+	}
+}
+
+template<unsigned int TLength>
+inline bool EvaluationVector<TLength>::load(std::string filename)
+{
+	std::ifstream inputFile(filename, std::ios::binary);
+
+	if (!inputFile) {
+		std::cerr << "Error opening file: " << filename << std::endl;
+		return false;
+	}
+
+	inputFile.read(reinterpret_cast<char*>(data.data()), data.size() * sizeof(float));
+
+	if (inputFile.fail()) {
+		std::cerr << "Error reading file: " << filename << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+template<unsigned int TLength>
+inline bool EvaluationVector<TLength>::save(std::string filename)
+{
+	std::ofstream outputFile(filename, std::ios::binary);
+	outputFile.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(float));
+	outputFile.close();
+	return true;
+}
+
+template<unsigned int TLength>
+inline float EvaluationVector<TLength>::evaluate(const EvaluationVector<TLength>& v)
+{
+	auto total = 0.0f;
+
+	for (auto ndx = 0u; ndx < data.size(); ndx++)
+	{
+		total += data[ndx] * v.data[ndx];
+	}
+
+	return total;
+}
+
+template<unsigned int TLength>
+inline void EvaluationVector<TLength>::promote(const EvaluationVector<TLength>& v)
+{
+	for (auto ndx = 0u; ndx < data.size(); ndx++)
+	{
+		auto test = data[ndx] * v.data[ndx];
+		if (test > 0.0f)
+		{
+			data[ndx] *= 1.01;
+		}
+		else if (test < 0.0f)
+		{
+			data[ndx] /= 1.01;
+		}
+	}
+}
+
+template<unsigned int TLength>
+inline void EvaluationVector<TLength>::demote(const EvaluationVector<TLength>& v)
+{
+	for (auto ndx = 0u; ndx < data.size(); ndx++)
+	{
+		auto test = data[ndx] * v.data[ndx];
+		if (test > 0.0f)
+		{
+			data[ndx] /= 1.01;
+		}
+		else if (test < 0.0f)
+		{
+			data[ndx] *= 1.01;
+		}
+	}
+}

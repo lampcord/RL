@@ -149,6 +149,7 @@
     <ClInclude Include="analyzer_agent.h" />
     <ClInclude Include="backgammon.h" />
     <ClInclude Include="console_agent.h" />
+    <ClInclude Include="evaluation_vector.h" />
     <ClInclude Include="Gammon.h" />
     <ClInclude Include="movelist.h" />
     <ClInclude Include="PerfTimer.h" />

@@ -664,12 +664,12 @@ namespace BackgammonNS
         const auto [player_0_bar, player_1_bar] = get_bar_info(position);
         cout << "|";
         for (auto bar = 0; bar < 8; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "      | " << setw(3) << scan.stat[AC_pip_count].element[1] << " X" << (player == 1 ? "*" : " ") << "|      ";
+        cout << "      | " << fixed << setprecision(0) << setw(3) << scan.stat[AC_pip_count].element[1] << " X" << (player == 1 ? "*" : " ") << "|      ";
         for (auto bar = 0; bar < 8; bar++) cout << (player_1_bar + 1 > (8 - bar) ? 'X' : ' ');
         cout << "|" << endl;
         cout << "|";
         for (auto bar = 8; bar < 15; bar++) cout << (player_0_bar > bar ? 'O' : ' ');
-        cout << "       | " << setw(3) << scan.stat[AC_pip_count].element[0] << " O" << (player == 0 ? "*" : " ") << "|       ";
+        cout << "       | " << fixed << setprecision(0) << setw(3) << scan.stat[AC_pip_count].element[0] << " O" << (player == 0 ? "*" : " ") << "|       ";
         for (auto bar = 8; bar < 15; bar++) cout << (player_1_bar > (22 - bar) ? 'X' : ' ');
         cout << "|" << endl;
     }

@@ -48,11 +48,19 @@ namespace BackgammonNS
 	const unsigned int AC_raw_block_value = 15;
 	const unsigned int AC_raw_slot_value = 16;
 	const unsigned int AC_raw_range_value = 17;
-	const unsigned int AC_max_value = 17;
+	const unsigned int AC_hit_pct = 18;
+	const unsigned int AC_max_value = 19;
+
 
 	struct AnalysisStat
 	{
 		float element[2];
+	};
+	struct AnalyzerVector
+	{
+		AnalysisStat stat[AC_max_value];
+		void clear();
+		void dump_stat_line(int player);
 	};
 	struct AnalyzerScan
 	{
@@ -62,8 +70,10 @@ namespace BackgammonNS
 		unsigned int blots_mask[2] = { 0,0 };
 		unsigned int mountains_mask[2] = { 0,0 };
 		unsigned int triples_mask[2] = { 0,0 };
-		unsigned int number_of_hits = 0;
+		//unsigned int number_of_hits = 0;
 		void render();
+		void dump_stat_line(int player);
+		void dump_stat_header();
 		static void print_mask_desc(unsigned int mask);
 		void clear();
 	};
@@ -83,6 +93,6 @@ namespace BackgammonNS
 
 		static short get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, bool verbose);
 		static void scan_position(const PositionStruct& position, AnalyzerScan& scan);
-		static float analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure);
+		static float analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure, bool verbose);
 	};
 }

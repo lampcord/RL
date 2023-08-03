@@ -163,7 +163,7 @@ float rollout(const PositionStruct &position, unsigned char player, std::unique_
 		{
 			AnalyzerScan scan;
 			Analyzer::scan_position(rollout_position, scan);
-			total_score += Analyzer::analyze(scan, player, BoardStructure::unclear, BoardStructure::unclear);
+			total_score += Analyzer::analyze(scan, player, BoardStructure::unclear, BoardStructure::unclear, false);
 		}
 		else
 		{

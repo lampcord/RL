@@ -148,6 +148,28 @@ using namespace std;
 
 namespace BackgammonNS
 {
+    static std::map<const unsigned int, std::string> stat_descriptions = {
+        {AC_pip_count, "PiP"},
+        {AC_in_the_zone, "InZn"},
+        {AC_anchors_in_opp_board, "Anch"},
+        {AC_blots_in_opp_board, "B OP"},
+        {AC_checkers_on_bar, "Bar"},
+        {AC_location_of_high_anchor, "H Anc"},
+        {AC_location_of_high_blot, "H Blt"},
+        {AC_blocks_in_home_board, "BL HB"},
+        {AC_blots_in_home_board, "BT HB"},
+        {AC_structure, "STR"},
+        {AC_impurity, "IMP"},
+        {AC_waste, "WASTE"},
+        {AC_first, "First"},
+        {AC_last, "Last"},
+        {AC_mountains, "Mnt"},
+        {AC_raw_block_value, "BL V"},
+        {AC_raw_slot_value, "SL V"},
+        {AC_raw_range_value, "RN V"},
+        {AC_hit_pct, "HtPct"}
+    };
+
     static ska::bytell_hash_map<unsigned short, unsigned long long> block_masks_for_rolls = {
         {36, 0b100000000000000000000000},
         {72, 0b110000000000000000000000},
@@ -265,8 +287,8 @@ namespace BackgammonNS
             auto move_set = move_list.move_list[move_list.move_list_ndx[ndx]];
 
             scan_position(move_set.result_position, scan);
-            scan.number_of_hits = get_number_of_hits(move_set.result_position, 1 - player, hit_move_list, false);
-            float score = analyze(scan , player, player_0_structure, player_1_structure);
+            scan.stat[AC_hit_pct].element[player] = (float)get_number_of_hits(move_set.result_position, 1 - player, hit_move_list, false) / 36.0f;
+            float score = analyze(scan , player, player_0_structure, player_1_structure, verbose);
             if (verbose) {
                 cout << MoveList::get_move_desc(move_set, player) << " " << score << endl;
                 //scan.render();
@@ -483,13 +505,12 @@ namespace BackgammonNS
 
 
     */
-    float Analyzer::analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure)
+    float Analyzer::analyze(AnalyzerScan& scan, unsigned char player, const BoardStructure& player_0_structure, const BoardStructure& player_1_structure, bool verbose)
     {
         cout << "Board Structures: " << get_board_structure_desc(player_0_structure) << " " << get_board_structure_desc(player_1_structure) << endl;
         auto pip_lead = player == 0 ? (float)scan.stat[AC_pip_count].element[1] - (float)scan.stat[AC_pip_count].element[0] : (float)scan.stat[AC_pip_count].element[0] - (float)scan.stat[AC_pip_count].element[1];
         auto score = 0.0f; 
         auto opponent = 1 - player;
-        auto hit_pct = (float)scan.number_of_hits / 36.0f;
 
         auto player_board_structure = player == 0 ? player_0_structure : player_1_structure;
         auto opponent_board_structure = player == 1 ? player_0_structure : player_1_structure;
@@ -497,6 +518,8 @@ namespace BackgammonNS
         //score += (float)scan.raw_block_value[player];
         //score += (float)scan.raw_slot_value[player] / 3.0f;
 
+        AnalyzerVector mult_vec;
+        mult_vec.clear();
         if (player_board_structure == BoardStructure::prime && opponent_board_structure == BoardStructure::prime)
         {
             /*
@@ -517,6 +540,29 @@ namespace BackgammonNS
                 Number of opponents blocks in home board
                 Location of high opponents anchor.
             */
+            auto test_total = 0.0f;
+            mult_vec.stat[AC_location_of_high_anchor].element[player] = 1.0f / 5.0f;
+            mult_vec.stat[AC_location_of_high_blot].element[player] = 1.0f / 15.0f;
+            mult_vec.stat[AC_anchors_in_opp_board].element[player] = -1.0f;
+            mult_vec.stat[AC_blots_in_opp_board].element[player] = -1.0f;
+
+            mult_vec.stat[AC_raw_block_value].element[player] = 1.0f;
+            mult_vec.stat[AC_raw_slot_value].element[player] = 1.0f / 3.0f;
+            mult_vec.stat[AC_raw_range_value].element[player] = 1.0f / 3.0f;
+
+            mult_vec.stat[AC_pip_count].element[player] = 1.0f / 16.0f;
+            mult_vec.stat[AC_pip_count].element[opponent] = -1.0f / 16.0f;
+            mult_vec.stat[AC_hit_pct].element[player] = -1.0f / 3.0f;
+
+            for (auto ac = 0u; ac < AC_max_value; ac++)
+            {
+                test_total += mult_vec.stat[ac].element[0] * scan.stat[ac].element[0];
+                test_total += mult_vec.stat[ac].element[1] * scan.stat[ac].element[1];
+            }
+            //test_total -= pip_lead / 16.0f;
+            //test_total -= hit_pct / 3.0f;
+            cout << "test_total " << test_total << endl;
+
             score += scan.stat[AC_location_of_high_anchor].element[player] / 5.0f;
             score += scan.stat[AC_location_of_high_blot].element[player] / 15.0f;
             score -= scan.stat[AC_anchors_in_opp_board].element[player];
@@ -526,7 +572,7 @@ namespace BackgammonNS
             score += (float)scan.stat[AC_raw_slot_value].element[player] / 3.0f;
             score += (float)scan.stat[AC_raw_range_value].element[player] / 3.0f;
             score -= pip_lead / 16.0f;
-            score -= hit_pct / 3.0;
+            score -= scan.stat[AC_hit_pct].element[player] / 3.0;
         }
         else if (player_board_structure == BoardStructure::prime && opponent_board_structure == BoardStructure::blitz)
         {
@@ -553,7 +599,7 @@ namespace BackgammonNS
             score += (float)scan.stat[AC_raw_slot_value].element[player] / 3.0f;
             score += (float)scan.stat[AC_raw_range_value].element[player] / 3.0f;
             score -= pip_lead / 16.0f;
-            score -= hit_pct / 3.0;
+            score -= scan.stat[AC_hit_pct].element[player] / 3.0;
         }
         else if (player_board_structure == BoardStructure::blitz && opponent_board_structure == BoardStructure::prime)
         {
@@ -596,9 +642,20 @@ namespace BackgammonNS
             score -= scan.stat[AC_blots_in_opp_board].element[player];
             score += pip_lead / 8.0f;
         }
+        if (verbose)
+        {
+            scan.dump_stat_line(0);
+            cout << endl;
+            scan.dump_stat_line(1);
+            cout << endl;
+            mult_vec.dump_stat_line(0);
+            cout << endl;
+            mult_vec.dump_stat_line(1);
+            cout << endl;
+        }
 
 
-        return score / 2.0f;
+        return score;
     }
 
     bool Analyzer::test_board_structure()
@@ -955,26 +1012,13 @@ namespace BackgammonNS
 
     void AnalyzerScan::render()
     {
-        cout << "Pip Count:      " << setw(4) << stat[AC_pip_count].element[0] << " " << setw(4) << stat[AC_pip_count].element[1] << endl;
-        cout << "In the Zone:    " << setw(4) << stat[AC_in_the_zone].element[0] << " " << setw(4) << stat[AC_in_the_zone].element[1] << endl;
-        cout << "Raw Blk Value:  " << setw(4) << stat[AC_raw_block_value].element[0] << " " << setw(4) << stat[AC_raw_block_value].element[1] << endl;
-        cout << "Raw Slot Value: " << setw(4) << stat[AC_raw_slot_value].element[0] << " " << setw(4) << stat[AC_raw_slot_value].element[1] << endl;
-        cout << "Raw Rng Value:  " << setw(4) << stat[AC_raw_range_value].element[0] << " " << setw(4) << stat[AC_raw_range_value].element[1] << endl;
-        cout << "Structure:      " << setw(4) << stat[AC_structure].element[0] << " " << setw(4) << stat[AC_structure].element[1] << endl;
-        cout << "Impurity:       " << setw(4) << stat[AC_impurity].element[0] << " " << setw(4) << stat[AC_impurity].element[1] << endl;
-        cout << "Waste:          " << setw(4) << stat[AC_waste].element[0] << " " << setw(4) << stat[AC_waste].element[1] << endl;
-        cout << "First:          " << setw(4) << stat[AC_first].element[0] << " " << setw(4) << stat[AC_first].element[1] << endl;
-        cout << "Last:           " << setw(4) << stat[AC_last].element[0] << " " << setw(4) << stat[AC_last].element[1] << endl;
-        cout << "Mountains:      " << setw(4) << stat[AC_mountains].element[0] << " " << setw(4) << stat[AC_mountains].element[1] << endl;
-        cout << "Anchors:        " << setw(4) << stat[AC_anchors_in_opp_board].element[0] << " " << setw(4) << stat[AC_anchors_in_opp_board].element[1] << endl;
-        cout << "Blots OP HB:    " << setw(4) << stat[AC_blots_in_opp_board].element[0] << " " << setw(4) << stat[AC_blots_in_opp_board].element[1] << endl;
-        cout << "On Bar:         " << setw(4) << stat[AC_checkers_on_bar].element[0] << " " << setw(4) << stat[AC_checkers_on_bar].element[1] << endl;
-        cout << "High Anchor P:  " << setw(4) << stat[AC_location_of_high_anchor].element[0] << " " << setw(4) << stat[AC_location_of_high_anchor].element[1] << endl;
-        cout << "High blot:      " << setw(4) << stat[AC_location_of_high_blot].element[0] << " " << setw(4) << stat[AC_location_of_high_blot].element[1] << endl;
-        cout << "Blocks in HB:   " << setw(4) << stat[AC_blocks_in_home_board].element[0] << " " << setw(4) << stat[AC_blocks_in_home_board].element[1] << endl;
-        cout << "Blots in HB:    " << setw(4) << stat[AC_blots_in_home_board].element[0] << " " << setw(4) << stat[AC_blots_in_home_board].element[1] << endl;
-        
-        cout << "Number of Hits  " << setw(4) << number_of_hits << endl;
+        dump_stat_header();
+        cout << endl;
+        dump_stat_line(0);
+        cout << endl;
+        dump_stat_line(1);
+        cout << endl;
+
         cout << "Blocked Mask:        ";
         print_mask_desc(blocked_points_mask[0]);
         cout << "   ";
@@ -998,6 +1042,22 @@ namespace BackgammonNS
         cout << "   ";
         print_mask_desc(triples_mask[1]);
         cout << endl;
+    }
+
+    void AnalyzerScan::dump_stat_line(int player)
+    {
+        for (auto ac = 0u; ac < AC_max_value; ac++)
+        {
+            cout << fixed << setprecision(2) << setw(6) << stat[ac].element[player] << "|";
+        }
+    }
+
+    void AnalyzerScan::dump_stat_header()
+    {
+        for (unsigned int ac = 0u; ac < AC_max_value; ac++)
+        {
+            cout << setw(6) << stat_descriptions[ac] << "|";
+        }
     }
 
     void AnalyzerScan::print_mask_desc(unsigned int mask)
@@ -1032,10 +1092,31 @@ namespace BackgammonNS
             stat[AC_first].element[x] = -1;
             stat[AC_last].element[x] = 0;
             stat[AC_mountains].element[x] = 0;
+            stat[AC_hit_pct].element[x] = 0;
+
             blocked_points_mask[x] = 0;
             blots_mask[x] = 0;
             mountains_mask[x] = 0;
             triples_mask[x] = 0;
+        }
+    }
+
+    void AnalyzerVector::clear()
+    {
+        for (auto ac = 0u; ac < AC_max_value; ac++)
+        {
+            for (auto x = 0u; x < 2; x++)
+            {
+                stat[ac].element[x] = 0.0f;
+            }
+        }
+    }
+
+    void AnalyzerVector::dump_stat_line(int player)
+    {
+        for (auto ac = 0u; ac < AC_max_value; ac++)
+        {
+            cout << fixed << setprecision(2) << setw(6) << stat[ac].element[player] << "|";
         }
     }
 

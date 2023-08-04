@@ -74,48 +74,49 @@ int main()
 	Squirrel3 rng(42);
 
 
-	EvaluationVector<10> t;
-	EvaluationVector<10> u;
-	EvaluationVector<10> v;
-	EvaluationVector<10> w;
+	//EvaluationVector<10> t;
+	//EvaluationVector<10> u;
+	//EvaluationVector<10> v;
+	//EvaluationVector<10> w;
 
-	for (auto ndx = 0u; ndx < 10; ndx++)
-	{
-		if (ndx % 3 == 0) t.data[ndx] = (float)ndx;
-		if (ndx % 2 == 0) u.data[ndx] = (float)ndx;
-		v.data[ndx] = (float)ndx + 1.0f;
-		w.data[ndx] = ((float)(rng() % 501) - 237.0f) / 257.0f;
-	}
+	//for (auto ndx = 0u; ndx < 10; ndx++)
+	//{
+	//	if (ndx % 3 == 0) t.data[ndx] = (float)ndx;
+	//	if (ndx % 2 == 0) u.data[ndx] = (float)ndx;
+	//	v.data[ndx] = (float)ndx + 1.0f;
+	//	w.data[ndx] = ((float)(rng() % 501) - 237.0f) / 257.0f;
+	//}
+	//w.set(1.0f);
 
-	float t1 = 1.0f;
-	float t2 = 0.0f;
-	float t3 = -1.0f;
-	for (auto x = 0u; x < 1000; x++)
-	{
-		w.move_towards(u, t1);
-		w.move_towards(v, t2);
-		w.move_towards(t, t3);
-		w.dump();
-		cout << setw(4) << x << " " << setprecision(4) << w.evaluate(u) << " " << w.evaluate(v) << " " << w.evaluate(t) << endl;
-		if (abs(w.evaluate(u) - t1) < 0.001f && abs(w.evaluate(v) - t2) < 0.001f && abs(w.evaluate(t) - t3) < 0.001f) break;
-	}
-	cout << "Before save ";
-	w.dump();
-	cout << endl;
-	w.save("test.vec");
-	w.clear();
-	cout << "After clear ";
-	w.dump();
-	cout << endl;
-	w.load("test.vec");
-	cout << "After load ";
-	w.dump();
-	cout << endl;
+	//float t1 = 1.0f;
+	//float t2 = 0.0f;
+	//float t3 = -1.0f;
+	//for (auto x = 0u; x < 1000; x++)
+	//{
+	//	w.move_towards(u, t1);
+	//	w.move_towards(v, t2);
+	//	w.move_towards(t, t3);
+	//	w.dump();
+	//	cout << setw(4) << x << " " << setprecision(4) << w.evaluate(u) << " " << w.evaluate(v) << " " << w.evaluate(t) << endl;
+	//	if (abs(w.evaluate(u) - t1) < 0.001f && abs(w.evaluate(v) - t2) < 0.001f && abs(w.evaluate(t) - t3) < 0.001f) break;
+	//}
+	//cout << "Before save ";
+	//w.dump();
+	//cout << endl;
+	//w.save("test.vec");
+	//w.clear();
+	//cout << "After clear ";
+	//w.dump();
+	//cout << endl;
+	//w.load("test.vec");
+	//cout << "After load ";
+	//w.dump();
+	//cout << endl;
 
-	return 0;
-
-	//Analyzer::test_board_structure();
 	//return 0;
+
+	Analyzer::test_board_structure();
+	return 0;
 
 	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();

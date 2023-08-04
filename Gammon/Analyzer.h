@@ -81,9 +81,9 @@ namespace BackgammonNS
 	private:
 		static void dump_block_mask_for_rolls();
 	public:
-		static void dump_chart(std::string desc, std::map<int, std::vector<char>>& chart_structure);
 		static std::string get_board_structure_desc(const BoardStructure& structure);
-		static std::tuple<BoardStructure, BoardStructure> get_board_structure(const AnalyzerScan& scan, bool verbose=true);
+		static std::tuple<BoardStructure, BoardStructure> get_board_structure(const AnalyzerScan& scan, bool verbose = true);
+		static std::tuple<float, float> get_board_structure_score(const AnalyzerScan& scan, bool verbose=true);
 		static bool test_board_structure();
 
 		static unsigned short get_number_of_hits(const PositionStruct& position, unsigned char player, MoveList& move_list, bool verbose = true);

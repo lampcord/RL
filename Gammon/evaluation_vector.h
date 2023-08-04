@@ -17,9 +17,12 @@ public:
 
 	void dump();
 	void clear();
+	void set(float val);
 
 	bool load(std::string filename);
 	bool save(std::string filename);
+
+	float magnitude();
 	float evaluate(const EvaluationVector<TLength>&v);
 	void move_towards(const EvaluationVector<TLength>& v, float target);
 };
@@ -42,6 +45,15 @@ inline void EvaluationVector<TLength>::clear()
 	for (auto ndx = 0u; ndx < data.size(); ndx++)
 	{
 		data[ndx] = 0.0f;
+	}
+}
+
+template<unsigned int TLength>
+inline void EvaluationVector<TLength>::set(float val)
+{
+	for (auto ndx = 0u; ndx < data.size(); ndx++)
+	{
+		data[ndx] = val;
 	}
 }
 
@@ -75,6 +87,16 @@ inline bool EvaluationVector<TLength>::save(std::string filename)
 }
 
 template<unsigned int TLength>
+inline float EvaluationVector<TLength>::magnitude()
+{
+	auto mag = 0.0f;
+
+	for (auto val : data) mag += val;
+	
+	return mag;
+}
+
+template<unsigned int TLength>
 inline float EvaluationVector<TLength>::evaluate(const EvaluationVector<TLength>& v)
 {
 	auto total = 0.0f;
@@ -93,6 +115,7 @@ inline void EvaluationVector<TLength>::move_towards(const EvaluationVector<TLeng
 	auto actual = evaluate(v);
 	auto delta = target - actual;
 	auto magnitude = 0.0f;
+	
 	for (auto ndx = 0u; ndx < data.size(); ndx++)
 	{
 		magnitude += abs(data[ndx] * v.data[ndx]);

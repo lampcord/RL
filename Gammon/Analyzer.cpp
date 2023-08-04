@@ -304,6 +304,16 @@ namespace BackgammonNS
 
     std::tuple<BoardStructure, BoardStructure> Analyzer::get_board_structure(const AnalyzerScan& scan, bool verbose)
     {
+        auto [total_blitz_pct_0, total_blitz_pct_1] = get_board_structure_score(scan, verbose);
+
+        BoardStructure board_structure_0 = total_blitz_pct_0 > 0.5f ? BoardStructure::blitz : BoardStructure::prime;
+        BoardStructure board_structure_1 = total_blitz_pct_1 > 0.5f ? BoardStructure::blitz : BoardStructure::prime;
+        
+        return {board_structure_0, board_structure_1};
+    }
+
+    std::tuple<float, float> Analyzer::get_board_structure_score(const AnalyzerScan& scan, bool verbose)
+    {
         float total_impurity_pct[2] = { 0.0f, 0.0f };
         float total_first_pct[2] = { 0.0f, 0.0f };
         float total_in_the_zone_pct[2] = { 0.0f, 0.0f };
@@ -373,17 +383,14 @@ namespace BackgammonNS
         }
         if (verbose)
         {
-            cout << "Impurity PCT    " << setw(12) << total_impurity_pct[0] << " " << setw(12) << total_impurity_pct[1] << endl;
-            cout << "First PCT       " << setw(12) << total_first_pct[0] << " " << setw(12) << total_first_pct[1] << endl;
-            cout << "In The Zone PCT " << setw(12) << total_in_the_zone_pct[0] << " " << setw(12) << total_in_the_zone_pct[1] << endl;
-            cout << "Lead PCT        " << setw(12) << total_lead_pct[0] << " " << setw(12) << total_lead_pct[1] << endl;
-            cout << "Blitz PCT       " << setw(12) << total_blitz_pct[0] << " " << setw(12) << total_blitz_pct[1] << endl;
+            cout << "Impurity PCT    " << setprecision(4) << setw(12) << total_impurity_pct[0] << " " << setw(12) << total_impurity_pct[1] << endl;
+            cout << "First PCT       " << setprecision(4) << setw(12) << total_first_pct[0] << " " << setw(12) << total_first_pct[1] << endl;
+            cout << "In The Zone PCT " << setprecision(4) << setw(12) << total_in_the_zone_pct[0] << " " << setw(12) << total_in_the_zone_pct[1] << endl;
+            cout << "Lead PCT        " << setprecision(4) << setw(12) << total_lead_pct[0] << " " << setw(12) << total_lead_pct[1] << endl;
+            cout << "Blitz PCT       " << setprecision(4) << setw(12) << total_blitz_pct[0] << " " << setw(12) << total_blitz_pct[1] << endl;
         }
 
-        BoardStructure board_structure_0 = total_blitz_pct[0] > 0.5f ? BoardStructure::blitz : BoardStructure::prime;
-        BoardStructure board_structure_1 = total_blitz_pct[1] > 0.5f ? BoardStructure::blitz : BoardStructure::prime;
-        
-        return {board_structure_0, board_structure_1};
+        return { total_blitz_pct[0], total_blitz_pct[1] };
     }
 
 
@@ -660,55 +667,45 @@ namespace BackgammonNS
 
     bool Analyzer::test_board_structure()
     {
-        map<int, vector<char>> chart_structure;
-        map<int, vector<char>> chart_impurity;
-        map<int, vector<char>> chart_waste;
-        map<int, vector<char>> chart_first;
-        map<int, vector<char>> chart_in_the_zone;
-        map<int, vector<char>> chart_lead;
-        map<int, vector<char>> chart_mountains;
-
         auto ndx = 0;
+        auto total = 0.0f;
+        auto correct = 0.0f;
+        auto variance = 0.0f;
+
         for (auto &s : blitz_prime_test_data)
         {
             cout << setw(3) << ndx ++ << ") " << s << endl;
             PositionStruct position;
             Backgammon::position_from_string(s, position);
             Backgammon::render(position, 0);
-            auto player_0_test_struct = s[79];
-            auto player_1_test_struct = s[81];
+            auto player_0_test_struct_char = s[79];
+            auto player_1_test_struct_char = s[81];
             AnalyzerScan scan;
             scan_position(position, scan);
-            auto [player_0_structure, player_1_structure] = get_board_structure(scan);
+            //auto [player_0_structure, player_1_structure] = get_board_structure(scan);
+            auto [total_blitz_pct_0, total_blitz_pct_1] = get_board_structure_score(scan, true);
 
-            chart_structure[scan.stat[AC_structure].element[0]].push_back(player_0_test_struct);
-            chart_waste[scan.stat[AC_waste].element[0]].push_back(player_0_test_struct);
-            chart_impurity[scan.stat[AC_impurity].element[0]].push_back(player_0_test_struct);
-            chart_first[scan.stat[AC_first].element[0]].push_back(player_0_test_struct);
-            chart_in_the_zone[scan.stat[AC_in_the_zone].element[0]].push_back(player_0_test_struct);
-            chart_mountains[scan.stat[AC_mountains].element[0]].push_back(player_0_test_struct);
-            chart_lead[scan.stat[AC_pip_count].element[1] - scan.stat[AC_pip_count].element[0]].push_back(player_0_test_struct);
-            
-            chart_structure[scan.stat[AC_structure].element[1]].push_back(player_1_test_struct);
-            chart_waste[scan.stat[AC_waste].element[1]].push_back(player_1_test_struct);
-            chart_impurity[scan.stat[AC_impurity].element[1]].push_back(player_1_test_struct);
-            chart_first[scan.stat[AC_first].element[1]].push_back(player_1_test_struct);
-            chart_in_the_zone[scan.stat[AC_in_the_zone].element[1]].push_back(player_1_test_struct);
-            chart_mountains[scan.stat[AC_mountains].element[1]].push_back(player_1_test_struct);
-            chart_lead[scan.stat[AC_pip_count].element[0] - scan.stat[AC_pip_count].element[1]].push_back(player_1_test_struct);
+            BoardStructure player_0_structure = total_blitz_pct_0 > 0.5f ? BoardStructure::blitz : BoardStructure::prime;
+            BoardStructure player_1_structure = total_blitz_pct_1 > 0.5f ? BoardStructure::blitz : BoardStructure::prime;
 
             scan.render();
-            cout << player_0_test_struct << " " << player_1_test_struct << endl;
+            BoardStructure player_0_test_struct = player_0_test_struct_char == 'B' ? BoardStructure::blitz : BoardStructure::prime;
+            BoardStructure player_1_test_struct = player_1_test_struct_char == 'B' ? BoardStructure::blitz : BoardStructure::prime;
+            if (player_0_test_struct_char == 'B')
+            cout << player_0_test_struct_char << " " << player_1_test_struct_char << endl;
+            cout << get_board_structure_desc(player_0_test_struct) << " " << get_board_structure_desc(player_1_test_struct) << endl;
+            if (player_0_test_struct == player_0_structure) correct++;
+            if (player_1_test_struct == player_1_structure) correct++;
+            total += 2.0f;
+            auto diff = 0.0f;
+            diff = player_0_test_struct == BoardStructure::blitz ? 1.0f - total_blitz_pct_0 : 0.0f - total_blitz_pct_0;
+            variance += diff * diff;
+            diff = player_1_test_struct == BoardStructure::blitz ? 1.0f - total_blitz_pct_1 : 0.0f - total_blitz_pct_1;
+            variance += diff * diff;
 
         }
-        dump_chart("Structure", chart_structure);
-        dump_chart("Impurity", chart_impurity);
-        dump_chart("Waste", chart_waste);
-        dump_chart("First", chart_first);
-        dump_chart("In The Zone", chart_in_the_zone);
-        dump_chart("Lead", chart_lead);
-        dump_chart("Mountains", chart_mountains);
 
+        cout << "Correct: " << correct << " Total: " << total << " pct " << correct / total << " variance " << setprecision(6) << variance / total << endl;
         /*
         if impurity <= 0: P
         if impurity >= 3: B
@@ -988,25 +985,6 @@ namespace BackgammonNS
                 }
                 roll_test_mask >>= 1;
             }
-        }
-    }
-
-    void Analyzer::dump_chart(string desc, std::map<int, std::vector<char>>& chart_structure)
-    {
-        cout << desc << endl;
-        for (auto &p : chart_structure)
-        {
-            float total_b = 0.0f;
-            float total_p = 0.0f;
-
-            cout << p.first << " => ";
-            for (auto v : p.second) {
-                if (v == 'B') total_b++;
-                if (v == 'P') total_p++;
-                cout << v;
-            }
-            cout << " %B " << total_b/ (total_b + total_p);
-            cout << endl;
         }
     }
 

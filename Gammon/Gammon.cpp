@@ -74,43 +74,30 @@ int main()
 	Squirrel3 rng(42);
 
 
+	EvaluationVector<10> t;
 	EvaluationVector<10> u;
 	EvaluationVector<10> v;
 	EvaluationVector<10> w;
 
 	for (auto ndx = 0u; ndx < 10; ndx++)
 	{
+		if (ndx % 3 == 0) t.data[ndx] = (float)ndx;
 		if (ndx % 2 == 0) u.data[ndx] = (float)ndx;
 		v.data[ndx] = (float)ndx + 1.0f;
 		w.data[ndx] = ((float)(rng() % 501) - 237.0f) / 257.0f;
 	}
-	u.dump();
-	cout << endl;
-	v.dump();
-	cout << endl;
-	w.dump();
-	cout << endl;
-	cout << "u x w " << w.evaluate(u) << endl;
-	cout << "v x w " << w.evaluate(v) << endl;
-	w.promote(u);
-	w.dump();
-	cout << endl;
-	cout << "u x w " << w.evaluate(u) << endl;
-	w.demote(u);
-	w.dump();
-	cout << endl;
-	cout << "u x w " << w.evaluate(u) << endl;
 
-	for (auto x = 0u; x < 100; x++)
+	float t1 = 1.0f;
+	float t2 = 0.0f;
+	float t3 = -1.0f;
+	for (auto x = 0u; x < 1000; x++)
 	{
-		auto test = w.evaluate(u);
-		if (test > 10.0f) w.demote(u);
-		else if (test < 10.0f) w.promote(u);
-		auto test2 = w.evaluate(v);
-		if (test2 > 20.0f) w.demote(v);
-		else if (test2 < 20.f) w.promote(v);
+		w.move_towards(u, t1);
+		w.move_towards(v, t2);
+		w.move_towards(t, t3);
 		w.dump();
-		cout << " " << test << " " << test2 << endl;
+		cout << setw(4) << x << " " << setprecision(4) << w.evaluate(u) << " " << w.evaluate(v) << " " << w.evaluate(t) << endl;
+		if (abs(w.evaluate(u) - t1) < 0.001f && abs(w.evaluate(v) - t2) < 0.001f && abs(w.evaluate(t) - t3) < 0.001f) break;
 	}
 	cout << "Before save ";
 	w.dump();

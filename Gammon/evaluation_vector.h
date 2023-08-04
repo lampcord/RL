@@ -21,8 +21,7 @@ public:
 	bool load(std::string filename);
 	bool save(std::string filename);
 	float evaluate(const EvaluationVector<TLength>&v);
-	void promote(const EvaluationVector<TLength>& v);
-	void demote(const EvaluationVector<TLength>& v);
+	void move_towards(const EvaluationVector<TLength>& v, float target);
 };
 
 
@@ -89,35 +88,26 @@ inline float EvaluationVector<TLength>::evaluate(const EvaluationVector<TLength>
 }
 
 template<unsigned int TLength>
-inline void EvaluationVector<TLength>::promote(const EvaluationVector<TLength>& v)
+inline void EvaluationVector<TLength>::move_towards(const EvaluationVector<TLength>& v, float target)
 {
+	auto actual = evaluate(v);
+	auto delta = target - actual;
+	auto magnitude = 0.0f;
 	for (auto ndx = 0u; ndx < data.size(); ndx++)
 	{
-		auto test = data[ndx] * v.data[ndx];
-		if (test > 0.0f)
-		{
-			data[ndx] *= 1.01;
-		}
-		else if (test < 0.0f)
-		{
-			data[ndx] /= 1.01;
-		}
+		magnitude += abs(data[ndx] * v.data[ndx]);
 	}
-}
 
-template<unsigned int TLength>
-inline void EvaluationVector<TLength>::demote(const EvaluationVector<TLength>& v)
-{
+	if (magnitude == 0.0f) return;
+
 	for (auto ndx = 0u; ndx < data.size(); ndx++)
 	{
-		auto test = data[ndx] * v.data[ndx];
-		if (test > 0.0f)
-		{
-			data[ndx] /= 1.01;
-		}
-		else if (test < 0.0f)
-		{
-			data[ndx] *= 1.01;
-		}
+		auto val = (abs(data[ndx] * v.data[ndx]));
+
+		auto adjustment = delta * val / magnitude;
+		adjustment *= 0.01f;
+
+		data[ndx] += adjustment;
 	}
+
 }

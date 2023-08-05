@@ -8,8 +8,10 @@ namespace AnalyzerAgentNS
 {
 	void AnalyzerAgent::get_move(PositionStruct& position, unsigned char player, unsigned int roll, unique_ptr<MoveList>& move_list, Squirrel3& rng, bool verbose)
 	{
+		TStructVec struct_v;
+
 		Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
-		auto best_ndx = Analyzer::get_best_move_index(position, *move_list, player, verbose);
+		auto best_ndx = Analyzer::get_best_move_index(position, *move_list, player, struct_v, verbose);
 		if (best_ndx >= 0)
 		{
 			auto best_move_set = move_list->move_list[move_list->move_list_ndx[best_ndx]];

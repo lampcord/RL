@@ -15,7 +15,7 @@ public:
 
 	std::array<float, TLength> data;
 
-	void dump();
+	void dump(unsigned int digits=2);
 	void clear();
 	void set(float val);
 
@@ -29,13 +29,13 @@ public:
 
 
 template<unsigned int TLength>
-inline void EvaluationVector<TLength>::dump()
+inline void EvaluationVector<TLength>::dump(unsigned int digits)
 {
 	using namespace std;
 	
 	for (auto ndx = 0u; ndx < data.size(); ndx++)
 	{
-		cout << fixed << setprecision(2) << setw(6) << data[ndx] << "|";
+		cout << fixed << setprecision(digits) << setw(digits + 4) << data[ndx] << "|";
 	}
 }
 
@@ -118,17 +118,19 @@ inline void EvaluationVector<TLength>::move_towards(const EvaluationVector<TLeng
 	
 	for (auto ndx = 0u; ndx < data.size(); ndx++)
 	{
-		magnitude += abs(data[ndx] * v.data[ndx]);
+		//magnitude += abs(data[ndx] * v.data[ndx]);
+		magnitude += abs(v.data[ndx]);
 	}
 
 	if (magnitude == 0.0f) return;
 
 	for (auto ndx = 0u; ndx < data.size(); ndx++)
 	{
-		auto val = (abs(data[ndx] * v.data[ndx]));
+		//auto val = (abs(data[ndx] * v.data[ndx]));
+		auto val = (v.data[ndx]);
 
 		auto adjustment = delta * val / magnitude;
-		adjustment *= 0.01f;
+		adjustment *= 0.001f;
 
 		data[ndx] += adjustment;
 	}

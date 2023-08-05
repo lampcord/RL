@@ -153,11 +153,11 @@ int main()
 	//play_games<RandomAgentNS::RandomAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, random_agent, analyzer_agent);
 	return 0;
 
-	auto roll = 0;
-	Backgammon::render(position, player);
-	Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
-	Analyzer::get_best_move_index(position, *move_list, player, true);
-	return 0;
+	//auto roll = 0;
+	//Backgammon::render(position, player);
+	//Backgammon::generate_legal_moves(position, player, roll, *move_list, true);
+	//Analyzer::get_best_move_index(position, *move_list, player, true);
+	//return 0;
 
 }
 

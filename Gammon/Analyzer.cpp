@@ -171,7 +171,8 @@ namespace BackgammonNS
         {AC_raw_block_value, "BL V"},
         {AC_raw_slot_value, "SL V"},
         {AC_raw_range_value, "RN V"},
-        {AC_hit_pct, "HtPct"}
+        {AC_hit_pct, "HtPct"},
+        {AC_hit_loss, "HtLoss"}
     };
 
     static ska::bytell_hash_map<unsigned short, unsigned long long> block_masks_for_rolls = {
@@ -292,6 +293,7 @@ namespace BackgammonNS
 
             scan_position(move_set.result_position, scan);
             scan.stat[AC_hit_pct].element[player] = (float)get_number_of_hits(move_set.result_position, 1 - player, hit_move_list, false) / 36.0f;
+
             float score = analyze(scan , player, player_0_structure, player_1_structure, verbose);
             if (verbose) {
                 cout << MoveList::get_move_desc(move_set, player) << " " << score << endl;
@@ -385,6 +387,7 @@ namespace BackgammonNS
         scan.stat[AC_pip_count].element[1] = player_1_bar * 25;
 
         unsigned int player_mask[2] = { 0b000000000000000000000001, 0b100000000000000000000000 };
+        float total_blot_position[2] = { 0.0f, 0.0f };
 
         for (auto slot = 0u; slot < 24; slot++)
         {
@@ -432,6 +435,7 @@ namespace BackgammonNS
             if (num_checkers == 1) 
             {
                 scan.blots_mask[slot_player] |= player_mask[slot_player];
+                scan.stat[AC_hit_loss].element[slot_player] += slot_player == 0 ? (24 - slot): (slot + 1);
                 if (slot_player == 0 && in_player_0_home_board) scan.stat[AC_blots_in_home_board].element[0]++;
                 if (slot_player == 1 && in_player_1_home_board) scan.stat[AC_blots_in_home_board].element[1]++;
                 if (slot_player == 0 && in_player_1_home_board)
@@ -499,7 +503,6 @@ namespace BackgammonNS
         scan.stat[AC_waste].element[1] = scan.stat[AC_total_in_the_zone].element[1] - scan.stat[AC_structure].element[1] * 2;
         scan.stat[AC_impurity].element[0] = scan.stat[AC_last].element[0] + 1 - scan.stat[AC_first].element[0] - scan.stat[AC_structure].element[0];
         scan.stat[AC_impurity].element[1] = scan.stat[AC_last].element[1] + 1 - scan.stat[AC_first].element[1] - scan.stat[AC_structure].element[1];
-
     }
 
     /*
@@ -724,6 +727,7 @@ namespace BackgammonNS
         }
         best_v.dump(8);
         cout << " Correct: " << best_score << " variance " << setprecision(6) << best_variance / total << endl;
+        best_v.save(brain_dir + "structure.vec");
         /*
         if impurity <= 0: P
         if impurity >= 3: B
@@ -1099,6 +1103,7 @@ namespace BackgammonNS
             stat[AC_stripped_in_the_zone].element[x] = 0;
             stat[AC_triples_in_the_zone].element[x] = 0;
             stat[AC_mountains_in_the_zone].element[x] = 0;
+            stat[AC_hit_loss].element[x] = 0;
 
             blocked_points_mask[x] = 0;
             blots_mask[x] = 0;

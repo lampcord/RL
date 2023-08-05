@@ -31,6 +31,8 @@ namespace BackgammonNS
     [X] Raw checkers in range of slot
     [X] Raw slot score
 	*/
+	const std::string brain_dir = "C:\\GitHub\\RL\\Gammon\\Brain\\";
+
 	const unsigned int AC_pip_count = 0;
 	const unsigned int AC_total_in_the_zone = 1;
 	const unsigned int AC_anchors_in_opp_board = 2;
@@ -50,11 +52,12 @@ namespace BackgammonNS
 	const unsigned int AC_raw_slot_value = 16;
 	const unsigned int AC_raw_range_value = 17;
 	const unsigned int AC_hit_pct = 18;
-	const unsigned int AC_blots_in_the_zone = 19;
-	const unsigned int AC_stripped_in_the_zone = 20;
-	const unsigned int AC_triples_in_the_zone = 21;
-	const unsigned int AC_mountains_in_the_zone = 22;
-	const unsigned int AC_max_value = 23;
+	const unsigned int AC_hit_loss = 19;
+	const unsigned int AC_blots_in_the_zone = 20;
+	const unsigned int AC_stripped_in_the_zone = 21;
+	const unsigned int AC_triples_in_the_zone = 22;
+	const unsigned int AC_mountains_in_the_zone = 23;
+	const unsigned int AC_max_value = 24;
 
 	typedef EvaluationVector<11> TStructVec;
 

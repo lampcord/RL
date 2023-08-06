@@ -7,14 +7,14 @@ namespace ConsoleAgentNS
 	using namespace BackgammonNS;
 	using namespace std;
 
-	void ConsoleAgentNS::ConsoleAgent::get_move(BackgammonNS::PositionStruct& position, unsigned char player, unsigned int roll, unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng, bool verbose)
+	void ConsoleAgentNS::ConsoleAgent::get_move(BackgammonNS::PositionStruct& position, unsigned char player, unsigned int roll, std::unique_ptr<BackgammonNS::AnalyzerState>& state, bool verbose)
 	{
-		BackgammonNS::Backgammon::generate_legal_moves(position, player, roll, *move_list, false);
+		BackgammonNS::Backgammon::generate_legal_moves(position, player, roll, state->move_list, false);
 		PositionStruct display_position = position;
 		std::vector<unsigned char> moves_so_far;
 		while (true)
 		{
-			auto moves = move_list->get_all_single_moves(position, moves_so_far);
+			auto moves = state->move_list.get_all_single_moves(position, moves_so_far);
 			if (moves.size() == 0) break;
 			char move_char = 'a';
 			for (auto move : moves)
@@ -31,7 +31,7 @@ namespace ConsoleAgentNS
 				auto move = moves[move_ndx];
 				display_move(move, player);
 				moves_so_far.push_back(move);
-				display_position = move_list->get_position_for_partial_move(moves_so_far);
+				display_position = state->move_list.get_position_for_partial_move(moves_so_far);
 				Backgammon::render(display_position, player);
 			}
 			else

@@ -4,7 +4,8 @@
 
 class Squirrel3 {
 public:
-    Squirrel3(uint32_t seed) : state(seed) {}
+    Squirrel3(uint32_t seed = 1) : state(seed) {}
+    void set_seed(uint32_t seed) { state = seed; }
 
     uint32_t operator()() {
         state *= 0x1B851B851B851B85;

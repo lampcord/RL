@@ -13,20 +13,19 @@
 
 using namespace BackgammonNS;
 using namespace std;
-static MoveList hit_move_list;
 
 template<typename TAgentType0, typename TAgentType1>
-inline void play_games(BackgammonNS::PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::MoveList>& move_list, Squirrel3& rng, TAgentType0& agent_0, TAgentType1& agent_1, bool verbose=true)
+inline void play_games(BackgammonNS::PositionStruct& position, unsigned char player, std::unique_ptr<BackgammonNS::AnalyzerState>& state, TAgentType0& agent_0, TAgentType1& agent_1, bool verbose=true)
 {
 	auto winner = 0;
 	while (winner == 0)
 	{
-		auto roll = rng() % 36;
+		auto roll = state->rng() % 36;
 		//roll = 0;
 		if (verbose)
 		{
 			BackgammonNS::Backgammon::render(position, player);
-			Analyzer::get_number_of_hits(position, player, hit_move_list);
+			Analyzer::get_number_of_hits(position, player, *state);
 			auto die1 = roll % 6 + 1;
 			auto die2 = roll / 6 + 1;
 			std::cout << "Roll: " << (int)die1 << ", " << (int)die2 << std::endl;
@@ -36,11 +35,11 @@ inline void play_games(BackgammonNS::PositionStruct& position, unsigned char pla
 
 		if (player == 0)
 		{
-			agent_0.get_move(position, player, roll, move_list, rng, verbose);
+			agent_0.get_move(position, player, roll, state, verbose);
 		}
 		else
 		{
-			agent_1.get_move(position, player, roll, move_list, rng, verbose);
+			agent_1.get_move(position, player, roll, state, verbose);
 		}
 
 		winner = BackgammonNS::Backgammon::get_winner(position);
@@ -49,7 +48,7 @@ inline void play_games(BackgammonNS::PositionStruct& position, unsigned char pla
 	if (verbose)
 	{
 		BackgammonNS::Backgammon::render(position, player);
-		Analyzer::get_number_of_hits(position, player, hit_move_list);
+		Analyzer::get_number_of_hits(position, player, *state);
 	}
 	//auto num_rolls = Analyzer::get_number_of_rolls_that_hit(position, player, hit_move_list, false);
 	//cout << Backgammon::string_from_position(position) << setw(3) << (int)player << setw(3) << num_rolls << endl;
@@ -118,10 +117,10 @@ int main()
 	//Analyzer::test_board_structure();
 	//return 0;
 
-	std::unique_ptr<MoveList> move_list = std::make_unique<MoveList>();
+	std::unique_ptr<AnalyzerState> state = std::make_unique<AnalyzerState>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();
 	
-	//Analyzer::test_number_of_hits("C:\\GitHub\\RL\\test_hits.txt" , *move_list);
+	//Analyzer::test_number_of_hits("C:\\GitHub\\RL\\test_hits.txt" , *state);
 	//return 0;
 
 	//Backgammon::run_position_tests("C:\\GitHub\\RL\\test_games.txt", false, *move_list);
@@ -145,10 +144,10 @@ int main()
 
 	//play_games<ConsoleAgentNS::ConsoleAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, console_agent, random_agent);
 	//play_games<RandomAgentNS::RandomAgent, RandomAgentNS::RandomAgent>(position, player, move_list, rng, random_agent, random_agent);
-	//play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, console_agent, analyzer_agent, true);
+	//play_games<ConsoleAgentNS::ConsoleAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, state, console_agent, analyzer_agent, true);
 	//for (auto x = 0; x < 1000; x++) {
 	//	Backgammon::get_initial_position(position);
-		play_games<AnalyzerAgentNS::AnalyzerAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, analyzer_agent, analyzer_agent, true);
+		play_games<AnalyzerAgentNS::AnalyzerAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, state, analyzer_agent, analyzer_agent, true);
 	//}
 	//play_games<RandomAgentNS::RandomAgent, AnalyzerAgentNS::AnalyzerAgent>(position, player, move_list, rng, random_agent, analyzer_agent);
 	return 0;

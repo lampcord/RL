@@ -211,8 +211,6 @@ namespace BackgammonNS
         {863, 0b000001000001000001000000}
     };
 
-    static MoveList hit_move_list;
-
     static array<unsigned long long, 24> distance_roll_table = {
         0b111111000000000000000000000000000000,
         0b110000011111000000000000000000000000,
@@ -276,7 +274,7 @@ namespace BackgammonNS
         }
         return result;
     }
-    short Analyzer::get_best_move_index(const PositionStruct& position, MoveList& move_list, unsigned char player, TStructVec& struct_v, bool verbose)
+    short Analyzer::get_best_move_index(const PositionStruct& position, AnalyzerState& state, unsigned char player, bool verbose)
     {
         const int num_scores = 3;
         auto best_score = -1000.0f;
@@ -285,14 +283,14 @@ namespace BackgammonNS
         AnalyzerScan scan;
         scan_position(position, scan);
         scan.render();
-        auto [player_0_structure, player_1_structure] = get_board_structure(scan, struct_v, verbose);
+        auto [player_0_structure, player_1_structure] = get_board_structure(scan, state.struct_v, verbose);
 
-        for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
+        for (auto ndx = 0u; ndx < state.move_list.move_list_ndx_size; ndx++)
         {
-            auto move_set = move_list.move_list[move_list.move_list_ndx[ndx]];
+            auto move_set = state.move_list.move_list[state.move_list.move_list_ndx[ndx]];
 
             scan_position(move_set.result_position, scan);
-            scan.stat[AC_hit_pct].element[player] = (float)get_number_of_hits(move_set.result_position, 1 - player, hit_move_list, false) / 36.0f;
+            scan.stat[AC_hit_pct].element[player] = (float)get_number_of_hits(move_set.result_position, 1 - player, state, false) / 36.0f;
 
             float score = analyze(scan , player, player_0_structure, player_1_structure, verbose);
             if (verbose) {
@@ -735,7 +733,7 @@ namespace BackgammonNS
         return false;
     }
 
-    unsigned short Analyzer::get_number_of_hits(const PositionStruct& position, unsigned char player, MoveList& move_list, bool verbose)
+    unsigned short Analyzer::get_number_of_hits(const PositionStruct& position, unsigned char player, AnalyzerState& state, bool verbose)
     {
         auto [player_0_hit, player_1_hit] = Backgammon::get_bar_info(position);
         auto player_hit = player == 0 ? player_1_hit : player_0_hit;
@@ -744,11 +742,11 @@ namespace BackgammonNS
         auto total_hits = 0u;
         for (auto roll = 0u; roll < 36; roll++)
         {
-            Backgammon::generate_legal_moves(position, player, roll, move_list, true);
+            Backgammon::generate_legal_moves(position, player, roll, state.hit_list, true);
 
-            for (auto ndx = 0u; ndx < move_list.move_list_ndx_size; ndx++)
+            for (auto ndx = 0u; ndx < state.hit_list.move_list_ndx_size; ndx++)
             {
-                auto move_set = move_list.move_list[move_list.move_list_ndx[ndx]];
+                auto move_set = state.hit_list.move_list[state.hit_list.move_list_ndx[ndx]];
                 auto [test_player_0_hit, test_player_1_hit] = Backgammon::get_bar_info(move_set.result_position);
                 auto test_player_hit = player == 0 ? test_player_1_hit : test_player_0_hit;
                 if (test_player_hit > player_hit)
@@ -903,7 +901,7 @@ namespace BackgammonNS
         return total_hits;
     }
 
-    bool Analyzer::test_number_of_hits(std::string filename, MoveList& move_list)
+    bool Analyzer::test_number_of_hits(std::string filename, AnalyzerState& state)
     {
         struct record {
             PositionStruct position;
@@ -943,7 +941,7 @@ namespace BackgammonNS
             num_tests++;
             //cout << '.';
             //if (num_tests % 100 == 0) cout << endl;
-            auto number_of_hits = get_number_of_hits(rec.position, rec.player, move_list, false);
+            auto number_of_hits = get_number_of_hits(rec.position, rec.player, state, false);
             if (number_of_hits != rec.expected_number_of_hits)
             {
                 cout << "ERROR!! " << number_of_hits << " " << rec.expected_number_of_hits << endl;
@@ -1130,6 +1128,15 @@ namespace BackgammonNS
         {
             cout << fixed << setprecision(2) << setw(6) << stat[ac].element[player] << "|";
         }
+    }
+
+    AnalyzerState::AnalyzerState(unsigned int seed)
+    {
+        struct_v.load(brain_dir + "structure.vec");
+        struct_v.dump(8);
+        cout << " structure.vec" << endl;
+
+        rng.set_seed(seed);
     }
 
 }

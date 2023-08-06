@@ -60,23 +60,11 @@ namespace BackgammonNS
 	typedef EvaluationVector<11> TStructVec;
 	typedef EvaluationVector<AC_max_value> TAnalysisStatVec;
 
-	struct AnalysisStat
-	{
-		float element[2];
-	};
-	struct AnalyzerVector
-	{
-		AnalysisStat stat[AC_max_value];
-	
-		void clear();
-		void dump_stat_line(int player);
-	};
-
 	struct AnalyzerState
 	{
 		AnalyzerState(unsigned int seed=42);
 		TStructVec struct_v;
-		TAnalysisStatVec analysis_v[BS_max];
+		TAnalysisStatVec analysis_v[BS_max * 2];
 
 		MoveList move_list;
 		MoveList hit_list;
@@ -86,13 +74,14 @@ namespace BackgammonNS
 
 	struct AnalyzerScan
 	{
-		AnalysisStat stat[AC_max_value];
+		TAnalysisStatVec stat[2];
 
 		unsigned int blocked_points_mask[2] = { 0,0 };
 		unsigned int blots_mask[2] = { 0,0 };
 		unsigned int stripped_mask[2] = { 0,0 };
 		unsigned int triples_mask[2] = { 0,0 };
 		unsigned int mountains_mask[2] = { 0,0 };
+
 		void render();
 		void dump_stat_line(int player);
 		void dump_stat_header();

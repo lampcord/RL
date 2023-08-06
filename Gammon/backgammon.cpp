@@ -115,7 +115,7 @@ namespace BackgammonNS
         return slot_info{ player, num_checkers };
     }
 
-    void Backgammon::update_slot(PositionStruct&position, unsigned char player, unsigned char slot, bool increment, MoveList& move_list)
+    void Backgammon::update_slot(PositionStruct&position, unsigned char player, unsigned char slot, bool increment)
     {
         const unsigned char shift = 55 - (slot % 12) * 5;
         const unsigned char position_ndx = slot / 12;
@@ -279,7 +279,7 @@ namespace BackgammonNS
 
                 move_list.move_list[move_list.move_list_size] = move_list.move_list[pos_ndx];
                 move_list.move_list[move_list.move_list_size].moves[move_ndx] = move;
-                update_slot(move_list.move_list[move_list.move_list_size].result_position, player, slot, false, move_list);
+                update_slot(move_list.move_list[move_list.move_list_size].result_position, player, slot, false);
 
                 if (no_duplicates)
                 {
@@ -336,7 +336,7 @@ namespace BackgammonNS
 
                         move_list.move_list[move_list.move_list_size] = move_list.move_list[pos_ndx];
                         move_list.move_list[move_list.move_list_size].moves[move_ndx] = move;
-                        update_slot(move_list.move_list[move_list.move_list_size].result_position, player, first_slot_with_pieces, false, move_list);
+                        update_slot(move_list.move_list[move_list.move_list_size].result_position, player, first_slot_with_pieces, false);
 
                         if (no_duplicates)
                         {
@@ -381,8 +381,8 @@ namespace BackgammonNS
 
                 move_list.move_list[move_list.move_list_size] = move_list.move_list[pos_ndx];
                 move_list.move_list[move_list.move_list_size].moves[move_ndx] = move;
-                update_slot(move_list.move_list[move_list.move_list_size].result_position, player, target, true, move_list);
-                update_slot(move_list.move_list[move_list.move_list_size].result_position, player, bar_indicator, false, move_list);
+                update_slot(move_list.move_list[move_list.move_list_size].result_position, player, target, true);
+                update_slot(move_list.move_list[move_list.move_list_size].result_position, player, bar_indicator, false);
 
                 if (no_duplicates)
                 {
@@ -429,8 +429,8 @@ namespace BackgammonNS
 
                     move_list.move_list[move_list.move_list_size] = move_list.move_list[pos_ndx];
                     move_list.move_list[move_list.move_list_size].moves[move_ndx] = move;
-                    update_slot(move_list.move_list[move_list.move_list_size].result_position, player, target, true, move_list);
-                    update_slot(move_list.move_list[move_list.move_list_size].result_position, player, slot, false, move_list);
+                    update_slot(move_list.move_list[move_list.move_list_size].result_position, player, target, true);
+                    update_slot(move_list.move_list[move_list.move_list_size].result_position, player, slot, false);
 
                     if (no_duplicates)
                     {
@@ -858,6 +858,90 @@ namespace BackgammonNS
         cout << "Roll:   " << max_move_roll << " (" << (max_move_roll / 6) + 1 << ", " << (max_move_roll % 6) + 1 << ")" << endl;
     }
 
+    int Backgammon::get_roll_from_string(std::string s)
+    {
+        int roll = -1;
+
+        if (s.size() >= 2)
+        {
+            auto d1 = s.substr(0, 1);
+            auto die1 = atoi(d1.c_str()) - 1;
+            auto d2 = s.substr(1, 1);
+            auto die2 = atoi(d2.c_str()) - 1;
+            roll = die1 * 6 + die2;
+        }
+        return roll;
+    }
+
+    std::vector<std::tuple<int, int>> Backgammon::parse_move_string(std::string s)
+    {
+        std::vector<std::tuple<int, int>> moves;
+        string working_digit = "";
+        auto d1 = -1;
+        auto d2 = -1;
+        auto spaces_in_a_row = 0;
+        auto repeats = 1;
+
+        for (auto c : s)
+        {
+            if (c == '/')
+            {
+                //cout << "D1: " << working_digit << " " << atoi(working_digit.c_str()) << endl;
+                auto test = atoi(working_digit.c_str());
+                if (test > 0) d1 = test;
+                working_digit = "";
+                spaces_in_a_row = 0;
+                continue;
+            }
+            if (c == ' ')
+            {
+                if (spaces_in_a_row > 0) break;
+                //cout << "D2: " << working_digit << " " << atoi(working_digit.c_str()) << endl;
+                auto test = atoi(working_digit.c_str());
+                if (test > 0) d2 = test;
+                if (d1 != -1 || d2 != -1) moves.push_back(make_tuple(d1, d2));
+                d1 = -1;
+                d2 = -1;
+                working_digit = "";
+                spaces_in_a_row++;
+                continue;
+            }
+            if (c == '(')
+            {
+                auto test = atoi(working_digit.c_str());
+                if (test > 0) d2 = test;
+                if (d1 != -1 || d2 != -1) moves.push_back(make_tuple(d1, d2));
+                d1 = -1;
+                d2 = -1;
+                working_digit = "";
+                spaces_in_a_row = 0;
+                continue;
+            }
+            if (c == ')')
+            {
+                auto test = atoi(working_digit.c_str());
+                if (test > 0 && moves.size() > 0)
+                {
+                    auto last_tuple = moves[moves.size() - 1];
+                    for (auto x = 0u; x < test - 1; x++)
+                    {
+                        moves.push_back(last_tuple);
+                    }
+                }
+                d1 = -1;
+                d2 = -1;
+                working_digit = "";
+                spaces_in_a_row = 0;
+                continue;
+            }
+            working_digit += c;
+            spaces_in_a_row = 0;
+
+        }
+
+        return moves;
+    }
+
     int Backgammon::get_winner(const PositionStruct& position)
     {
         auto result = 0;
@@ -875,6 +959,92 @@ namespace BackgammonNS
         }
         
         return result;
+    }
+
+    bool Backgammon::transform_game_log(std::string from_filename, std::string to_filename)
+    {
+        const string training_path = "C:\\GitHub\\RL\\Gammon\\training_games\\";
+
+
+        ifstream infile(training_path + from_filename);
+        string line;
+        auto player = 0u;
+        PositionStruct position = { 0 };
+
+        while (getline(infile, line))
+        {
+            if (line.size() < 5) continue;
+
+            auto check = line.substr(1, 4);
+            //cout << line << endl;
+            //cout << "[" << check << "]" << endl;
+            if (check == "Game")
+            {
+                get_initial_position(position);
+                render(position, player);
+                continue;
+            }
+
+            if (line.size() < 20) continue;
+
+            check = line.substr(7, 1);
+            if (check == ":")
+            {
+                auto roll0 = line.substr(5, 2);
+                auto play0 = line.substr(9, 30);
+                auto roll1 = line.size() > 40 ? line.substr(39, 2): "";
+                auto play1 = line.size() > 44 ? line.substr(43, 30): "";
+                auto int_roll0 = get_roll_from_string(roll0);
+                auto int_roll1 = get_roll_from_string(roll1);
+                cout << "[" << roll0;
+                cout << "] [" << int_roll0;
+                cout << "] [" << roll1;
+                cout << "] [" << int_roll1;
+                cout << "] [" << play0;
+                cout << "] [" << play1;
+                cout << "]" << endl;
+                auto moves0 = parse_move_string(play0);
+                for (auto move : moves0)
+                {
+                    auto [m1, m2] = move;
+                    unsigned char slot = bar_indicator;
+                    if (m1 > 0)
+                    {
+                        slot = 24 - m1;
+                    }
+                    update_slot(position, 0, slot, false);
+                    if (m2 > 0)
+                    {
+                        slot = 24 - m2;
+                        update_slot(position, 0, slot, true);
+                    }
+                    cout << "(" << m1 << "," << m2 << ") ";
+                }
+                cout << endl;
+                render(position, 1);
+                auto moves1 = parse_move_string(play1);
+                for (auto move : moves1)
+                {
+                    auto [m1, m2] = move;
+                    unsigned char slot = bar_indicator;
+                    if (m1 > 0)
+                    {
+                        slot = m1 - 1;
+                    }
+                    update_slot(position, 1, slot, false);
+                    if (m2 > 0)
+                    {
+                        slot = m2 - 1;
+                        update_slot(position, 1, slot, true);
+                    }
+                    cout << "(" << m1 << "," << m2 << ") ";
+                }
+                cout << endl;
+                render(position, 0);
+            }
+        }
+
+        return false;
     }
 
 

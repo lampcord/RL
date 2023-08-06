@@ -120,6 +120,9 @@ int main()
 	std::unique_ptr<AnalyzerState> state = std::make_unique<AnalyzerState>();
 	std::unique_ptr<MoveList> rollout_move_list = std::make_unique<MoveList>();
 	
+	Backgammon::transform_game_log("X001.txt", "TX001.txt");
+	return 0;
+
 	//Analyzer::test_number_of_hits("C:\\GitHub\\RL\\test_hits.txt" , *state);
 	//return 0;
 

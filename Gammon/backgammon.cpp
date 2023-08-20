@@ -673,7 +673,7 @@ namespace BackgammonNS
         for (auto bar = 8; bar < 15; bar++) cout << (player_1_bar > (22 - bar) ? 'X' : ' ');
         cout << "|" << endl;
     }
-    void Backgammon::render(const PositionStruct& position, unsigned char player)
+    void Backgammon::render(const PositionStruct& position, unsigned char player, bool verbose)
     {
         const string far_numbers  = " 13 14 15 16 17 18  19 20 21 22 23 24 ";
         const string near_numbers = " 12 11 10  9  8  7   6  5  4  3  2  1 ";
@@ -691,18 +691,21 @@ namespace BackgammonNS
         casted_off[0] -= player_0_bar;
         casted_off[1] -= player_1_bar;
 
-        cout << (player == 0? far_numbers : near_numbers) << endl;
-        cout << sep << endl;
-        render_board_section(position, true, casted_off[1]);
-        cout << sep2 << endl;
-        render_bar_section(position, player);
-        cout << sep2 << endl;
-        render_board_section(position, false, casted_off[0]);
-        cout << sep << endl;
-        cout << (player == 1 ? far_numbers : near_numbers) << endl;
+        if (verbose)
+        {
+            cout << (player == 0 ? far_numbers : near_numbers) << endl;
+            cout << sep << endl;
+            render_board_section(position, true, casted_off[1]);
+            cout << sep2 << endl;
+            render_bar_section(position, player);
+            cout << sep2 << endl;
+            render_board_section(position, false, casted_off[0]);
+            cout << sep << endl;
+            cout << (player == 1 ? far_numbers : near_numbers) << endl;
 
-        cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
-        cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
+            cout << "position.position[0] = 0b" << bitset<64>(position.position[0]) << ";" << endl;
+            cout << "position.position[1] = 0b" << bitset<64>(position.position[1]) << ";" << endl;
+        }
         cout << string_from_position(position) << endl;
     }
 
@@ -961,7 +964,7 @@ namespace BackgammonNS
         return result;
     }
 
-    bool Backgammon::transform_game_log(std::string from_filename, std::string to_filename)
+    bool Backgammon::transform_game_log(std::string from_filename, std::string to_filename, bool verbose)
     {
         const string training_path = "C:\\GitHub\\RL\\Gammon\\training_games\\";
 
@@ -981,7 +984,7 @@ namespace BackgammonNS
             if (check == "Game")
             {
                 get_initial_position(position);
-                render(position, player);
+                render(position, player, verbose);
                 continue;
             }
 
@@ -996,13 +999,16 @@ namespace BackgammonNS
                 auto play1 = line.size() > 44 ? line.substr(43, 30): "";
                 auto int_roll0 = get_roll_from_string(roll0);
                 auto int_roll1 = get_roll_from_string(roll1);
-                cout << "[" << roll0;
-                cout << "] [" << int_roll0;
-                cout << "] [" << roll1;
-                cout << "] [" << int_roll1;
-                cout << "] [" << play0;
-                cout << "] [" << play1;
-                cout << "]" << endl;
+                if (verbose)
+                {
+                    cout << "[" << roll0;
+                    cout << "] [" << int_roll0;
+                    cout << "] [" << roll1;
+                    cout << "] [" << int_roll1;
+                    cout << "] [" << play0;
+                    cout << "] [" << play1;
+                    cout << "]" << endl;
+                }
                 auto moves0 = parse_move_string(play0);
                 for (auto move : moves0)
                 {
@@ -1018,10 +1024,10 @@ namespace BackgammonNS
                         slot = 24 - m2;
                         update_slot(position, 0, slot, true);
                     }
-                    cout << "(" << m1 << "," << m2 << ") ";
+                    if (verbose) cout << "(" << m1 << "," << m2 << ") ";
                 }
-                cout << endl;
-                render(position, 1);
+                if (verbose) cout << endl;
+                render(position, 1, verbose);
                 auto moves1 = parse_move_string(play1);
                 for (auto move : moves1)
                 {
@@ -1037,10 +1043,10 @@ namespace BackgammonNS
                         slot = m2 - 1;
                         update_slot(position, 1, slot, true);
                     }
-                    cout << "(" << m1 << "," << m2 << ") ";
+                    if (verbose) cout << "(" << m1 << "," << m2 << ") ";
                 }
-                cout << endl;
-                render(position, 0);
+                if (verbose) cout << endl;
+                render(position, 0, verbose);
             }
         }
 

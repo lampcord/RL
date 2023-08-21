@@ -13,7 +13,7 @@ background_colour = (255, 255, 255)
 edge_color = (64, 64, 64)
 surface_color = (28, 24, 75)
 triangle_color = ((255, 255, 255), (216, 151, 0))
-checker_color = ((128, 0, 0), (0, 0, 128))
+checker_color = ((128, 0, 0), (28, 24, 75))
 border_color = (192, 192, 192)
 
 dimensions = (2 * padding + 4 * border_size + 2 * target_background_width, 2 * padding + 2 * border_size + target_background_height)
@@ -66,11 +66,16 @@ def paint_background(_screen):
 
 def paint_checkers(_screen, player, count, first_x, first_y, size, up):
     offset = -size if up else size
+    orig_first_y = first_y
 
-    for _ in range(count):
+    for num in range(count):
         pygame.draw.circle(_screen, border_color, (first_x + size / 2, first_y + offset / 2), size / 2 - 1)
         pygame.draw.circle(_screen, checker_color[player], (first_x + size / 2, first_y + offset / 2), size / 2 - 3)
         first_y += offset
+        if num == 5:
+            first_y = orig_first_y + offset / 2
+        if num == 10:
+            first_y = orig_first_y + offset
 
 def paint_board(_screen, board_string):
     _screen.fill(background_colour)
@@ -80,6 +85,7 @@ def paint_board(_screen, board_string):
         player, count = get_slot_count(board_string, slot)
         # player = 0
         # count = slot % 6 + 1
+        # count = 15
         if count == 0: continue
 
         player_ndx = 0 if player == 'W' else 1

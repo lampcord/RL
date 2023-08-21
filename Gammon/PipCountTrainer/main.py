@@ -4,11 +4,13 @@ import pygame
 
 # Define the background colour
 # using RGB color coding.
+padding = 5
+hinge_width = 20
 target_checker_size = 60
 target_background_width = target_checker_size * 6
 target_background_height = (5 * target_checker_size) / .4
-padding = 5
-border_size = 10
+border_size = 20
+
 background_colour = (255, 255, 255)
 edge_color = (64, 64, 64)
 surface_color = (28, 24, 75)
@@ -16,7 +18,7 @@ triangle_color = ((255, 255, 255), (216, 151, 0))
 checker_color = ((128, 0, 0), (28, 24, 75))
 border_color = (192, 192, 192)
 
-dimensions = (2 * padding + 4 * border_size + 2 * target_background_width, 2 * padding + 2 * border_size + target_background_height)
+dimensions = (2 * padding + 4 * border_size + 2 * target_background_width + hinge_width + border_size + target_checker_size, 2 * padding + 2 * border_size + target_background_height)
 screen = pygame.display.set_mode(dimensions)
 
 # Set the caption of the screen
@@ -34,6 +36,13 @@ def get_slot_count(board_string, slot):
 
     return (player, count)
 
+
+def get_bar_count(board_string):
+    player1_count = int(board_string[24 * 3: 25 * 3])
+    player2_count = int(board_string[25 * 3: 26 * 3])
+    return player1_count, player2_count
+
+
 def draw_triangle_set(_screen, starting_x, starting_y, up, width, height, color_ndx):
     offset = -height if up else height
 
@@ -44,13 +53,13 @@ def draw_triangle_set(_screen, starting_x, starting_y, up, width, height, color_
 
 
 def paint_background(_screen):
-    surface_width = (dimensions[0] - border_size  * 4 - padding * 2) / 2
-    surface_height = dimensions[1] - (border_size + padding) * 2
+    surface_width = target_background_width
+    surface_height = target_background_height
     surface_1_origin_x = padding + border_size
     surface_origin_y = padding + border_size
-    surface_2_origin_x = padding + border_size + dimensions[0] / 2 - padding
+    surface_2_origin_x = padding + border_size * 3 + hinge_width + target_background_width
     triangle_height = surface_height * 0.4
-    triangle_width = surface_width / 6
+    triangle_width = target_checker_size
 
     pygame.draw.rect(_screen, edge_color, (padding, padding, dimensions[0] - padding * 2, dimensions[1] - padding * 2))
     pygame.draw.rect(_screen, surface_color, (surface_1_origin_x, surface_origin_y, surface_width, surface_height))
@@ -111,6 +120,11 @@ def paint_board(_screen, board_string):
 
         paint_checkers(_screen, player_ndx, count, x_origin, y_origin, triangle_width, up)
         # print(f"{slot:3} {player} {count}")
+
+    # checkers on the bar
+    player_1_bar, player_2_bar = get_bar_count(board_string)
+    paint_checkers(_screen, 0, player_1_bar, surface_1_origin + target_background_width + border_size + hinge_width / 2 - triangle_width / 2, surface_origin_y + surface_height - triangle_width / 4, triangle_width, True)
+    paint_checkers(_screen, 1, player_2_bar, surface_1_origin + target_background_width + border_size + hinge_width / 2 - triangle_width / 2, surface_origin_y + triangle_width / 4, triangle_width, False)
 
     pygame.display.flip()
 

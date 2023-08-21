@@ -11,6 +11,7 @@ checker_thickness = 20
 target_background_width = target_checker_size * 6
 target_background_height = (5 * target_checker_size) / .4
 border_size = 20
+message_size = 30
 
 background_colour = (255, 255, 255)
 edge_color = (64, 64, 64)
@@ -19,7 +20,7 @@ triangle_color = ((255, 255, 255), (216, 151, 0))
 checker_color = ((128, 0, 0), (28, 24, 75))
 border_color = (192, 192, 192)
 
-dimensions = (2 * padding + 4 * border_size + 2 * target_background_width + hinge_width + border_size + target_checker_size, 2 * padding + 2 * border_size + target_background_height)
+dimensions = (2 * padding + 4 * border_size + 2 * target_background_width + hinge_width + border_size + target_checker_size, 2 * padding + 2 * border_size + target_background_height + message_size)
 screen = pygame.display.set_mode(dimensions)
 
 # Set the caption of the screen
@@ -62,7 +63,7 @@ def paint_background(_screen):
     triangle_height = surface_height * 0.4
     triangle_width = target_checker_size
 
-    pygame.draw.rect(_screen, edge_color, (padding, padding, dimensions[0] - padding * 2, dimensions[1] - padding * 2))
+    pygame.draw.rect(_screen, edge_color, (padding, padding, dimensions[0] - padding * 2, dimensions[1] - padding * 2 - message_size))
     pygame.draw.rect(_screen, surface_color, (surface_1_origin_x, surface_origin_y, surface_width, surface_height))
     pygame.draw.rect(_screen, surface_color, (surface_2_origin_x, surface_origin_y, surface_width, surface_height))
     pygame.draw.rect(_screen, (0, 0, 0), (surface_2_origin_x + surface_width + border_size, surface_origin_y, target_checker_size, checker_thickness * 15))
@@ -142,7 +143,6 @@ def paint_board(_screen, board_string):
     # castoffs
     paint_cast_off_checkers(_screen, 0, castoffs[0], surface_2_origin + surface_width + border_size, surface_origin_y, False)
     paint_cast_off_checkers(_screen, 1, castoffs[1], surface_2_origin + surface_width + border_size, surface_origin_y + surface_height - checker_thickness, True)
-    pygame.display.flip()
 
 # Variable to keep our game loop running
 running = True
@@ -210,17 +210,64 @@ def get_pip_count(board_string):
 
     return counts
 
-
+keys = {}
+keys[pygame.K_0] = '0'
+keys[pygame.K_1] = '1'
+keys[pygame.K_2] = '2'
+keys[pygame.K_3] = '3'
+keys[pygame.K_4] = '4'
+keys[pygame.K_5] = '5'
+keys[pygame.K_6] = '6'
+keys[pygame.K_7] = '7'
+keys[pygame.K_8] = '8'
+keys[pygame.K_9] = '9'
+keys[pygame.K_KP0] = '0'
+keys[pygame.K_KP1] = '1'
+keys[pygame.K_KP2] = '2'
+keys[pygame.K_KP3] = '3'
+keys[pygame.K_KP4] = '4'
+keys[pygame.K_KP5] = '5'
+keys[pygame.K_KP6] = '6'
+keys[pygame.K_KP7] = '7'
+keys[pygame.K_KP8] = '8'
+keys[pygame.K_KP9] = '9'
+keys[pygame.K_SPACE] = ' '
 # game loop
 test_ndx = 0
+pygame.font.init() # you have to call this at the start,
+                   # if you want to use this module.
+my_font = pygame.font.SysFont('Arial.ttf', 30)
+mode = 'COUNTING'
+error = ''
+count_string = ''
 while running:
     if test_ndx >= len(test_strings):
         break
 
     test_string = test_strings[test_ndx]
-    counts = get_pip_count(test_string)
-    print(counts[0], counts[1])
+    pip_counts = get_pip_count(test_string)
+    # print(pip_counts[0], pip_counts[1])
     paint_board(screen, test_string)
+
+    message = ''
+    background_colour = (255, 255, 255)
+    font_color = (0, 0, 0)
+
+    if mode == 'COUNTING':
+        message = 'Count Pips Then Hit Space Bar When Ready'
+    elif mode == 'ENTERING':
+        background_colour = (0, 255, 0)
+        message = 'Enter Counts Separated by Space then hit ENTER ' + count_string
+
+    if len(error) > 0:
+        background_colour = (255, 0, 0)
+        font_color = (255, 255, 255)
+        message = error
+
+    text_surface = my_font.render(message, False, font_color)
+
+    screen.blit(text_surface, (dimensions[0] / 2 - text_surface.get_size()[0] / 2, dimensions[1] - message_size / 2 - text_surface.get_size()[1] / 2))
+    pygame.display.flip()
 
     # for loop through the event queue
     for event in pygame.event.get():
@@ -230,8 +277,34 @@ while running:
             running = False
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                test_ndx += 1
+            if event.key == pygame.K_ESCAPE:
+                running = False
+                break
+            if len(error) > 0:
+                if event.key == pygame.K_SPACE:
+                    error = ''
+                    count_string = ''
+            elif mode == 'COUNTING':
+                if event.key == pygame.K_SPACE:
+                    mode = 'ENTERING'
+                    count_string = ''
+            elif mode == 'ENTERING':
+                print(event.key, pygame.K_KP_0)
+                if event.key == pygame.K_RETURN:
+                    counts = count_string.split(' ')
+                    if len(counts) < 2:
+                        error = 'Invalid entry'
+                    else:
+                        guess1 = int(counts[0])
+                        guess0 = int(counts[1])
+                        if guess0 != pip_counts[0] or guess1 != pip_counts[1]:
+                            error = f'WRONG! Guessed: ({count_string}) actual ({pip_counts[1]} {pip_counts[0]})'
+
+                        mode = 'COUNTING'
+                        test_ndx += 1
+                elif event.key in keys:
+                    count_string += keys[event.key]
+
 
     time.sleep(.03) # ~30 FPS
 

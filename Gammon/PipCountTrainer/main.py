@@ -7,6 +7,7 @@ import pygame
 padding = 5
 hinge_width = 20
 target_checker_size = 60
+checker_thickness = 20
 target_background_width = target_checker_size * 6
 target_background_height = (5 * target_checker_size) / .4
 border_size = 20
@@ -64,6 +65,8 @@ def paint_background(_screen):
     pygame.draw.rect(_screen, edge_color, (padding, padding, dimensions[0] - padding * 2, dimensions[1] - padding * 2))
     pygame.draw.rect(_screen, surface_color, (surface_1_origin_x, surface_origin_y, surface_width, surface_height))
     pygame.draw.rect(_screen, surface_color, (surface_2_origin_x, surface_origin_y, surface_width, surface_height))
+    pygame.draw.rect(_screen, (0, 0, 0), (surface_2_origin_x + surface_width + border_size, surface_origin_y, target_checker_size, checker_thickness * 15))
+    pygame.draw.rect(_screen, (0, 0, 0), (surface_2_origin_x + surface_width + border_size, surface_origin_y + surface_height - checker_thickness * 15, target_checker_size, checker_thickness * 15))
 
     draw_triangle_set(_screen, surface_1_origin_x, padding + border_size, False, triangle_width, triangle_height, 0)
     draw_triangle_set(_screen, surface_2_origin_x, padding + border_size, False, triangle_width, triangle_height, 0)

@@ -89,10 +89,20 @@ def paint_checkers(_screen, player, count, first_x, first_y, size, up):
         if num == 10:
             first_y = orig_first_y + offset
 
+
+def paint_cast_off_checkers(_screen, player, count, first_x, first_y, up):
+    offset = -checker_thickness if up else checker_thickness
+
+    for _ in range(count):
+        pygame.draw.rect(_screen, border_color, (first_x, first_y, target_checker_size, checker_thickness - 1))
+        pygame.draw.rect(_screen, checker_color[player], (first_x + 2, first_y + 2, target_checker_size - 4, checker_thickness - 5))
+        first_y += offset
+
 def paint_board(_screen, board_string):
     _screen.fill(background_colour)
 
     surface_width, surface_height, surface_1_origin, surface_2_origin, surface_origin_y, triangle_width = paint_background(_screen)
+    castoffs = [15, 15]
     for slot in range(24):
         player, count = get_slot_count(board_string, slot)
         # player = 0
@@ -101,9 +111,9 @@ def paint_board(_screen, board_string):
         if count == 0: continue
 
         player_ndx = 0 if player == 'W' else 1
-
+        castoffs[player_ndx] -= count
         quadrant = slot // 6
-        print (quadrant)
+        # print (quadrant)
         y_origin = surface_origin_y + surface_height
         up = True
         x_origin = surface_2_origin + 5 * triangle_width - (slot % 6) * triangle_width
@@ -129,19 +139,87 @@ def paint_board(_screen, board_string):
     paint_checkers(_screen, 0, player_1_bar, surface_1_origin + target_background_width + border_size + hinge_width / 2 - triangle_width / 2, surface_origin_y + surface_height - triangle_width / 4, triangle_width, True)
     paint_checkers(_screen, 1, player_2_bar, surface_1_origin + target_background_width + border_size + hinge_width / 2 - triangle_width / 2, surface_origin_y + triangle_width / 4, triangle_width, False)
 
+    # castoffs
+    paint_cast_off_checkers(_screen, 0, castoffs[0], surface_2_origin + surface_width + border_size, surface_origin_y, False)
+    paint_cast_off_checkers(_screen, 1, castoffs[1], surface_2_origin + surface_width + border_size, surface_origin_y + surface_height - checker_thickness, True)
     pygame.display.flip()
 
 # Variable to keep our game loop running
 running = True
-test_string = "W02  0  0  0  0B05  0B03  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0"
+test_strings = [
+    "W02  0  0  0  0B05  0B03  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0",
+    "W01W01  0  0  0B05  0B03  0  0  0W04B05  0  0W01W03  0W05  0  0  0  0B02  0  0",
+    "W01W01  0  0  0B05  0B04  0  0  0W04B04  0  0W01W03  0W05B01  0  0  0B01  0  0",
+    "  0  0  0  0  0B05W02B04  0  0  0W04B04  0  0W01W03  0W05B01  0  0  0B01  0  0",
+    "  0  0  0  0B01B04W02B04  0  0  0W04B04B01  0W01W03  0W05  0  0  0  0B01  0  0",
+    "  0  0  0  0B01B04  0B04  0  0  0W06B04B01  0W01W03  0W03  0  0  0  0W02  0  1",
+    "  0  0  0  0B01B04  0B05  0  0  0W06B04  0  0W01W03  0W03  0B01  0  0W02  0  0",
+    "  0  0  0  0B01B04  0B05  0  0  0W05B04  0  0  0W04  0W04  0B01  0  0W02  0  0",
+    "  0  0  0  0B02B04  0B05  0  0  0W05B03  0  0  0W04  0W04  0B01  0  0W02  0  0",
+    "  0  0  0  0B02B04  0B05  0  0  0W04B03  0  0  0W05  0W03  0B01  0W01W02  0  0",
+    "  0  0  0  0B02B04B02B04  0  0  0W04B02  0  0  0W05  0W03  0B01  0W01W02  0  0",
+    "  0  0  0  0B02B04B02B04  0  0  0W03B02  0  0  0W04W02W03  0B01  0W01W02  0  0",
+    "  0  0  0B02B02B04B02B02  0  0  0W03B02  0  0  0W04W02W03  0B01  0W01W02  0  0",
+    "  0  0  0B02B02B04B02B02  0  0  0  0B02  0  0  0W06W02W03  0B01W01W01W02  0  0",
+    "  0  0B01B02B02B04B02B01  0B01  0  0B01  0  0  0W06W02W03  0B01W01W01W02  0  0",
+    "  0  0B01B02B02B04B02B01  0B01  0  0B01  0  0  0W05W02W03  0B01W01W01W03  0  0",
+    "  0B01B01B02B03B03B01B01  0B01B01  0  0  0  0  0W05W02W03  0B01W01W01W03  0  0",
+    "  0B01B01B02B03B03B01B01  0B01B01  0  0  0  0  0W04W02W03  0B01W02W01W03  0  0",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W04W02W03  0B01W02W01W03  0  0",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W03  0W03  0W02W02W02W03  0  1",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W03  0W03  0W02W02W02W03  0  1",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W01  0W04  0W02W03W02W03  0  1",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W01  0W04  0W02W03W02W03  0  1",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W04  0W02W03W03W03  0  1",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W04  0W02W03W03W03  0  1",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W04  0W02W03W02W02  0  1",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W04  0W02W03W02W02  0  1",
+    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W02  0W03W03W02W03  0  1",
+    "  0B01B02B04B03B02B01B01  0  0  0  0  0  0  0  0  0  0W02B01W03W03W02W03  0  0",
+    "  0B01B02B04B03B02B01B01  0  0  0  0  0  0  0  0  0  0W02B01W03W02W02W02  0  0",
+    "  0B01B03B04B03B03  0  0  0  0  0  0  0  0  0  0  0  0W02B01W03W02W02W02  0  0",
+    "  0B01B03B04B03B03  0  0  0  0  0  0  0  0  0  0  0  0W02B01W03W01W02W01  0  0",
+    "B01B02B03B03B03B02  0  0  0  0  0  0  0  0  0  0  0  0W02B01W03W01W02W01  0  0",
+    "B01B02B03B03B03B02  0  0  0  0  0  0  0  0  0  0  0  0W02B01W02W01W02  0  0  0",
+    "B01B02B03B03B03B02  0  0  0  0  0  0B01  0  0  0  0  0W02  0W02W01W02  0  0  0",
+    "B01B02B03B03B03B02  0  0  0  0  0  0B01  0  0  0  0  0W02  0W01W01W01  0  0  0",
+    "B01B02B03B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W02  0W01W01W01  0  0  0",
+    "B01B02B03B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W01W01W01  0W01  0  0  0",
+    "B01B01B02B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W01W01W01  0W01  0  0  0",
+    "B01B01B02B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W01  0  0  0W02  0  0  0",
+    "B01  0B01B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W01  0  0  0W02  0  0  0",
+    "B01  0B01B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0W02W01  0  0",
+    "B01  0  0B03B04B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0W02W01  0  0",
+    "B01  0  0B03B04B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0W01  0  0  0",
+    "B01B01  0B02B03B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0W01  0  0  0",
+    "B01B01  0B02B03B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0",
+    "B01B01  0B02B03B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0"
+]
 
 
+def get_pip_count(board_string):
+    counts = [0, 0]
+    for slot in range(24):
+        player, count = get_slot_count(board_string, slot)
+        player_ndx = 0 if player == 'W' else 1
+        value = (slot + 1) * count if player_ndx == 1 else (24 - slot) * count
+        counts[player_ndx] += value
+    bar = get_bar_count(board_string)
+    counts[0] += 25 * bar[0]
+    counts[1] += 25 * bar[1]
 
+    return counts
 
 
 # game loop
+test_ndx = 0
 while running:
+    if test_ndx >= len(test_strings):
+        break
 
+    test_string = test_strings[test_ndx]
+    counts = get_pip_count(test_string)
+    print(counts[0], counts[1])
     paint_board(screen, test_string)
 
     # for loop through the event queue
@@ -150,6 +228,10 @@ while running:
         # Check for QUIT event
         if event.type == pygame.QUIT:
             running = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                test_ndx += 1
 
     time.sleep(.03) # ~30 FPS
 

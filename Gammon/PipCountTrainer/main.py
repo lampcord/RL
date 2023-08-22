@@ -1,4 +1,5 @@
 # import the pygame module
+import random
 import time
 import pygame
 
@@ -146,55 +147,8 @@ def paint_board(_screen, board_string):
 
 # Variable to keep our game loop running
 running = True
-test_strings = [
-    "W02  0  0  0  0B05  0B03  0  0  0W05B05  0  0  0W03  0W05  0  0  0  0B02  0  0",
-    "W01W01  0  0  0B05  0B03  0  0  0W04B05  0  0W01W03  0W05  0  0  0  0B02  0  0",
-    "W01W01  0  0  0B05  0B04  0  0  0W04B04  0  0W01W03  0W05B01  0  0  0B01  0  0",
-    "  0  0  0  0  0B05W02B04  0  0  0W04B04  0  0W01W03  0W05B01  0  0  0B01  0  0",
-    "  0  0  0  0B01B04W02B04  0  0  0W04B04B01  0W01W03  0W05  0  0  0  0B01  0  0",
-    "  0  0  0  0B01B04  0B04  0  0  0W06B04B01  0W01W03  0W03  0  0  0  0W02  0  1",
-    "  0  0  0  0B01B04  0B05  0  0  0W06B04  0  0W01W03  0W03  0B01  0  0W02  0  0",
-    "  0  0  0  0B01B04  0B05  0  0  0W05B04  0  0  0W04  0W04  0B01  0  0W02  0  0",
-    "  0  0  0  0B02B04  0B05  0  0  0W05B03  0  0  0W04  0W04  0B01  0  0W02  0  0",
-    "  0  0  0  0B02B04  0B05  0  0  0W04B03  0  0  0W05  0W03  0B01  0W01W02  0  0",
-    "  0  0  0  0B02B04B02B04  0  0  0W04B02  0  0  0W05  0W03  0B01  0W01W02  0  0",
-    "  0  0  0  0B02B04B02B04  0  0  0W03B02  0  0  0W04W02W03  0B01  0W01W02  0  0",
-    "  0  0  0B02B02B04B02B02  0  0  0W03B02  0  0  0W04W02W03  0B01  0W01W02  0  0",
-    "  0  0  0B02B02B04B02B02  0  0  0  0B02  0  0  0W06W02W03  0B01W01W01W02  0  0",
-    "  0  0B01B02B02B04B02B01  0B01  0  0B01  0  0  0W06W02W03  0B01W01W01W02  0  0",
-    "  0  0B01B02B02B04B02B01  0B01  0  0B01  0  0  0W05W02W03  0B01W01W01W03  0  0",
-    "  0B01B01B02B03B03B01B01  0B01B01  0  0  0  0  0W05W02W03  0B01W01W01W03  0  0",
-    "  0B01B01B02B03B03B01B01  0B01B01  0  0  0  0  0W04W02W03  0B01W02W01W03  0  0",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W04W02W03  0B01W02W01W03  0  0",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W03  0W03  0W02W02W02W03  0  1",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W03  0W03  0W02W02W02W03  0  1",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W01  0W04  0W02W03W02W03  0  1",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0W01  0W04  0W02W03W02W03  0  1",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W04  0W02W03W03W03  0  1",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W04  0W02W03W03W03  0  1",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W04  0W02W03W02W02  0  1",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W04  0W02W03W02W02  0  1",
-    "  0B01B02B04B03B02  0B01  0  0B01  0  0  0  0  0  0  0W02  0W03W03W02W03  0  1",
-    "  0B01B02B04B03B02B01B01  0  0  0  0  0  0  0  0  0  0W02B01W03W03W02W03  0  0",
-    "  0B01B02B04B03B02B01B01  0  0  0  0  0  0  0  0  0  0W02B01W03W02W02W02  0  0",
-    "  0B01B03B04B03B03  0  0  0  0  0  0  0  0  0  0  0  0W02B01W03W02W02W02  0  0",
-    "  0B01B03B04B03B03  0  0  0  0  0  0  0  0  0  0  0  0W02B01W03W01W02W01  0  0",
-    "B01B02B03B03B03B02  0  0  0  0  0  0  0  0  0  0  0  0W02B01W03W01W02W01  0  0",
-    "B01B02B03B03B03B02  0  0  0  0  0  0  0  0  0  0  0  0W02B01W02W01W02  0  0  0",
-    "B01B02B03B03B03B02  0  0  0  0  0  0B01  0  0  0  0  0W02  0W02W01W02  0  0  0",
-    "B01B02B03B03B03B02  0  0  0  0  0  0B01  0  0  0  0  0W02  0W01W01W01  0  0  0",
-    "B01B02B03B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W02  0W01W01W01  0  0  0",
-    "B01B02B03B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W01W01W01  0W01  0  0  0",
-    "B01B01B02B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W01W01W01  0W01  0  0  0",
-    "B01B01B02B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W01  0  0  0W02  0  0  0",
-    "B01  0B01B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0W01  0  0  0W02  0  0  0",
-    "B01  0B01B03B04B02  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0W02W01  0  0",
-    "B01  0  0B03B04B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0W02W01  0  0",
-    "B01  0  0B03B04B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0W01  0  0  0",
-    "B01B01  0B02B03B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0W01  0  0  0",
-    "B01B01  0B02B03B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0",
-    "B01B01  0B02B03B01  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0"
-]
+test_strings = open('positions.txt', 'r').read().split('\n')
+
 
 
 def get_pip_count(board_string):
@@ -233,7 +187,7 @@ keys[pygame.K_KP8] = '8'
 keys[pygame.K_KP9] = '9'
 keys[pygame.K_SPACE] = ' '
 # game loop
-test_ndx = 0
+test_ndx = random.randint(0, len(test_strings) - 1)
 pygame.font.init() # you have to call this at the start,
                    # if you want to use this module.
 my_font = pygame.font.SysFont('Arial.ttf', 30)
@@ -277,6 +231,9 @@ while running:
             running = False
 
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:
+                print(test_string)
+
             if event.key == pygame.K_ESCAPE:
                 running = False
                 break
@@ -301,7 +258,7 @@ while running:
                             error = f'WRONG! Guessed: ({count_string}) actual ({pip_counts[1]} {pip_counts[0]})'
 
                         mode = 'COUNTING'
-                        test_ndx += 1
+                        test_ndx = random.randint(0, len(test_strings) - 1)
                 elif event.key in keys:
                     count_string += keys[event.key]
 

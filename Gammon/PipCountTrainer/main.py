@@ -234,6 +234,13 @@ while running:
             if event.key == pygame.K_s:
                 print(test_string)
 
+            if event.key == pygame.K_x:
+                mode = 'COUNTING'
+                error = ''
+                count_string = ''
+                test_ndx = random.randint(0, len(test_strings) - 1)
+                continue
+                    
             if event.key == pygame.K_ESCAPE:
                 running = False
                 break

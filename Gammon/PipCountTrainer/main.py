@@ -100,8 +100,10 @@ def paint_cast_off_checkers(_screen, player, count, first_x, first_y, up):
         pygame.draw.rect(_screen, checker_color[player], (first_x + 2, first_y + 2, target_checker_size - 4, checker_thickness - 5))
         first_y += offset
 
-def paint_board(_screen, board_string):
+def paint_board(_screen, board_string, show):
     _screen.fill(background_colour)
+    if not show:
+        return
 
     surface_width, surface_height, surface_1_origin, surface_2_origin, surface_origin_y, triangle_width = paint_background(_screen)
     castoffs = [15, 15]
@@ -194,6 +196,9 @@ my_font = pygame.font.SysFont('Arial.ttf', 30)
 mode = 'COUNTING'
 error = ''
 count_string = ''
+total = 0.0
+correct = 0.0
+miss = 0.0
 while running:
     if test_ndx >= len(test_strings):
         break
@@ -201,7 +206,7 @@ while running:
     test_string = test_strings[test_ndx]
     pip_counts = get_pip_count(test_string)
     # print(pip_counts[0], pip_counts[1])
-    paint_board(screen, test_string)
+    paint_board(screen, test_string, len(error) == 0)
 
     message = ''
     background_colour = (255, 255, 255)

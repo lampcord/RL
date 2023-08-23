@@ -75,6 +75,7 @@ namespace BackgammonNS
 		static int get_roll_from_string(std::string s);
 		static std::vector<std::tuple<int, int>> parse_move_string(std::string s);
 		static bool transform_game_log(std::string from_filename, std::string to_filename, bool verbose=true);
+		static bool is_valid_position(PositionStruct& position);
 	};
 
 }

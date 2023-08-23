@@ -1012,48 +1012,89 @@ namespace BackgammonNS
                     cout << "] [" << play1;
                     cout << "]" << endl;
                 }
-                auto moves0 = parse_move_string(play0);
-                for (auto move : moves0)
+                if (int_roll0 >= 0)
                 {
-                    auto [m1, m2] = move;
-                    unsigned char slot = bar_indicator;
-                    if (m1 > 0)
+                    auto moves0 = parse_move_string(play0);
+                    for (auto move : moves0)
                     {
-                        slot = 24 - m1;
+                        auto [m1, m2] = move;
+                        unsigned char slot = bar_indicator;
+                        if (m1 > 0)
+                        {
+                            slot = 24 - m1;
+                        }
+                        update_slot(position, 0, slot, false);
+                        if (m2 > 0)
+                        {
+                            slot = 24 - m2;
+                            update_slot(position, 0, slot, true);
+                        }
+                        if (verbose) cout << "(" << m1 << "," << m2 << ") ";
                     }
-                    update_slot(position, 0, slot, false);
-                    if (m2 > 0)
+                    if (verbose) cout << endl;
+                    render(position, 1, verbose);
+                    if (!is_valid_position(position))
                     {
-                        slot = 24 - m2;
-                        update_slot(position, 0, slot, true);
+                        cout << endl << endl << "!!!!!!!!!!!!!!!!!!!ERROR!!!!!!!!!!!!!!!!" << endl << endl;
+                        cout << line << endl;
+                        render(position, 1, true);
+                        cout << endl << endl << "!!!!!!!!!!!!!!!!!!!ERROR!!!!!!!!!!!!!!!!" << endl << endl;
+                        break;
                     }
-                    if (verbose) cout << "(" << m1 << "," << m2 << ") ";
                 }
-                if (verbose) cout << endl;
-                render(position, 1, verbose);
-                auto moves1 = parse_move_string(play1);
-                for (auto move : moves1)
+                if (int_roll1 >= 0)
                 {
-                    auto [m1, m2] = move;
-                    unsigned char slot = bar_indicator;
-                    if (m1 > 0)
+                    auto moves1 = parse_move_string(play1);
+                    for (auto move : moves1)
                     {
-                        slot = m1 - 1;
+                        auto [m1, m2] = move;
+                        unsigned char slot = bar_indicator;
+                        if (m1 > 0)
+                        {
+                            slot = m1 - 1;
+                        }
+                        update_slot(position, 1, slot, false);
+                        if (m2 > 0)
+                        {
+                            slot = m2 - 1;
+                            update_slot(position, 1, slot, true);
+                        }
+                        if (verbose) cout << "(" << m1 << "," << m2 << ") ";
                     }
-                    update_slot(position, 1, slot, false);
-                    if (m2 > 0)
+                    if (verbose) cout << endl;
+                    render(position, 0, verbose);
+                    if (!is_valid_position(position))
                     {
-                        slot = m2 - 1;
-                        update_slot(position, 1, slot, true);
+                        cout << endl << endl << "!!!!!!!!!!!!!!!!!!!ERROR!!!!!!!!!!!!!!!!" << endl << endl;
+                        cout << line << endl;
+                        render(position, 0, true);
+                        cout << endl << endl << "!!!!!!!!!!!!!!!!!!!ERROR!!!!!!!!!!!!!!!!" << endl << endl;
+                        break;
                     }
-                    if (verbose) cout << "(" << m1 << "," << m2 << ") ";
                 }
-                if (verbose) cout << endl;
-                render(position, 0, verbose);
             }
         }
 
         return false;
+    }
+
+    bool Backgammon::is_valid_position(PositionStruct& position)
+    {
+        unsigned char totals[2] = { 0, 0 };
+        for (auto slot = 0u; slot < 24; slot++)
+        {
+            auto [player, num_checkers] = get_slot_info(position, slot);
+
+            totals[player] += num_checkers;
+            if (totals[player] > 15) return false;
+
+        }
+
+        auto [bar_0, bar_1] = get_bar_info(position);
+        if (totals[0] + bar_0 > 15) return false;
+        if (totals[1] + bar_1 > 15) return false;
+
+        return true;
     }
 
 

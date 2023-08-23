@@ -240,7 +240,7 @@ while running:
                 count_string = ''
                 test_ndx = random.randint(0, len(test_strings) - 1)
                 continue
-                    
+
             if event.key == pygame.K_ESCAPE:
                 running = False
                 break

@@ -984,14 +984,17 @@ namespace BackgammonNS
             if (check == "Game")
             {
                 get_initial_position(position);
+                if (verbose) cout << "------------------------------------------------------------------------------------------------------" << endl;
+                if (verbose) cout << "-                                                                                                    -" << endl;
+                if (verbose) cout << "------------------------------------------------------------------------------------------------------" << endl;
                 render(position, player, verbose);
                 continue;
             }
 
             if (line.size() < 20) continue;
 
-            check = line.substr(7, 1);
-            if (check == ":")
+            check = line.substr(3, 1);
+            if (check == ")")
             {
                 auto roll0 = line.substr(5, 2);
                 auto play0 = line.substr(9, 30);

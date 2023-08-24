@@ -199,6 +199,8 @@ count_string = ''
 total = 0.0
 correct = 0.0
 miss = 0.0
+total_time = 0.0
+start_time = time.time()
 while running:
     if test_ndx >= len(test_strings):
         break
@@ -206,7 +208,9 @@ while running:
     test_string = test_strings[test_ndx]
     pip_counts = get_pip_count(test_string)
     # print(pip_counts[0], pip_counts[1])
-    paint_board(screen, test_string, len(error) == 0)
+    show = True if mode == 'COUNTING' and len(error) == 0 else False
+
+    paint_board(screen, test_string, show)
 
     message = ''
     background_colour = (255, 255, 255)
@@ -257,8 +261,9 @@ while running:
                 if event.key == pygame.K_SPACE:
                     mode = 'ENTERING'
                     count_string = ''
+                    total_time += time.time() - start_time
             elif mode == 'ENTERING':
-                print(event.key, pygame.K_KP_0)
+                # print(event.key, pygame.K_KP_0)
                 if event.key == pygame.K_RETURN:
                     counts = count_string.split(' ')
                     if len(counts) < 2:
@@ -268,14 +273,21 @@ while running:
                         guess0 = int(counts[1])
                         if guess0 != pip_counts[0] or guess1 != pip_counts[1]:
                             error = f'WRONG! Guessed: ({count_string}) actual ({pip_counts[1]} {pip_counts[0]})'
+                        else:
+                            correct += 1.0
 
+                        miss += abs(guess0 - pip_counts[0]) + abs(guess1 - pip_counts[1])
                         mode = 'COUNTING'
+                        start_time = time.time()
+                        total += 1.0
                         test_ndx = random.randint(0, len(test_strings) - 1)
                 elif event.key in keys:
                     count_string += keys[event.key]
 
 
     time.sleep(.03) # ~30 FPS
+
+print(f'Runs: {total} Correct: {correct} Pct: {correct / total} Avg Miss: {miss / total} Avg Time: {total_time / total}')
 
 
 

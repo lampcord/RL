@@ -257,6 +257,7 @@ while running:
                 if event.key == pygame.K_SPACE:
                     error = ''
                     count_string = ''
+                    start_time = time.time()
             elif mode == 'COUNTING':
                 if event.key == pygame.K_SPACE:
                     mode = 'ENTERING'
@@ -275,10 +276,10 @@ while running:
                             error = f'WRONG! Guessed: ({count_string}) actual ({pip_counts[1]} {pip_counts[0]})'
                         else:
                             correct += 1.0
+                            start_time = time.time()
 
                         miss += abs(guess0 - pip_counts[0]) + abs(guess1 - pip_counts[1])
                         mode = 'COUNTING'
-                        start_time = time.time()
                         total += 1.0
                         test_ndx = random.randint(0, len(test_strings) - 1)
                 elif event.key in keys:

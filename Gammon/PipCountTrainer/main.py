@@ -206,6 +206,7 @@ while running:
         break
 
     test_string = test_strings[test_ndx]
+
     pip_counts = get_pip_count(test_string)
     # print(pip_counts[0], pip_counts[1])
     show = True if mode == 'COUNTING' and len(error) == 0 else False
@@ -277,11 +278,13 @@ while running:
                         else:
                             correct += 1.0
                             start_time = time.time()
+                            test_ndx = random.randint(0, len(test_strings) - 1)
 
                         miss += abs(guess0 - pip_counts[0]) + abs(guess1 - pip_counts[1])
                         mode = 'COUNTING'
                         total += 1.0
-                        test_ndx = random.randint(0, len(test_strings) - 1)
+                elif event.key == pygame.K_BACKSPACE:
+                    count_string = count_string[:-1]
                 elif event.key in keys:
                     count_string += keys[event.key]
 

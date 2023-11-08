@@ -264,6 +264,7 @@ while running:
                     mode = 'ENTERING'
                     count_string = ''
                     total_time += time.time() - start_time
+                    print(f'Time used: {time.time() - start_time}')
             elif mode == 'ENTERING':
                 # print(event.key, pygame.K_KP_0)
                 if event.key == pygame.K_RETURN:

@@ -1,6 +1,8 @@
 import pygame
 import pygame.draw
 import pygame.image
+import copy
+import json
 from pygame import gfxdraw
 
 # Initialize Pygame
@@ -25,6 +27,7 @@ BUTTON_COLOR = (255, 0, 0)
 BUTTON_TEXT_COLOR = (255, 255, 255)
 DBL_CUBE_COLOR = (192, 193, 255)
 DBL_CUBE_TEXT_COLOR = (0, 0, 128)
+POSITIONS_FILE_NAME = 'positions.json'
 
 DICE_SIZE = 36
 DOT_SIZE = 4
@@ -38,6 +41,8 @@ CUBE_LOC = 28
 HAS_ROLLED_LOC = 29
 RESET_LOC = 30
 CLR_LOC = 31
+SAVE_LOC = 32
+SAVE_ALL_LOC = 33
 
 # Initialize the window
 screen = pygame.display.set_mode(WINDOW_SIZE)
@@ -93,6 +98,13 @@ cube_values[6] = 64
 starting_checkers = [2, 0, 0, 0, 0, -5, 0, -3, 0, 0, 0, 5, -5, 0, 0, 0, 3, 0, 5, 0, 0, 0, 0, -2, 0, 0]
 clear_checkers =    [0, 0, 0, 0, 0,  0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0]
 
+try:
+    # Attempt to open and read the JSON file
+    with open(POSITIONS_FILE_NAME, 'r') as json_file:
+        positions = json.load(json_file)
+
+except Exception as e:
+    positions = []
 
 position = {}
 position["checkers"] = list(starting_checkers)
@@ -121,23 +133,23 @@ def draw_slot(target, x, y, cnt, delta):
         display_text(x, y, str(cnt), text_color, target)
 
 
-def draw_bar(target):
+def draw_bar(pos, target):
     x = CHECKER_SIZE / 2 + FRAME + CHECKER_SIZE * 6 + BORDER / 2
     y = CHECKER_SIZE * 3 + FRAME
     locations[BAR_0_LOC] = (x, y)
 
-    if position["checkers"][BAR_0_LOC] > 0:
+    if pos["checkers"][BAR_0_LOC] > 0:
         draw_checker(C0_COLOR, target, x, y)
-    if position["checkers"][BAR_0_LOC] > 1:
-        display_text(x, y, str(position["checkers"][BAR_0_LOC]), C1_COLOR, target)
+    if pos["checkers"][BAR_0_LOC] > 1:
+        display_text(x, y, str(pos["checkers"][BAR_0_LOC]), C1_COLOR, target)
 
     y = TOTAL_HEIGHT - CHECKER_SIZE * 3 + FRAME
     locations[BAR_1_LOC] = (x, y)
 
-    if position["checkers"][BAR_1_LOC] < 0:
+    if pos["checkers"][BAR_1_LOC] < 0:
         draw_checker(C1_COLOR, target, x, y)
-    if position["checkers"][BAR_1_LOC] < -1:
-        display_text(x, y, str(abs(position["checkers"][BAR_1_LOC])), C0_COLOR, target)
+    if pos["checkers"][BAR_1_LOC] < -1:
+        display_text(x, y, str(abs(pos["checkers"][BAR_1_LOC])), C0_COLOR, target)
 
 
 def draw_checker(color, target, x, y):
@@ -167,22 +179,32 @@ def draw_interface(target):
     x = FRAME + CHECKER_SIZE / 2
     y = FRAME + 5 * CHECKER_SIZE + CHECKER_SIZE / 2
     draw_button(target, x, y, "R/D")
-    locations[HAS_ROLLED_LOC] = (x,y)
+    locations[HAS_ROLLED_LOC] = (x, y)
 
     x += CHECKER_SIZE
     draw_button(target, x, y, "RST")
-    locations[RESET_LOC] = (x,y)
+    locations[RESET_LOC] = (x, y)
 
     x += CHECKER_SIZE
     draw_button(target, x, y, "CLR")
-    locations[CLR_LOC] = (x,y)
+    locations[CLR_LOC] = (x, y)
+
+    x += CHECKER_SIZE
+
+    x += CHECKER_SIZE
+    draw_button(target, x, y, "ALL")
+    locations[SAVE_ALL_LOC] = (x, y)
+
+    x += CHECKER_SIZE
+    draw_button(target, x, y, "SAV")
+    locations[SAVE_LOC] = (x, y)
 
 
-def draw_cube(target):
+def draw_cube(pos, target):
     x = WINDOW_SIZE[0] - FRAME / 2
-    if position["cube"] == 0:
+    if pos["cube"] == 0:
         y = CHECKER_SIZE * 5 + CHECKER_SIZE / 2 + FRAME
-    elif position["cube"] < 0:
+    elif pos["cube"] < 0:
         y = FRAME / 2 + CHECKER_SIZE
     else:
         y = WINDOW_SIZE[1] - FRAME / 2 - CHECKER_SIZE
@@ -195,7 +217,7 @@ def draw_cube(target):
 
     x += DICE_SIZE / 2
     y += DICE_SIZE / 2
-    value = cube_values[position["cube"]]
+    value = cube_values[pos["cube"]]
     display_text(x, y, str(value), DBL_CUBE_TEXT_COLOR, target)
 
 
@@ -213,22 +235,22 @@ def draw_die(target, x, y, color, dot_color, number):
         gfxdraw.filled_circle(target, int(x + dx), int(y + dy), DOT_SIZE - 1, dot_color)
 
 
-def draw_dice(target):
-    if position["turn"] == 0:
+def draw_dice(pos, target):
+    if pos["turn"] == 0:
         die_color = C0_COLOR
         dot_color = C1_COLOR
     else:
         die_color = C1_COLOR
         dot_color = C0_COLOR
 
-    if position["has_rolled"]:
+    if pos["has_rolled"]:
         x = FRAME + CHECKER_SIZE * 9 + BORDER + CHECKER_SIZE / 2
         y = CHECKER_SIZE * 5 + CHECKER_SIZE / 2 + FRAME
-        draw_die(target, x, y, die_color, dot_color, position["dice"][0])
+        draw_die(target, x, y, die_color, dot_color, pos["dice"][0])
         locations[DIE_0_LOC] = (x, y)
 
         x += CHECKER_SIZE
-        draw_die(target, x, y, die_color, dot_color, position["dice"][1])
+        draw_die(target, x, y, die_color, dot_color, pos["dice"][1])
         locations[DIE_1_LOC] = (x, y)
     else:
         x = FRAME / 2
@@ -258,12 +280,12 @@ def is_vali_position():
     return spares(0) >= 0 and spares(1) >= 0 and position["checkers"][BAR_0_LOC] >= 0 and position["checkers"][BAR_1_LOC] <= 0
 
 
-def draw_pip_count(target):
+def draw_pip_count(pos, target):
     pip0 = 0
     pip1 = 0
     loc0_value = 24
     for ndx in range(24):
-        c = position["checkers"][ndx]
+        c = pos["checkers"][ndx]
         loc1_value = 25 - loc0_value
 
         if c > 0:
@@ -272,8 +294,8 @@ def draw_pip_count(target):
             pip1 += abs(c) * loc1_value
         loc0_value -= 1
 
-    pip0 += 25 * position["checkers"][BAR_0_LOC]
-    pip1 += 25 * abs(position["checkers"][BAR_1_LOC])
+    pip0 += 25 * pos["checkers"][BAR_0_LOC]
+    pip1 += 25 * abs(pos["checkers"][BAR_1_LOC])
 
     x = WINDOW_SIZE[0] - FRAME
     y = FRAME / 2
@@ -281,7 +303,8 @@ def draw_pip_count(target):
     y = WINDOW_SIZE[1] - FRAME / 2
     display_text(x, y, f"({str(pip0)})", POS_TEXT_COLOR, target)
 
-def draw_board(target):
+
+def draw_board(pos, target):
     x = CHECKER_SIZE / 2 + FRAME
     y = CHECKER_SIZE / 2 + FRAME - 1
 
@@ -297,13 +320,13 @@ def draw_board(target):
     ndx = 0
     start_slot_num = 1
     slot_delta = 1
-    if position["turn"] == 0:
+    if pos["turn"] == 0:
         start_slot_num = 24
         slot_delta = -1
     slot_y = y - FRAME / 2 - CHECKER_SIZE / 2
     for c in range(6):
         draw_triangle(target, int(x), int(y - CIRCLE_RADIUS), 1, ndx)
-        draw_slot(target, x, y, position["checkers"][ndx], 1)
+        draw_slot(target, x, y, pos["checkers"][ndx], 1)
         display_text(x, slot_y, str(start_slot_num), POS_TEXT_COLOR, target)
         start_slot_num += slot_delta
         locations[ndx] = (x, y)
@@ -313,7 +336,7 @@ def draw_board(target):
     x += CHECKER_SIZE + BORDER
     for c in range(6):
         draw_triangle(target, int(x), int(y - CIRCLE_RADIUS), 1, ndx)
-        draw_slot(target, x, y, position["checkers"][ndx], 1)
+        draw_slot(target, x, y, pos["checkers"][ndx], 1)
         display_text(x, slot_y, str(start_slot_num), POS_TEXT_COLOR, target)
         start_slot_num += slot_delta
         locations[ndx] = (x, y)
@@ -325,7 +348,7 @@ def draw_board(target):
     slot_y = y + FRAME / 2 + CHECKER_SIZE / 2
     for c in range(6):
         draw_triangle(target, int(x), int(y + CIRCLE_RADIUS), -1, ndx)
-        draw_slot(target, x, y, position["checkers"][ndx], -1)
+        draw_slot(target, x, y, pos["checkers"][ndx], -1)
         display_text(x, slot_y, str(start_slot_num), POS_TEXT_COLOR, target)
         start_slot_num += slot_delta
         locations[ndx] = (x, y)
@@ -335,7 +358,7 @@ def draw_board(target):
     x -= CHECKER_SIZE + BORDER
     for c in range(6):
         draw_triangle(target, int(x), int(y + CIRCLE_RADIUS), -1, ndx)
-        draw_slot(target, x, y, position["checkers"][ndx], -1)
+        draw_slot(target, x, y, pos["checkers"][ndx], -1)
         display_text(x, slot_y, str(start_slot_num), POS_TEXT_COLOR, target)
         start_slot_num += slot_delta
         locations[ndx] = (x, y)
@@ -360,13 +383,13 @@ def draw_board(target):
         if c % 5 == 4:
             y -= 3
 
-    draw_bar(target)
+    draw_bar(pos, target)
 
-    draw_dice(target)
+    draw_dice(pos, target)
 
-    draw_cube(target)
+    draw_cube(pos, target)
 
-    draw_pip_count(target)
+    draw_pip_count(pos, target)
 
 
 def display_text(x, y, text, color, target):
@@ -386,9 +409,6 @@ def get_ndx_for_click(x, y):
             best = c
             best_distance = distance
     return best
-
-# Game loop
-running = True
 
 
 def handle_mouse_click(event):
@@ -435,6 +455,12 @@ def handle_mouse_click(event):
     elif ndx == CLR_LOC:
         position["checkers"] = list(clear_checkers)
 
+    elif ndx == SAVE_LOC:
+        save_position(False)
+
+    elif ndx == SAVE_ALL_LOC:
+        save_position(True)
+
     else:
         hold_position = list(position["checkers"])
 
@@ -449,30 +475,54 @@ def handle_mouse_click(event):
             position["checkers"] = hold_position
 
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.MOUSEBUTTONUP:
-            handle_mouse_click(event)
+def save_position(all_files):
+    if all_files:
+        for x in range(len(positions)):
+            pos = positions[x]
+            filename = 'position_{:06d}.png'.format(x)
+            draw_board(pos, board_image)
+            pygame.image.save(board_image, filename)
 
-    # Clear the screen
-    screen.fill(BG_COLOR)
+    else:
+        filename = 'position_{:06d}.png'.format(len(positions))
+        positions.append(copy.deepcopy(position))
+        with open(POSITIONS_FILE_NAME, 'w') as json_file:
+            json.dump(positions, json_file, indent=4)
 
-    # Draw the backgammon board
-    draw_board(board_image)
-    screen.blit(board_image, (0, 0))
+        pygame.image.save(board_image, filename)
 
-    draw_interface(screen)
+    # Save the result as a black and white PNG file
 
-    # Update the display
-    pygame.display.flip()
 
-    # Control the frame rate
-    clock.tick(60)
+def edit_position():
+    # Game loop
+    running = True
 
-# Save the result as a black and white PNG file
-pygame.image.save(board_image, "backgammon_position.png")
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONUP:
+                handle_mouse_click(event)
 
-# Quit Pygame
-pygame.quit()
+        # Clear the screen
+        screen.fill(BG_COLOR)
+
+        # Draw the backgammon board
+        draw_board(position, board_image)
+
+        screen.blit(board_image, (0, 0))
+
+        draw_interface(screen)
+
+        # Update the display
+        pygame.display.flip()
+
+        # Control the frame rate
+        clock.tick(60)
+
+if __name__ == "__main__":
+    edit_position()
+
+    # Quit Pygame
+    pygame.quit()

@@ -1,3 +1,6 @@
+import os
+import sys
+
 import pygame
 import pygame.draw
 import pygame.image
@@ -15,18 +18,20 @@ CHECKER_SIZE = 40
 TOTAL_WIDTH = 14 * CHECKER_SIZE
 TOTAL_HEIGHT = 11 * CHECKER_SIZE
 WINDOW_SIZE = (TOTAL_WIDTH + BORDER * 3 + FRAME * 2, TOTAL_HEIGHT + FRAME * 2)
+CIRCLE_RADIUS = (CHECKER_SIZE - 2) // 2
+
 C0_COLOR = (39, 33, 19)
 C1_COLOR = (220, 200, 190)
 BG_COLOR = (143, 192, 143)
 LINE_COLOR = (64, 64, 64)
-CIRCLE_RADIUS = (CHECKER_SIZE - 2) // 2
-T1_COLOR = (235, 119, 34)
-T2_COLOR = (128, 128, 128)
+T0_COLOR = (235, 119, 34)
+T1_COLOR = (128, 128, 128)
 POS_TEXT_COLOR = (255, 255, 255)
 BUTTON_COLOR = (255, 0, 0)
 BUTTON_TEXT_COLOR = (255, 255, 255)
 DBL_CUBE_COLOR = (192, 193, 255)
 DBL_CUBE_TEXT_COLOR = (0, 0, 128)
+
 POSITIONS_FILE_NAME = 'positions.json'
 
 DICE_SIZE = 36
@@ -43,6 +48,48 @@ RESET_LOC = 30
 CLR_LOC = 31
 SAVE_LOC = 32
 SAVE_ALL_LOC = 33
+
+theme = {}
+theme["C0_COLOR"] = (39, 33, 19)
+theme["C1_COLOR"] = (220, 200, 190)
+theme["BG_COLOR"] = (143, 192, 143)
+theme["LINE_COLOR"] = (64, 64, 64)
+theme["T0_COLOR"] = (235, 119, 34)
+theme["T1_COLOR"] = (128, 128, 128)
+theme["POS_TEXT_COLOR"] = (255, 255, 255)
+theme["BUTTON_COLOR"] = (255, 0, 0)
+theme["BUTTON_TEXT_COLOR"] = (255, 255, 255)
+theme["DBL_CUBE_COLOR"] = (192, 193, 255)
+theme["DBL_CUBE_TEXT_COLOR"] = (0, 0, 128)
+with open('default.json', 'w') as json_file:
+    json.dump(theme, json_file, indent=4)
+
+theme_file_name = None
+theme_dir = None
+if len(sys.argv) > 1:
+    theme_file_name = sys.argv[1]
+    theme_dir = theme_file_name.split('.')[0]
+    if not os.path.exists(theme_dir):
+        os.makedirs(theme_dir)
+
+if theme_file_name:
+    try:
+        with open(theme_file_name, 'r') as json_file:
+            theme = json.load(json_file)
+        C0_COLOR = theme["C0_COLOR"]
+        C1_COLOR = theme["C1_COLOR"]
+        BG_COLOR = theme["BG_COLOR"]
+        LINE_COLOR = theme["LINE_COLOR"]
+        T0_COLOR = theme["T0_COLOR"]
+        T1_COLOR = theme["T1_COLOR"]
+        POS_TEXT_COLOR = theme["POS_TEXT_COLOR"]
+        BUTTON_COLOR = theme["BUTTON_COLOR"]
+        BUTTON_TEXT_COLOR = theme["BUTTON_TEXT_COLOR"]
+        DBL_CUBE_COLOR = theme["DBL_CUBE_COLOR"]
+        DBL_CUBE_TEXT_COLOR = theme["DBL_CUBE_TEXT_COLOR"]
+
+    except Exception as e:
+        pass
 
 # Initialize the window
 screen = pygame.display.set_mode(WINDOW_SIZE)
@@ -160,7 +207,7 @@ def draw_checker(color, target, x, y):
 
 
 def draw_triangle(target, x, y, delta, ndx):
-    color = T1_COLOR if ndx % 2 == 0 else T2_COLOR
+    color = T0_COLOR if ndx % 2 == 0 else T1_COLOR
     gfxdraw.aatrigon(target, x - CIRCLE_RADIUS, y, x + CIRCLE_RADIUS, y, x, y + delta * CHECKER_SIZE * 5, color)
     gfxdraw.filled_trigon(target, x - CIRCLE_RADIUS, y, x + CIRCLE_RADIUS, y, x, y + delta * CHECKER_SIZE * 5, color)
 
@@ -480,11 +527,15 @@ def save_position(all_files):
         for x in range(len(positions)):
             pos = positions[x]
             filename = 'position_{:06d}.png'.format(x)
+            if theme_dir:
+                filename = theme_dir + '/' + filename
             draw_board(pos, board_image)
             pygame.image.save(board_image, filename)
 
     else:
         filename = 'position_{:06d}.png'.format(len(positions))
+        if theme_dir:
+            filename = theme_dir + '/' + filename
         positions.append(copy.deepcopy(position))
         with open(POSITIONS_FILE_NAME, 'w') as json_file:
             json.dump(positions, json_file, indent=4)

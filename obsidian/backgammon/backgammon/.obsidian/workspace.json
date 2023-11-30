@@ -1,0 +1,226 @@
+{
+  "main": {
+    "id": "b9234b996fa2b058",
+    "type": "split",
+    "children": [
+      {
+        "id": "21167aaba42f0991",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cd54d7ed72b1e31a",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {}
+            }
+          },
+          {
+            "id": "708b0f8c8b1749d2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Backgammon Boot Camp/Proto-Backgames.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "8f933fc8beca8d91",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Proto-Backgame Tactics.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "48b2e62b5f3ecf16",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Backgame Bear-in.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "7fa32967c7abbb58",
+    "type": "split",
+    "children": [
+      {
+        "id": "9531e28dfb2755af",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8b42117efc62ea9e",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "7a5b0e648a3fa06d",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "a4317b193458cdb1",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "433ceddff4786d54",
+    "type": "split",
+    "children": [
+      {
+        "id": "b3fcf89753fb5cc5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2a24611c3e2b9a3f",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Backgame Bear-in.md",
+                "collapseAll": true,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "1f3de51a95433d82",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Backgame Bear-in.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "8d180ad2635e43fb",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "18104aff6573535c",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Backgame Bear-in.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "48b2e62b5f3ecf16",
+  "lastOpenFiles": [
+    "images/position_000069.png",
+    "images/position_000068.png",
+    "images/position_000067.png",
+    "Proto-Backgame Tactics.md",
+    "Backgame Bear-in.md",
+    "images/position_000066.png",
+    "images/position_000065.png",
+    "images/position_000064.png",
+    "images/position_000063.png",
+    "Backgammon Boot Camp/Proto-Backgames.md",
+    "Backgame Tactics.md",
+    "Prime.md",
+    "images/position_000062.png",
+    "Backgammon Boot Camp/Backgame.md",
+    "Backgammon Boot Camp/The Cube and the Ace Point.md",
+    "Backgammon Boot Camp/Opening Blitz Doubles.md",
+    "Backgammon Boot Camp/Basic Backgames.md",
+    "images/position_000061.png",
+    "images/position_000060.png",
+    "images/position_000059.png",
+    "Backgammon Boot Camp/Reference.md",
+    "Backgammon Boot Camp/Doubling.md",
+    "Backgammon Boot Camp/General Principles.md",
+    "Backgammon Boot Camp/Backgammon Boot Camp.md",
+    "Backgammon Boot Camp/Anti-Joker.md",
+    "Backgammon Boot Camp/Joker.md",
+    "Backgammon Boot Camp/One Checker Closeouts.md",
+    "Backgammon Boot Camp/Two Checker Closeouts.md",
+    "Backgammon Boot Camp/End Contact Positions.md",
+    "Isight/Isight.md",
+    "Backgammon Boot Camp/Pipcount to Cube Action.md",
+    "Backgammon Boot Camp/wastage.md",
+    "Backgammon Boot Camp/Beaver.md",
+    "Backgammon Boot Camp/Racing off the Ace point.md",
+    "Backgammon Boot Camp/Two Roll Bearoffs.md",
+    "Backgammon Boot Camp/double.md",
+    "Isight",
+    "Backgammon Boot Camp",
+    "images"
+  ]
+}

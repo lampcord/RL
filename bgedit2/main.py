@@ -71,6 +71,8 @@ if len(sys.argv) > 1:
     theme_dir = theme_file_name.split('.')[0]
     if not os.path.exists(theme_dir):
         os.makedirs(theme_dir)
+if len(sys.argv) > 2:
+    theme_dir = sys.argv[2]
 
 if theme_file_name:
     try:
@@ -208,8 +210,8 @@ def draw_checker(color, target, x, y):
 
 def draw_triangle(target, x, y, delta, ndx):
     color = T0_COLOR if ndx % 2 == 0 else T1_COLOR
-    gfxdraw.aatrigon(target, x - CIRCLE_RADIUS, y, x + CIRCLE_RADIUS, y, x, y + delta * CHECKER_SIZE * 5, color)
     gfxdraw.filled_trigon(target, x - CIRCLE_RADIUS, y, x + CIRCLE_RADIUS, y, x, y + delta * CHECKER_SIZE * 5, color)
+    gfxdraw.aatrigon(target, x - CIRCLE_RADIUS, y, x + CIRCLE_RADIUS, y, x, y + delta * CHECKER_SIZE * 5, LINE_COLOR)
 
 
 def draw_button(target, x, y, text):
@@ -310,21 +312,21 @@ def draw_dice(pos, target):
         locations[DIE_1_LOC] = (x, y)
 
 
-def spares(side):
+def spares(side, pos):
     spares = 15
     if side == 0:
-        for c in position["checkers"]:
+        for c in pos["checkers"]:
             if c > 0:
                 spares -= c
     else:
-        for c in position["checkers"]:
+        for c in pos["checkers"]:
             if c < 0:
                 spares += c
     return spares
 
 
-def is_vali_position():
-    return spares(0) >= 0 and spares(1) >= 0 and position["checkers"][BAR_0_LOC] >= 0 and position["checkers"][BAR_1_LOC] <= 0
+def is_vali_position(pos):
+    return spares(0, pos) >= 0 and spares(1, pos) >= 0 and pos["checkers"][BAR_0_LOC] >= 0 and pos["checkers"][BAR_1_LOC] <= 0
 
 
 def draw_pip_count(pos, target):
@@ -414,7 +416,7 @@ def draw_board(pos, target):
 
     x = CHECKER_SIZE * 13 + BORDER * 3 + FRAME + 2
     y = FRAME + 2
-    num_spares = spares(1)
+    num_spares = spares(1, pos)
     for c in range(num_spares):
         gfxdraw.box(target, (x, y, CHECKER_SIZE - 5, 6), C0_COLOR)
         gfxdraw.box(target, (x + 1, y + 1, CHECKER_SIZE - 7, 4), C1_COLOR)
@@ -423,7 +425,7 @@ def draw_board(pos, target):
             y += 3
 
     y = WINDOW_SIZE[1] - FRAME - 8
-    num_spares = spares(0)
+    num_spares = spares(0, pos)
     for c in range(num_spares):
         gfxdraw.box(target, (x, y, CHECKER_SIZE - 5, 6), C0_COLOR)
         y -= 8
@@ -518,7 +520,7 @@ def handle_mouse_click(event):
         if event.button == 3:
             position["checkers"][ndx] -= 1
 
-        if not is_vali_position():
+        if not is_vali_position(position):
             position["checkers"] = hold_position
 
 

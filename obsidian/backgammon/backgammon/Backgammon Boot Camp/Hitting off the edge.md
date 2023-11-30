@@ -1,0 +1,2 @@
+Whenever you are priming and your opponent moves up to the edge of a prime, it’s usually a good idea to hit loose if you can’t point on him. Of course you have to decide if getting hit is a bigger loss than letting him escape. 
+[[Backgammon Boot Camp]]

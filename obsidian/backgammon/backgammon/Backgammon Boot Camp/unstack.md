@@ -1,0 +1,2 @@
+When you start the game, your 6 point and [[midpoint]] are [[overstacked]]. This is a waste of checkers and it is often considered a valuable move to simply unstack them usually down to 3 checkers and get the other 2 into play where they can be useful.
+[[Backgammon Boot Camp]]

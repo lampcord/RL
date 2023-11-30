@@ -1,0 +1,1 @@
+The Beaver rule is optional. Instead of taking or dropping, the player that was just doubled can keep the cube but immediately double its value again. This is usually done when your opponent doubles you by mistake.

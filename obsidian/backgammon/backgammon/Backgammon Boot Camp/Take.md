@@ -1,0 +1,1 @@
+When a player is doubled, he can take the cube. The game will now be worth twice as much as before but only he will be able to double going forward.

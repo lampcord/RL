@@ -1,0 +1,1 @@
+When a player is doubled, he can pass. At that point the game is over and his opponent is awarded whatever the current value of the cube is.

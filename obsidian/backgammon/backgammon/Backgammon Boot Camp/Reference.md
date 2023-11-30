@@ -1,0 +1,1 @@
+Reference positions are positions that are right on the edge of either a double or a take. So when you have a similar position, you need to gauge whether you are slightly better or slightly worse and you can make your double / take decisions based on that with very good accuracy.

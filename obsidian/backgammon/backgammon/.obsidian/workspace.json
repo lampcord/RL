@@ -34,7 +34,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Proto-Backgame Tactics.md",
+                "file": "Backgammon Boot Camp/Proto-Backgame Tactics.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -47,15 +47,27 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Backgame Bear-in.md",
+                "file": "Backgammon Boot Camp/Backgame Bear-in.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "8ddf95507abb5e20",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Backgammon Boot Camp/Proto-Backgame Tactics.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
               }
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -121,7 +133,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Backgame Bear-in.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -138,7 +149,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Backgame Bear-in.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -160,9 +170,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "Backgame Bear-in.md"
-              }
+              "state": {}
             }
           }
         ]
@@ -181,28 +189,28 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "48b2e62b5f3ecf16",
+  "active": "cd54d7ed72b1e31a",
   "lastOpenFiles": [
+    "Backgammon Boot Camp/Proto-Backgame Tactics.md",
+    "Backgammon Boot Camp/Prime.md",
+    "Backgammon Boot Camp/Forward or Backward.md",
+    "Backgammon Boot Camp/Backgame Tactics.md",
+    "Backgammon Boot Camp/Backgame Bear-in.md",
+    "images/position_000075.png",
+    "images/position_000074.png",
+    "images/position_000073.png",
+    "images/position_000072.png",
+    "images/position_000071.png",
     "images/position_000070.png",
     "images/position_000069.png",
     "images/position_000068.png",
     "images/position_000067.png",
-    "Proto-Backgame Tactics.md",
-    "Backgame Bear-in.md",
     "images/position_000066.png",
-    "images/position_000065.png",
-    "images/position_000064.png",
-    "images/position_000063.png",
     "Backgammon Boot Camp/Proto-Backgames.md",
-    "Backgame Tactics.md",
-    "Prime.md",
-    "images/position_000062.png",
     "Backgammon Boot Camp/Backgame.md",
     "Backgammon Boot Camp/The Cube and the Ace Point.md",
     "Backgammon Boot Camp/Opening Blitz Doubles.md",
     "Backgammon Boot Camp/Basic Backgames.md",
-    "images/position_000061.png",
-    "images/position_000060.png",
     "Backgammon Boot Camp/Reference.md",
     "Backgammon Boot Camp/Doubling.md",
     "Backgammon Boot Camp/General Principles.md",
@@ -218,7 +226,6 @@
     "Backgammon Boot Camp/Beaver.md",
     "Backgammon Boot Camp/Racing off the Ace point.md",
     "Backgammon Boot Camp/Two Roll Bearoffs.md",
-    "Backgammon Boot Camp/double.md",
     "Isight",
     "Backgammon Boot Camp",
     "images"

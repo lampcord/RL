@@ -7,5 +7,7 @@ Black could play 8/3 8/4 which would be safest. But it allows white to escape so
 Usually, you want to clear from the back. But in backgames, you want to clear the most difficult points first. The 8 point is in shooting range of both anchors but the 9 isn't. So here, it is actually better to play 8/4 8/3 even though it leaves a gap. This is known as the [[Squeeze Play]].
 ![[position_000070.png]]
 Another example of where the squeeze play is best. 7/4 7/3. It also means if white rolls a 6 he has to break his 1 point which he really doesn't want to do.
+[[Backgammon Boot Camp]]
+
 
 

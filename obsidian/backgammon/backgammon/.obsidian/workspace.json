@@ -4,67 +4,15 @@
     "type": "split",
     "children": [
       {
-        "id": "21167aaba42f0991",
+        "id": "e15d2a76fa160645",
         "type": "tabs",
         "children": [
           {
-            "id": "cd54d7ed72b1e31a",
+            "id": "c021fe28bf71689f",
             "type": "leaf",
             "state": {
-              "type": "graph",
+              "type": "empty",
               "state": {}
-            }
-          },
-          {
-            "id": "708b0f8c8b1749d2",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Backgammon Boot Camp/Proto-Backgames.md",
-                "mode": "source",
-                "backlinks": true,
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "8f933fc8beca8d91",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Backgammon Boot Camp/Proto-Backgame Tactics.md",
-                "mode": "source",
-                "backlinks": true,
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "48b2e62b5f3ecf16",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Backgammon Boot Camp/Backgame Bear-in.md",
-                "mode": "source",
-                "backlinks": true,
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "8ddf95507abb5e20",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Backgammon Boot Camp/Proto-Backgame Tactics.md",
-                "mode": "source",
-                "backlinks": true,
-                "source": false
-              }
             }
           }
         ]
@@ -189,32 +137,35 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "cd54d7ed72b1e31a",
+  "active": "c021fe28bf71689f",
   "lastOpenFiles": [
+    "Backgammon Boot Camp/Reference.md",
+    "Backgammon Boot Camp/Backgammon Boot Camp.md",
+    "Backgammon Boot Camp/Backgame Cube Action III.md",
+    "Backgammon Boot Camp/Backgame Cube Action II.md",
+    "Backgammon Boot Camp/Backgame Cube Action.md",
+    "images/position_000090.png",
+    "images/position_000089.png",
+    "images/position_000088.png",
+    "images/position_000087.png",
+    "images/position_000086.png",
+    "images/position_000085.png",
+    "images/position_000084.png",
+    "images/position_000083.png",
+    "images/position_000082.png",
+    "images/position_000081.png",
     "Backgammon Boot Camp/Proto-Backgame Tactics.md",
     "Backgammon Boot Camp/Prime.md",
     "Backgammon Boot Camp/Forward or Backward.md",
     "Backgammon Boot Camp/Backgame Tactics.md",
     "Backgammon Boot Camp/Backgame Bear-in.md",
-    "images/position_000075.png",
-    "images/position_000074.png",
-    "images/position_000073.png",
-    "images/position_000072.png",
-    "images/position_000071.png",
-    "images/position_000070.png",
-    "images/position_000069.png",
-    "images/position_000068.png",
-    "images/position_000067.png",
-    "images/position_000066.png",
     "Backgammon Boot Camp/Proto-Backgames.md",
     "Backgammon Boot Camp/Backgame.md",
     "Backgammon Boot Camp/The Cube and the Ace Point.md",
     "Backgammon Boot Camp/Opening Blitz Doubles.md",
     "Backgammon Boot Camp/Basic Backgames.md",
-    "Backgammon Boot Camp/Reference.md",
     "Backgammon Boot Camp/Doubling.md",
     "Backgammon Boot Camp/General Principles.md",
-    "Backgammon Boot Camp/Backgammon Boot Camp.md",
     "Backgammon Boot Camp/Anti-Joker.md",
     "Backgammon Boot Camp/Joker.md",
     "Backgammon Boot Camp/One Checker Closeouts.md",
@@ -223,9 +174,6 @@
     "Isight/Isight.md",
     "Backgammon Boot Camp/Pipcount to Cube Action.md",
     "Backgammon Boot Camp/wastage.md",
-    "Backgammon Boot Camp/Beaver.md",
-    "Backgammon Boot Camp/Racing off the Ace point.md",
-    "Backgammon Boot Camp/Two Roll Bearoffs.md",
     "Isight",
     "Backgammon Boot Camp",
     "images"

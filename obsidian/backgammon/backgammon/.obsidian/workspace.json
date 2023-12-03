@@ -4,18 +4,50 @@
     "type": "split",
     "children": [
       {
-        "id": "e15d2a76fa160645",
+        "id": "848ca7a010f06253",
         "type": "tabs",
         "children": [
           {
-            "id": "c021fe28bf71689f",
+            "id": "384d4c6d4492c3dd",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {}
+              "type": "markdown",
+              "state": {
+                "file": "Impure Play.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "b4fa6c260143fc48",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Escape or Crash.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "b583a28472eab816",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Prime Time.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -81,6 +113,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Prime Time.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -97,6 +130,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Prime Time.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -118,7 +152,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "Prime Time.md"
+              }
             }
           }
         ]
@@ -137,23 +173,28 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "c021fe28bf71689f",
+  "active": "b583a28472eab816",
   "lastOpenFiles": [
+    "images/position_000113.png",
+    "images/position_000112.png",
+    "Prime Time.md",
+    "images/position_000111.png",
+    "Escape or Crash.md",
+    "images/position_000110.png",
+    "images/position_000109.png",
+    "images/position_000108.png",
+    "images/position_000107.png",
+    "images/position_000106.png",
+    "Prime vs. Prime.md",
+    "images/position_000105.png",
+    "images/position_000104.png",
+    "images/position_000103.png",
+    "Impure Play.md",
+    "Backgammon Boot Camp/Backgame Cube Action III.md",
     "Backgammon Boot Camp/Reference.md",
     "Backgammon Boot Camp/Backgammon Boot Camp.md",
-    "Backgammon Boot Camp/Backgame Cube Action III.md",
     "Backgammon Boot Camp/Backgame Cube Action II.md",
     "Backgammon Boot Camp/Backgame Cube Action.md",
-    "images/position_000090.png",
-    "images/position_000089.png",
-    "images/position_000088.png",
-    "images/position_000087.png",
-    "images/position_000086.png",
-    "images/position_000085.png",
-    "images/position_000084.png",
-    "images/position_000083.png",
-    "images/position_000082.png",
-    "images/position_000081.png",
     "Backgammon Boot Camp/Proto-Backgame Tactics.md",
     "Backgammon Boot Camp/Prime.md",
     "Backgammon Boot Camp/Forward or Backward.md",
@@ -170,10 +211,6 @@
     "Backgammon Boot Camp/Joker.md",
     "Backgammon Boot Camp/One Checker Closeouts.md",
     "Backgammon Boot Camp/Two Checker Closeouts.md",
-    "Backgammon Boot Camp/End Contact Positions.md",
-    "Isight/Isight.md",
-    "Backgammon Boot Camp/Pipcount to Cube Action.md",
-    "Backgammon Boot Camp/wastage.md",
     "Isight",
     "Backgammon Boot Camp",
     "images"

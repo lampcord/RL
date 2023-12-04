@@ -11,4 +11,4 @@ A good rule is its usually better to do two good things instead of one even if t
 A lot of people would make the bar point with a hit and then either bring the 9 point in or run one or both of the back checkers. But by far the best (by -0.321!!) is the double hit 13/7(2)* 7/1(2)*.
 
 
-
+[[Backgammon Boot Camp]]

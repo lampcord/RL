@@ -19,3 +19,4 @@ In this case when black gets a 6 he will have to move his checker forward pretty
 This is much different than the others because now the escape roll is a 5 eliminates a bunch of bad rolls for black. A 6 here is simply dead. This is a clear double / pass.
 ![[position_000110.png]]
 The anchor also makes a big difference. In other positions black either escapes or hits. In this one he escapes or moves closer to crashing. double and big take.
+[[Backgammon Boot Camp]]

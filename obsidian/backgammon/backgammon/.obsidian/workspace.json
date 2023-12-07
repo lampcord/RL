@@ -29,7 +29,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Match Play.md",
+                "file": "Backgammon Boot Camp/Match Play.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -42,7 +42,20 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "How to be a Winner.md",
+                "file": "Backgammon Boot Camp/PRAT.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "5ef09ce1b1d973f0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Online/PRAT Position.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -50,7 +63,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -116,7 +129,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "How to be a Winner.md",
+                "file": "Online/PRAT Position.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -133,7 +146,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "How to be a Winner.md",
+                "file": "Online/PRAT Position.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -156,7 +169,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "How to be a Winner.md"
+                "file": "Online/PRAT Position.md"
               }
             }
           }
@@ -176,25 +189,29 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "560ee84d080bbd16",
+  "active": "8b42117efc62ea9e",
   "lastOpenFiles": [
-    "Graduation.md",
-    "How to be a Winner.md",
-    "Match Play.md",
-    "Attacking Priorities.md",
+    "Backgammon Boot Camp/PRAT.md",
+    "Online",
+    "Online/PRAT Threat.md",
+    "Online/PRAT Race.md",
+    "Online/PRAT Position.md",
+    "Backgammon Boot Camp/Match Play.md",
+    "Backgammon Boot Camp/How to be a Winner.md",
+    "Backgammon Boot Camp/Graduation.md",
+    "Backgammon Boot Camp/Attacking Priorities.md",
+    "Backgammon Boot Camp/Attacking Doubles III.md",
+    "Backgammon Boot Camp/Attacking Doubles II.md",
     "images/position_000141.png",
     "images/position_000140.png",
     "images/position_000139.png",
     "images/position_000138.png",
     "images/position_000137.png",
-    "Attacking Doubles III.md",
     "images/position_000136.png",
     "images/position_000135.png",
     "images/position_000134.png",
     "images/position_000133.png",
     "images/position_000132.png",
-    "PRAT.md",
-    "Attacking Doubles II.md",
     "Backgammon Boot Camp/Middlegame Attacking Play.md",
     "Backgammon Boot Camp/Attacking Doubles.md",
     "Backgammon Boot Camp/Prime vs. Prime.md",
@@ -210,10 +227,6 @@
     "Backgammon Boot Camp/Backgame Cube Action II.md",
     "Backgammon Boot Camp/Backgame Cube Action.md",
     "Backgammon Boot Camp/Proto-Backgame Tactics.md",
-    "Backgammon Boot Camp/Prime.md",
-    "Backgammon Boot Camp/Forward or Backward.md",
-    "Backgammon Boot Camp/Backgame Tactics.md",
-    "Backgammon Boot Camp/Backgame Bear-in.md",
     "Isight",
     "Backgammon Boot Camp",
     "images"

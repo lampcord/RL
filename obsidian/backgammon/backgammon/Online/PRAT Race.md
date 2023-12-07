@@ -1,0 +1,1 @@
+Add 10% to the lower pip count. If it is less than the higher pip count, count 1 point.

@@ -27,3 +27,5 @@ White's lead is small. No extra black blots to tempo hit so white will have to t
 White has only 2 points and blots all over. 6 point is still over stacked. Black's position has great potential with perfect builder distribution. He is favored to come in and may even hit. This is not yet a double and huge take.
 ![[position_000130.png]]
 White has a huge lead in the race so he can win either by blitzing or racing. He has the race lead, more blots to shoot at, more checkers in the zone. This is a double / pass.
+
+[[Backgammon Boot Camp]]

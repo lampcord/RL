@@ -55,7 +55,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Online/PRAT Position.md",
+                "file": "Backgammon Boot Camp/Graduation.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -92,7 +92,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "fea",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -109,7 +109,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -129,7 +130,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Online/PRAT Position.md",
+                "file": "Backgammon Boot Camp/Graduation.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -146,7 +147,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Online/PRAT Position.md",
+                "file": "Backgammon Boot Camp/Graduation.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -169,7 +170,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Online/PRAT Position.md"
+                "file": "Backgammon Boot Camp/Graduation.md"
               }
             }
           }
@@ -189,13 +190,13 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "8b42117efc62ea9e",
+  "active": "7a5b0e648a3fa06d",
   "lastOpenFiles": [
+    "Online/PRAT Position.md",
     "Backgammon Boot Camp/PRAT.md",
     "Online",
     "Online/PRAT Threat.md",
     "Online/PRAT Race.md",
-    "Online/PRAT Position.md",
     "Backgammon Boot Camp/Match Play.md",
     "Backgammon Boot Camp/How to be a Winner.md",
     "Backgammon Boot Camp/Graduation.md",

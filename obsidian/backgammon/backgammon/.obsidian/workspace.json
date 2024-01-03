@@ -50,12 +50,51 @@
             }
           },
           {
-            "id": "5ef09ce1b1d973f0",
+            "id": "940bb24d07481683",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Backgammon Boot Camp/Graduation.md",
+                "file": "501 Essential Backgammon Problems/501 Essential Backgammon Problems.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "b93066c31ec1d9d2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "501 Essential Backgammon Problems/Introduction.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "6c410e1ef7b80485",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "501 Essential Backgammon Problems/Opening.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "f74b9bb52a58a9f0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Flexibility.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -63,7 +102,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 7
       }
     ],
     "direction": "vertical"
@@ -109,8 +148,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -130,7 +168,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Backgammon Boot Camp/Graduation.md",
+                "file": "Flexibility.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -147,7 +185,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Backgammon Boot Camp/Graduation.md",
+                "file": "Flexibility.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -170,7 +208,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Backgammon Boot Camp/Graduation.md"
+                "file": "Flexibility.md"
               }
             }
           }
@@ -190,10 +228,21 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "7a5b0e648a3fa06d",
+  "active": "f74b9bb52a58a9f0",
   "lastOpenFiles": [
-    "Online/PRAT Position.md",
+    "501 Essential Backgammon Problems/Opening.md",
+    "Flexibility.md",
     "Backgammon Boot Camp/PRAT.md",
+    "hit blots.md",
+    "501 Essential Backgammon Problems/501 Essential Backgammon Problems.md",
+    "501 Essential Backgammon Problems/Introduction.md",
+    "images/Pasted image 20240102183237.png",
+    "Untitled.canvas",
+    "Notes.md",
+    "2023-12-12.md",
+    "501 Essential Backgammon Problems",
+    "Online/2.7 Rule.md",
+    "Online/PRAT Position.md",
     "Online",
     "Online/PRAT Threat.md",
     "Online/PRAT Race.md",
@@ -212,7 +261,6 @@
     "images/position_000135.png",
     "images/position_000134.png",
     "images/position_000133.png",
-    "images/position_000132.png",
     "Backgammon Boot Camp/Middlegame Attacking Play.md",
     "Backgammon Boot Camp/Attacking Doubles.md",
     "Backgammon Boot Camp/Prime vs. Prime.md",
@@ -221,13 +269,6 @@
     "Backgammon Boot Camp/Escape or Crash.md",
     "Backgammon Boot Camp/Build or Split.md",
     "Backgammon Boot Camp/Blitzing.md",
-    "Backgammon Boot Camp/Attacking.md",
-    "Backgammon Boot Camp/Backgame Cube Action III.md",
-    "Backgammon Boot Camp/Reference.md",
-    "Backgammon Boot Camp/Backgammon Boot Camp.md",
-    "Backgammon Boot Camp/Backgame Cube Action II.md",
-    "Backgammon Boot Camp/Backgame Cube Action.md",
-    "Backgammon Boot Camp/Proto-Backgame Tactics.md",
     "Isight",
     "Backgammon Boot Camp",
     "images"

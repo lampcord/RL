@@ -5,7 +5,7 @@ There are really only 3 ways to win a game in backgammon:
 3) [[Blitzing]]
 
 This is according to [[Backgammon Boot Camp]], but modern backgammon theory adds a fourth one:
-4) [[Holding Games]]
+4) [[Backgammon Boot Camp/Holding Games]]
 
 Formulating a game plan involves ranking the possible game plans in order of which one is most feasible for a win. For example, if you are 40 pips up but have no prime at all, Racing is a much better game plan than priming.
 

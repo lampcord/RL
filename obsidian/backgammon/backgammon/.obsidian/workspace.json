@@ -4,32 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "1ce128c9db4c7134",
+        "id": "d0a30f6d03cb04b6",
         "type": "tabs",
         "children": [
           {
-            "id": "902ae0492a0692eb",
-            "type": "leaf",
-            "state": {
-              "type": "empty",
-              "state": {}
-            }
-          },
-          {
-            "id": "1fb6d435930f23d6",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {}
-            }
-          },
-          {
-            "id": "ad8f12b79629e3ab",
+            "id": "54a98ec2f2f463ce",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Backgammon Boot Camp/Match Play.md",
+                "file": "Holding Games.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -37,12 +21,12 @@
             }
           },
           {
-            "id": "560ee84d080bbd16",
+            "id": "6c4fa96649579f1d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Backgammon Boot Camp/PRAT.md",
+                "file": "501 Essential Backgammon Problems/The 5 Point.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -50,12 +34,12 @@
             }
           },
           {
-            "id": "940bb24d07481683",
+            "id": "006256f6290ef73f",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "501 Essential Backgammon Problems/501 Essential Backgammon Problems.md",
+                "file": "501 Essential Backgammon Problems/The Blitz.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -63,46 +47,19 @@
             }
           },
           {
-            "id": "b93066c31ec1d9d2",
+            "id": "de6e04a003bea67b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "501 Essential Backgammon Problems/Introduction.md",
-                "mode": "source",
-                "backlinks": true,
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "6c410e1ef7b80485",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "501 Essential Backgammon Problems/Opening.md",
-                "mode": "source",
-                "backlinks": true,
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "f74b9bb52a58a9f0",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Flexibility.md",
+                "file": "501 Essential Backgammon Problems/One Man Back.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
               }
             }
           }
-        ],
-        "currentTab": 7
+        ]
       }
     ],
     "direction": "vertical"
@@ -168,7 +125,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Flexibility.md",
+                "file": "Holding Games.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -185,7 +142,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Flexibility.md",
+                "file": "Holding Games.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -208,7 +165,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Flexibility.md"
+                "file": "Holding Games.md"
               }
             }
           }
@@ -228,14 +185,24 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "f74b9bb52a58a9f0",
+  "active": "54a98ec2f2f463ce",
   "lastOpenFiles": [
     "501 Essential Backgammon Problems/Opening.md",
-    "Flexibility.md",
-    "Backgammon Boot Camp/PRAT.md",
-    "hit blots.md",
+    "Backgammon Boot Camp/Backgammon Boot Camp.md",
     "501 Essential Backgammon Problems/501 Essential Backgammon Problems.md",
+    "Holding Games.md",
+    "501 Essential Backgammon Problems/The Blitz.md",
+    "501 Essential Backgammon Problems/Flexibility.md",
+    "501 Essential Backgammon Problems/One Man Back.md",
+    "501 Essential Backgammon Problems/The 5 Point.md",
+    "Shared",
+    "501 Essential Backgammon Problems/Middlegame.md",
     "501 Essential Backgammon Problems/Introduction.md",
+    "Backgammon Boot Camp/PRAT.md",
+    "Backgammon Boot Camp/Match Play.md",
+    "Backgammon Boot Camp/Simplified Opening Strategy.md",
+    "Online/Michi opponent on bar bearing off.md",
+    "Shared/hit blots.md",
     "images/Pasted image 20240102183237.png",
     "Untitled.canvas",
     "Notes.md",
@@ -246,7 +213,6 @@
     "Online",
     "Online/PRAT Threat.md",
     "Online/PRAT Race.md",
-    "Backgammon Boot Camp/Match Play.md",
     "Backgammon Boot Camp/How to be a Winner.md",
     "Backgammon Boot Camp/Graduation.md",
     "Backgammon Boot Camp/Attacking Priorities.md",
@@ -261,14 +227,6 @@
     "images/position_000135.png",
     "images/position_000134.png",
     "images/position_000133.png",
-    "Backgammon Boot Camp/Middlegame Attacking Play.md",
-    "Backgammon Boot Camp/Attacking Doubles.md",
-    "Backgammon Boot Camp/Prime vs. Prime.md",
-    "Backgammon Boot Camp/Prime Time.md",
-    "Backgammon Boot Camp/Impure Play.md",
-    "Backgammon Boot Camp/Escape or Crash.md",
-    "Backgammon Boot Camp/Build or Split.md",
-    "Backgammon Boot Camp/Blitzing.md",
     "Isight",
     "Backgammon Boot Camp",
     "images"

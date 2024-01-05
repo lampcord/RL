@@ -1,4 +1,4 @@
-This is a middle game position where one side has a lot of checkers back and possibly more than one anchor. Not far enough back to be considered a [[Backgame]] but with a few bad rolls could become one or if things go the other way, it could turn into a [[Holding Games]].
+This is a middle game position where one side has a lot of checkers back and possibly more than one anchor. Not far enough back to be considered a [[Backgame]] but with a few bad rolls could become one or if things go the other way, it could turn into a [[Backgammon Boot Camp/Holding Games]].
 
 ![[position_000062.png]]
 This is a classic proto-backgame. Black has two excellent [[Anchors]] and is 71 pips back. He really wants to be closer to 90. He has a good [[Prime]] but does not have a [[Well Timed Position]]. He would like to either escape right away or fall further behind and wait.

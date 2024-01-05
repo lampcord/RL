@@ -54,6 +54,7 @@ Don't bother fighting for the 5 point if it is very unlikely to work. For exampl
 
 Our goal is balance. Improve the part of your game that is in most need of help.
 
+[[Backgammon Boot Camp/Opening|Opening]]
 [[Bold or Safe Plays]]
 [[Tempo Play]]
 [[Simplified Opening Strategy]]

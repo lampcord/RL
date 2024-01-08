@@ -45,9 +45,48 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "5932db90c9c13f34",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "501 Essential Backgammon Problems/Various Endings.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "6bb1cf5ed4653947",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "501 Essential Backgammon Problems/The Race.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "ada7f36adaddc2e5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "501 Essential Backgammon Problems/The Bearoff.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              }
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -113,7 +152,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "501 Essential Backgammon Problems/Bearing Off Against Contact.md",
+                "file": "501 Essential Backgammon Problems/The Bearoff.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -130,7 +169,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "501 Essential Backgammon Problems/Bearing Off Against Contact.md",
+                "file": "501 Essential Backgammon Problems/The Bearoff.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -153,7 +192,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "501 Essential Backgammon Problems/Bearing Off Against Contact.md"
+                "file": "501 Essential Backgammon Problems/The Bearoff.md"
               }
             }
           }
@@ -175,8 +214,15 @@
   },
   "active": "8b42117efc62ea9e",
   "lastOpenFiles": [
-    "501 Essential Backgammon Problems/Saving the Gammon.md",
+    "images/position_000148.png",
+    "images/position_000147.png",
+    "501 Essential Backgammon Problems/The Race.md",
+    "501 Essential Backgammon Problems/The Bearoff.md",
+    "images/position_000146.png",
+    "501 Essential Backgammon Problems/Various Endings.md",
+    "images/position_000145.png",
     "501 Essential Backgammon Problems/Bearing Off Against Contact.md",
+    "501 Essential Backgammon Problems/Saving the Gammon.md",
     "501 Essential Backgammon Problems/Playing for the Gammon.md",
     "501 Essential Backgammon Problems/Post Ace Point Game.md",
     "images/position_000144.png",
@@ -200,10 +246,6 @@
     "501 Essential Backgammon Problems/Opening.md",
     "Backgammon Boot Camp/Backgammon Boot Camp.md",
     "501 Essential Backgammon Problems/501 Essential Backgammon Problems.md",
-    "501 Essential Backgammon Problems/The Blitz.md",
-    "501 Essential Backgammon Problems/Flexibility.md",
-    "501 Essential Backgammon Problems/One Man Back.md",
-    "501 Essential Backgammon Problems/The 5 Point.md",
     "Shared",
     "images/Pasted image 20240102183237.png",
     "Untitled.canvas",
@@ -212,9 +254,6 @@
     "images/position_000141.png",
     "images/position_000140.png",
     "images/position_000139.png",
-    "images/position_000138.png",
-    "images/position_000137.png",
-    "images/position_000136.png",
     "Isight",
     "Backgammon Boot Camp",
     "images"

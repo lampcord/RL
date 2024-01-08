@@ -13,6 +13,6 @@ A modern addendum is:
 7) *The more men your opponent has back the freer you are to abandon anchors and leave blots. This somewhat corrects (6) because while you don't want to hit as much you still can otherwise play bold.
 
 
-[[Hit or Not]]
+[[Backgammon Boot Camp/Hit or Not]]
 [[General Principles]]
 [[Backgammon Boot Camp]]

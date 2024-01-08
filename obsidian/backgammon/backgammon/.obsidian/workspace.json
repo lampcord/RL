@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "d0a30f6d03cb04b6",
+        "id": "307bdda0646d81e6",
         "type": "tabs",
         "children": [
           {
-            "id": "54a98ec2f2f463ce",
+            "id": "985dff1eaa2d5b17",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Holding Games.md",
+                "file": "501 Essential Backgammon Problems/Post Ace Point Game.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -21,12 +21,12 @@
             }
           },
           {
-            "id": "6c4fa96649579f1d",
+            "id": "2d217b902a7ddb7f",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "501 Essential Backgammon Problems/The 5 Point.md",
+                "file": "501 Essential Backgammon Problems/Playing for the Gammon.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -34,32 +34,20 @@
             }
           },
           {
-            "id": "006256f6290ef73f",
+            "id": "1a0c88a23eee0c0e",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "501 Essential Backgammon Problems/The Blitz.md",
-                "mode": "source",
-                "backlinks": true,
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "de6e04a003bea67b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "501 Essential Backgammon Problems/One Man Back.md",
+                "file": "501 Essential Backgammon Problems/Bearing Off Against Contact.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
               }
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -125,7 +113,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Holding Games.md",
+                "file": "501 Essential Backgammon Problems/Bearing Off Against Contact.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -142,7 +130,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Holding Games.md",
+                "file": "501 Essential Backgammon Problems/Bearing Off Against Contact.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -165,7 +153,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Holding Games.md"
+                "file": "501 Essential Backgammon Problems/Bearing Off Against Contact.md"
               }
             }
           }
@@ -185,48 +173,48 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "54a98ec2f2f463ce",
+  "active": "8b42117efc62ea9e",
   "lastOpenFiles": [
+    "501 Essential Backgammon Problems/Saving the Gammon.md",
+    "501 Essential Backgammon Problems/Bearing Off Against Contact.md",
+    "501 Essential Backgammon Problems/Playing for the Gammon.md",
+    "501 Essential Backgammon Problems/Post Ace Point Game.md",
+    "images/position_000144.png",
+    "images/position_000143.png",
+    "501 Essential Backgammon Problems/Containment Game.md",
+    "Online/Michi opponent on bar bearing off 1.md",
+    "501 Essential Backgammon Problems/Back Games.md",
+    "501 Essential Backgammon Problems/Coup Classique.md",
+    "images/position_000142.png",
+    "501 Essential Backgammon Problems/Ace Point Games.md",
+    "501 Essential Backgammon Problems/Too Good To Double.md",
+    "501 Essential Backgammon Problems/Post Blitz Turnaround.md",
+    "501 Essential Backgammon Problems/Late Game Blitz.md",
+    "501 Essential Backgammon Problems/Action Doubles.md",
+    "501 Essential Backgammon Problems/Crunch Positions.md",
+    "501 Essential Backgammon Problems/Breaking Anchor.md",
+    "501 Essential Backgammon Problems/Hit or Not.md",
+    "501 Essential Backgammon Problems/Connectivity.md",
+    "501 Essential Backgammon Problems/Priming Games.md",
+    "501 Essential Backgammon Problems/Holding Games.md",
     "501 Essential Backgammon Problems/Opening.md",
     "Backgammon Boot Camp/Backgammon Boot Camp.md",
     "501 Essential Backgammon Problems/501 Essential Backgammon Problems.md",
-    "Holding Games.md",
     "501 Essential Backgammon Problems/The Blitz.md",
     "501 Essential Backgammon Problems/Flexibility.md",
     "501 Essential Backgammon Problems/One Man Back.md",
     "501 Essential Backgammon Problems/The 5 Point.md",
     "Shared",
-    "501 Essential Backgammon Problems/Middlegame.md",
-    "501 Essential Backgammon Problems/Introduction.md",
-    "Backgammon Boot Camp/PRAT.md",
-    "Backgammon Boot Camp/Match Play.md",
-    "Backgammon Boot Camp/Simplified Opening Strategy.md",
-    "Online/Michi opponent on bar bearing off.md",
-    "Shared/hit blots.md",
     "images/Pasted image 20240102183237.png",
     "Untitled.canvas",
-    "Notes.md",
-    "2023-12-12.md",
     "501 Essential Backgammon Problems",
-    "Online/2.7 Rule.md",
-    "Online/PRAT Position.md",
     "Online",
-    "Online/PRAT Threat.md",
-    "Online/PRAT Race.md",
-    "Backgammon Boot Camp/How to be a Winner.md",
-    "Backgammon Boot Camp/Graduation.md",
-    "Backgammon Boot Camp/Attacking Priorities.md",
-    "Backgammon Boot Camp/Attacking Doubles III.md",
-    "Backgammon Boot Camp/Attacking Doubles II.md",
     "images/position_000141.png",
     "images/position_000140.png",
     "images/position_000139.png",
     "images/position_000138.png",
     "images/position_000137.png",
     "images/position_000136.png",
-    "images/position_000135.png",
-    "images/position_000134.png",
-    "images/position_000133.png",
     "Isight",
     "Backgammon Boot Camp",
     "images"

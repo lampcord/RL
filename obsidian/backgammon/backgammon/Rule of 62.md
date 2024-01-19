@@ -1,6 +1,6 @@
 First do the [[kieth count]]  
 
-If leader is over 62 before kk add 10% rounding down and add two. 
+If leader is over 62 after kk add 10% rounding down and add two. 
 
 Else subtract 5 and divide by 7 round down add to score. 
 

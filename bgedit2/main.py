@@ -73,6 +73,8 @@ if len(sys.argv) > 1:
         os.makedirs(theme_dir)
 if len(sys.argv) > 2:
     theme_dir = sys.argv[2]
+if len(sys.argv) > 3:
+    POSITIONS_FILE_NAME = sys.argv[3]
 
 if theme_file_name:
     try:

@@ -13,7 +13,7 @@
             "state": {
               "type": "image",
               "state": {
-                "file": "images/position_000176.png"
+                "file": "images/position_000160.png"
               }
             }
           }
@@ -83,7 +83,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "images/position_000176.png",
+                "file": "images/position_000160.png",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -100,7 +100,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "images/position_000176.png",
+                "file": "images/position_000160.png",
                 "linksCollapsed": true,
                 "unlinkedCollapsed": true
               }
@@ -123,7 +123,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "images/position_000176.png"
+                "file": "images/position_000160.png"
               }
             }
           }
@@ -147,17 +147,17 @@
   },
   "active": "98b3b762e20c115f",
   "lastOpenFiles": [
+    "images/position_000161.png",
+    "images/position_000160.png",
+    "images/position_000162.png",
+    "images/position_000163.png",
+    "images/position_000164.png",
+    "images/position_000165.png",
+    "images/position_000166.png",
+    "images/position_000176.png",
     "images/position_000175.png",
     "images/position_000174.png",
     "images/position_000173.png",
-    "images/position_000172.png",
-    "images/position_000171.png",
-    "images/position_000170.png",
-    "images/position_000169.png",
-    "images/position_000176.png",
-    "images/position_000177.png",
-    "images/position_000168.png",
-    "images/position_000167.png",
     "When to break an anchor.md",
     "kieth count.md",
     "Rule of 62.md",

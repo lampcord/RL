@@ -86,6 +86,8 @@ line_spacing = 20
 stage = 0
 session = {}
 user_choice = None
+num_questions = 1
+done_reviewing = False
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -105,6 +107,7 @@ while running:
                         choices = get_choices(quiz_line)
                         print(choices)
                         image = load_flashcard(quiz_line)
+                        num_questions += 1
                 elif stage == 1:
                     if len(session) > 0:
                         quiz_line_index = list(session.keys())[0]
@@ -113,6 +116,8 @@ while running:
                         choices = get_choices(quiz_line)
                         print(choices)
                         image = load_flashcard(quiz_line)
+                    else:
+                        done_reviewing = True
 
 
     # Clear the screen
@@ -126,7 +131,7 @@ while running:
     if stage == 0:
         display_text(center, text_line, quiz_line['prompt'], (0, 0, 0), screen)
         text_line += line_spacing
-        display_text(center, text_line, 'Press letter of choice below or Q to quit', (0, 0, 0), screen)
+        display_text(center, text_line, f'Question {num_questions}. Press letter of choice below or Q to quit', (0, 0, 0), screen)
         text_line += line_spacing
         text_line += line_spacing
 
@@ -142,25 +147,28 @@ while running:
                 col = 0
                 text_line += line_spacing
     elif stage == 1:
-        user_answer = quiz_line['answers'][user_choice[0][0]][0]
-        correct_answer = quiz_line['answers'][0][0]
-        display_text(center, text_line, f'You chose {user_answer} the correct choice was {correct_answer}', (0, 0, 0), screen)
-        text_line += line_spacing
-        if user_answer == correct_answer:
-            display_text(center, text_line, 'CORRECT', (0, 255, 0), screen)
+        if done_reviewing:
+            display_text(center, text_line, 'No more positions to review. Pres Q key to see summary.', (0, 0, 0), screen)
         else:
-            display_text(center, text_line, f'ERROR! ({quiz_line["answers"][user_choice[0][0]][1]})', (255, 0, 0), screen)
+            user_answer = quiz_line['answers'][user_choice[0][0]][0]
+            correct_answer = quiz_line['answers'][0][0]
+            display_text(center, text_line, f'You chose {user_answer} the correct choice was {correct_answer}', (0, 0, 0), screen)
+            text_line += line_spacing
+            if user_answer == correct_answer:
+                display_text(center, text_line, 'CORRECT', (0, 255, 0), screen)
+            else:
+                display_text(center, text_line, f'ERROR! ({quiz_line["answers"][user_choice[0][0]][1]})', (255, 0, 0), screen)
 
-        text_line += line_spacing
-        display_text(center, text_line, 'Press any key to continue or Q to quit', (0, 0, 0), screen)
+            text_line += line_spacing
+            display_text(center, text_line, 'Press any key to continue or Q to quit', (0, 0, 0), screen)
 
     elif stage == 2:
         total_answers = total_right + total_wrong
         pct = 0.0 if total_answers == 0.0 else total_right / total_answers
         average_error = 0.0 if total_answers == 0.0 else total_error / total_answers
-        display_text(center, text_line, f'You got {total_right} out of {total_answers} correct for pct of {pct}', (0, 0, 0), screen)
+        display_text(center, text_line, f'You got {total_right:.1f} out of {total_answers:.1f} correct for pct of {pct:.3f}', (0, 0, 0), screen)
         text_line += line_spacing
-        display_text(center, text_line, f'Your average error was {average_error} for a PR of {average_error * -500.0}', (0, 0, 0), screen)
+        display_text(center, text_line, f'Your average error was {average_error:.3f} for a PR of {average_error * -500.0:.3f}', (0, 0, 0), screen)
 
     pygame.display.flip()
 

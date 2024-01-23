@@ -21,6 +21,21 @@ class QuizController:
             with open(self.path, 'r') as json_file:
                 self.__dict__ = json.load(json_file)
             self.session = {}
+            recovered_keys = []
+            for key in range(self.count):
+                if key not in self.new_right and key not in self.old_right and key not in self.new_wrong and key not in self.old_wrong:
+                    recovered_keys.append(key)
+                    print(f'Recovering {key}')
+            for key in recovered_keys:
+                self.old_right.append()
+            wrong_list = []
+            for key in self.new_wrong:
+                wrong_list.append(key)
+            for key in self.old_wrong:
+                wrong_list.append(key)
+            self.old_wrong = wrong_list
+            self.new_wrong = []
+
 
         except Exception as e:
             self.old_right = list(range(self.count))

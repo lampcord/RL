@@ -8,6 +8,8 @@ import copy
 import random
 import json
 from quiz_controller import QuizController
+import bg_board
+from XGID_to_position import *
 
 WINDOW_SIZE = (800, 800)
 BG_COLOR = (255, 255, 255)
@@ -51,8 +53,16 @@ def choose_quiz_line():
 
 
 def load_flashcard(quiz_line):
-    image_path = directory + 'flashcards/' + quiz_line['flashcard']
-    return pygame.image.load(image_path)
+    if '.png' in quiz_line['flashcard']:
+        image_path = directory + 'flashcards/' + quiz_line['flashcard']
+        return pygame.image.load(image_path)
+    else:
+        board_image = pygame.Surface(bg_board.WINDOW_SIZE)
+        board_image.fill(BG_COLOR)
+        position = get_position(quiz_line['flashcard'])
+        print(position)
+        bg_board.draw_board(position, board_image)
+        return board_image
 
 
 def get_choices(quiz_line):

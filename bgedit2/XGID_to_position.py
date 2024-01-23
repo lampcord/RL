@@ -58,7 +58,7 @@ if __name__ == '__main__':
     board_image.fill(BG_COLOR)
     #pos= 'XGID=ab----C-C---eE---c-d----BB:0:0:1:63:0:0:3:0:10'
     #pos= 'XGID=ab----C-C---eE---c-d----BB:0:0:-1:14:0:0:3:0:10'
-    pos = 'XGID=ab----B-C---eE---c-b----BB:0:0:-1:00:0:0:3:0:10'
+    pos = 'XGID=-b----E-C---dEa--c-da---B-:0:0:1:43:0:0:3:0:10'
     position = get_position(pos.split('=')[1])
     print(position)
     draw_board(position, board_image)

@@ -33,7 +33,7 @@ class QuizController:
                 wrong_list.append(key)
             for key in self.old_wrong:
                 wrong_list.append(key)
-            self.old_wrong = wrong_list
+            self.old_wrong = copy.deepcopy(wrong_list)
             self.new_wrong = []
 
 
@@ -61,10 +61,14 @@ class QuizController:
         question_index = None
         if random.random() < 0.7:
             print('getting wrong')
-            question_index, self.old_wrong, self.new_wrong = self.get_question_index_from_lists(self.old_wrong, self.new_wrong)
+            question_index, old_wrong, new_wrong = self.get_question_index_from_lists(self.old_wrong, self.new_wrong)
+            self.old_wrong = copy.deepcopy(old_wrong)
+            self.new_wrong = copy.deepcopy(new_wrong)
         if question_index is None:
             print('getting right')
-            question_index, self.old_right, self.new_right = self.get_question_index_from_lists(self.old_right, self.new_right)
+            question_index, old_right, new_right = self.get_question_index_from_lists(self.old_right, self.new_right)
+            self.old_right = copy.deepcopy(old_right)
+            self.new_right = copy.deepcopy(new_right)
 
         return question_index
 

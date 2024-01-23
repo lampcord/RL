@@ -12,9 +12,11 @@ import bg_board
 from XGID_to_position import *
 
 WINDOW_SIZE = (800, 800)
-BG_COLOR = (255, 255, 255)
+BG_COLOR = (192, 192, 192)
 COLUMNS = 3
 COLUMN_WIDTH = WINDOW_SIZE[0] // (COLUMNS + 1)
+
+bg_board.update_theme('greyscale.json')
 
 columns = []
 next_column = COLUMN_WIDTH

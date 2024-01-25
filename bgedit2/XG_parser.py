@@ -27,7 +27,7 @@ def file_to_quiz_line(filename):
                         if '(' in score_line:
                             score = score_line.split('(')[1].split(')')[0]
 
-                    print(f'[{play}] [{score}]')
+                    # print(f'[{play}] [{score}]')
                     answers.append([play, score])
                     # print(f'[{score}]')
                 first_play_line += 1

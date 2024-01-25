@@ -15,6 +15,45 @@ class QuizController:
         self.history = {}
         self.load()
 
+
+    def check_for_duplicates(self):
+        keys = {}
+        old_right = []
+        for k in self.old_right:
+            if k in keys:
+                print(f"ERROR: Extra key found in old_right {k}")
+            else:
+                old_right.append(k)
+                keys[k] = True
+        self.old_right = copy.deepcopy(old_right)
+
+        new_wrong = []
+        for k in self.new_wrong:
+            if k in keys:
+                print(f"ERROR: Extra key found in new_wrong {k}")
+            else:
+                new_wrong.append(k)
+                keys[k] = True
+        self.new_wrong = copy.deepcopy(new_wrong)
+
+        new_right = []
+        for k in self.new_right:
+            if k in keys:
+                print(f"ERROR: Extra key found in new_right {k}")
+            else:
+                new_right.append(k)
+                keys[k] = True
+        self.new_right = copy.deepcopy(new_right)
+
+        old_wrong = []
+        for k in self.old_wrong:
+            if k in keys:
+                print(f"ERROR: Extra key found in old_wrong {k}")
+            else:
+                old_wrong.append(k)
+                keys[k] = True
+        self.old_wrong = copy.deepcopy(old_wrong)
+
     def load(self):
         pass
         try:
@@ -27,7 +66,7 @@ class QuizController:
                     recovered_keys.append(key)
                     print(f'Recovering {key}')
             for key in recovered_keys:
-                self.old_right.append()
+                self.old_right.append(key)
             wrong_list = []
             for key in self.new_wrong:
                 wrong_list.append(key)
@@ -35,7 +74,7 @@ class QuizController:
                 wrong_list.append(key)
             self.old_wrong = copy.deepcopy(wrong_list)
             self.new_wrong = []
-
+            self.check_for_duplicates()
 
         except Exception as e:
             self.old_right = list(range(self.count))
@@ -74,15 +113,17 @@ class QuizController:
 
     def post_result(self, question_index, choice, score):
         if score < 0.0:
-            self.new_wrong.append(question_index)
+            self.new_wrong.append(str(question_index))
         else:
-            self.new_right.append(question_index)
-        session = self.session.get(question_index, [])
-        session.append((choice, score))
-        self.session[question_index] = session
-        history = self.history.get(question_index, [])
-        history.append((choice, score))
-        self.history[question_index] = history
+            self.new_right.append(str(question_index))
+        session = self.session.get(str(question_index), [])
+        session.append([choice, score])
+        self.session[str(question_index)] = session
+        print(f'Before {self.history}')
+        history = self.history.get(str(question_index), [])
+        history.append([choice, score])
+        self.history[str(question_index)] = history
+        print(f'After {self.history}')
 
     def dump(self):
         print('-' * 40)

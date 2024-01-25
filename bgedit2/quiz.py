@@ -62,7 +62,7 @@ def load_flashcard(quiz_line):
         board_image = pygame.Surface(bg_board.WINDOW_SIZE)
         board_image.fill(BG_COLOR)
         position = get_position(quiz_line['flashcard'])
-        print(position)
+        # print(position)
         bg_board.draw_board(position, board_image)
         return board_image
 
@@ -107,7 +107,7 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if pygame.K_a <= event.key <= pygame.K_z:
                 key = chr(ord('A') + event.key - pygame.K_a)
-                print(key)
+                # print(key)
 
                 if stage == 0:
                     if key in choices:
@@ -117,7 +117,7 @@ while running:
                         quiz_line_index = choose_quiz_line()
                         quiz_line = quiz[quiz_line_index]
                         choices = get_choices(quiz_line)
-                        print(choices)
+                        # print(choices)
                         image = load_flashcard(quiz_line)
                         num_questions += 1
                 elif stage == 1:
@@ -126,7 +126,7 @@ while running:
                         user_choice = session.pop(quiz_line_index)
                         quiz_line = quiz[quiz_line_index]
                         choices = get_choices(quiz_line)
-                        print(choices)
+                        # print(choices)
                         image = load_flashcard(quiz_line)
                     else:
                         done_reviewing = True
@@ -181,6 +181,14 @@ while running:
         display_text(center, text_line, f'You got {total_right:.1f} out of {total_answers:.1f} correct for pct of {pct:.3f}', (0, 0, 0), screen)
         text_line += line_spacing
         display_text(center, text_line, f'Your average error was {average_error:.3f} for a PR of {average_error * -500.0:.3f}', (0, 0, 0), screen)
+        text_line += line_spacing
+        text_line += line_spacing
+        total_answers_h = total_right_h + total_wrong_h
+        pct_h = 0.0 if total_answers_h == 0.0 else total_right_h / total_answers_h
+        average_error_h = 0.0 if total_answers_h == 0.0 else total_error_h / total_answers_h
+        display_text(center, text_line, f'Overall, you got {total_right_h:.1f} out of {total_answers_h:.1f} correct for pct of {pct_h:.3f}', (0, 0, 0), screen)
+        text_line += line_spacing
+        display_text(center, text_line, f'Your overall error was {average_error_h:.3f} for a PR of {average_error_h * -500.0:.3f}', (0, 0, 0), screen)
 
     pygame.display.flip()
 
@@ -196,7 +204,7 @@ while running:
             user_choice = session.pop(quiz_line_index)
             quiz_line = quiz[quiz_line_index]
             choices = get_choices(quiz_line)
-            print(choices)
+            # print(choices)
             image = load_flashcard(quiz_line)
         elif stage == 2:
             session = copy.deepcopy(qc.session)
@@ -211,6 +219,18 @@ while running:
                     else:
                         total_right += 1.0
                     total_error += v[1]
+            history = copy.deepcopy(qc.history)
+            total_right_h = 0.0
+            total_wrong_h = 0.0
+            total_error_h = 0.0
+            for k in history.keys():
+                v_list = history[k]
+                for v in v_list:
+                    if v[1] < 0.0:
+                        total_wrong_h += 1.0
+                    else:
+                        total_right_h += 1.0
+                    total_error_h += v[1]
         if stage > 2:
             break
 

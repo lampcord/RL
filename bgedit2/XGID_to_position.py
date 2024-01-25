@@ -17,7 +17,7 @@ def get_position(xgid):
             v = -1 * (ord(c) - ord('a') + 1)
         if 'A' <= c <= 'O':
             v = ord(c) - ord('A') + 1
-        print (c, v)
+        # print (c, v)
 
         if x == 0:
             clear_checkers[25] = v
@@ -37,9 +37,9 @@ def get_position(xgid):
     if sections[3] == '1':
         turn = 0
 
-    print(sections)
-    print(checkers)
-    print(dice)
+    # print(sections)
+    # print(checkers)
+    # print(dice)
 
     position = {}
     position["checkers"] = list(clear_checkers)

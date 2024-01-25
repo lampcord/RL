@@ -1,0 +1,43 @@
+﻿XGID=-a--A-D-D-a-cD---dAc-c--A-:0:0:1:42:0:0:0:16:10
+
+X:lampcord   O:bezanodarro
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ | X        O     O |   | X  O           X |
+ |          O     O |   |    O           X |
+ |          O     O |   |    O           X |
+ |                  |   |    O           X |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                X |   |    X             |
+ |                X |   |    X           O |
+ |                X |   |    X           O |
+ | O        X     X |   |    X     O     O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 154  O: 140 X-O: 0-0/16
+Cube: 1
+X to play 42
+
+    1. XG Roller+  24/18                        eq:-0.320
+      Player:   42.17% (G:7.24% B:0.21%)
+      Opponent: 57.83% (G:13.06% B:0.34%)
+
+    2. XG Roller+  18/14 6/4                    eq:-0.389 (-0.069)
+      Player:   41.38% (G:8.72% B:0.35%)
+      Opponent: 58.62% (G:17.57% B:0.63%)
+
+    3. 4-ply       13/9 6/4                     eq:-0.348 (-0.028)
+      Player:   42.41% (G:9.73% B:0.42%)
+      Opponent: 57.59% (G:19.04% B:0.78%)
+
+    4. 4-ply       13/11 8/4                    eq:-0.360 (-0.040)
+      Player:   42.14% (G:9.84% B:0.40%)
+      Opponent: 57.86% (G:19.32% B:0.88%)
+
+    5. 4-ply       8/4 6/4                      eq:-0.379 (-0.059)
+      Player:   41.33% (G:9.48% B:0.39%)
+      Opponent: 58.67% (G:18.29% B:0.60%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

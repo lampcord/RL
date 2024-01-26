@@ -32,7 +32,7 @@ if len(sys.argv) > 1:
         # Attempt to open and read the JSON file
         with open(quiz_filename, 'r') as json_file:
             quiz = json.load(json_file)
-        qc = QuizController(directory + 'qc.json', len(quiz), 10)
+        qc = QuizController(directory + 'qc.json', len(quiz), 0.99)
     except Exception as e:
         print(f'ERROR: Problem loading quiz {str(e)}')
         sys.exit(1)
@@ -124,7 +124,7 @@ while running:
                     if len(session) > 0:
                         quiz_line_index = list(session.keys())[0]
                         user_choice = session.pop(quiz_line_index)
-                        quiz_line = quiz[quiz_line_index]
+                        quiz_line = quiz[int(quiz_line_index)]
                         choices = get_choices(quiz_line)
                         # print(choices)
                         image = load_flashcard(quiz_line)
@@ -202,7 +202,7 @@ while running:
             session = copy.deepcopy(qc.session)
             quiz_line_index = list(session.keys())[0]
             user_choice = session.pop(quiz_line_index)
-            quiz_line = quiz[quiz_line_index]
+            quiz_line = quiz[int(quiz_line_index)]
             choices = get_choices(quiz_line)
             # print(choices)
             image = load_flashcard(quiz_line)

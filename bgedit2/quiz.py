@@ -234,5 +234,6 @@ while running:
         if stage > 2:
             break
 
+qc.print_report()
 qc.save()
 pygame.quit()

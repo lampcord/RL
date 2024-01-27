@@ -1,0 +1,39 @@
+﻿XGID=------EBC-a-cBc--c-eB----A:0:0:1:64:0:0:0:16:10
+
+X:lampcord   O:troutmaster
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |             X  O |   |    O        O  X |
+ |             X  O |   |    O        O  X |
+ |                O |   |    O        O    |
+ |                O |   |                  |
+ |                O | X |                  |
+ |                  |BAR|                  |
+ |                X |   |                  |
+ |                X |   |                  |
+ |                X |   |    X           O |
+ |                X |   | X  X           O |
+ |                X |   | X  X     O     O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 159  O: 141 X-O: 0-0/16
+Cube: 1
+X to play 64
+
+    1. XG Roller+  Bar/21 8/2                   eq:-0.435
+      Player:   36.30% (G:4.38% B:0.10%)
+      Opponent: 63.70% (G:5.07% B:0.14%)
+
+    2. XG Roller+  Bar/15                       eq:-0.467 (-0.032)
+      Player:   35.18% (G:3.70% B:0.08%)
+      Opponent: 64.82% (G:4.38% B:0.12%)
+
+    3. 4-ply       Bar/21 7/1                   eq:-0.492 (-0.057)
+      Player:   34.37% (G:4.09% B:0.05%)
+      Opponent: 65.63% (G:5.60% B:0.16%)
+
+    4. 4-ply       Bar/21 13/7                  eq:-0.519 (-0.084)
+      Player:   34.15% (G:4.44% B:0.09%)
+      Opponent: 65.85% (G:7.50% B:0.16%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

@@ -56,6 +56,17 @@ class QuizController:
         for k in self.__dict__.keys():
             print(f'{k}: {self.__dict__[k]}')
 
+    def print_report(self):
+        for question_index in range(self.count):
+            history = self.history.get(str(question_index), [])
+            total_count = 0.0
+            total_score = 0.0
+            for h in history:
+                total_count += 1.0
+                total_score += h[1]
+            average_score = 0.0 if total_count == 0.0 else total_score / total_count
+            print(f'{question_index:3} {total_count:3} {average_score:.3}')
+
 
 if __name__ == '__main__':
     qc = QuizController('test.json', 30, 0.99)

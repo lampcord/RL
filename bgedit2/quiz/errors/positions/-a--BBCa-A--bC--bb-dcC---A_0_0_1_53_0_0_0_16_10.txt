@@ -1,0 +1,35 @@
+﻿XGID=-a--BBCa-A--bC--bb-dcC---A:0:0:1:53:0:0:0:16:10
+
+X:lampcord   O:twisted
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |          X  O  O |   |    O  O        X |
+ |          X  O  O |   |    O  O        X |
+ |          X  O  O |   |                X |
+ |                O |   |                  |
+ |                  | X |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                  |   |                  |
+ |                X |   |                  |
+ |          X  X  X |   |                O |
+ | O        X  X  X |   | O     X        O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 172  O: 141 X-O: 0-0/16
+Cube: 1
+X to play 53
+
+    1. XG Roller+  Bar/22 9/4                   eq:-0.419
+      Player:   39.29% (G:9.74% B:0.33%)
+      Opponent: 60.71% (G:15.52% B:0.52%)
+
+    2. XG Roller+  Bar/22 6/1*                  eq:-0.451 (-0.032)
+      Player:   40.11% (G:10.61% B:0.34%)
+      Opponent: 59.89% (G:21.02% B:0.88%)
+
+    3. 3-ply       Bar/22 13/8                  eq:-0.522 (-0.103)
+      Player:   38.87% (G:9.07% B:0.38%)
+      Opponent: 61.13% (G:22.62% B:0.90%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

@@ -26,13 +26,17 @@ for quiz_line in quiz:
 files = glob.glob(pos_dir + '/*.txt')
 print (files)
 
+new_files = 0
 for file in files:
     filename = os.path.basename(file)
     quiz_line = file_to_quiz_line(file)
-    print(filename)
+    # print(filename)
     if quiz_line['flashcard'] not in keys:
         print(quiz_line)
         quiz.append(quiz_line)
+        new_files += 1
+
+print(f'Found {new_files} new files.')
 
 with open(quiz_filename, 'w') as json_file:
     json.dump(quiz, json_file, indent=4)

@@ -141,7 +141,7 @@ while running:
     text_line = bottom + line_spacing
 
     if stage == 0:
-        display_text(center, text_line, quiz_line['prompt'], (0, 0, 0), screen)
+        display_text(center, text_line, f'[{quiz_line_index}] ' + quiz_line['prompt'], (0, 0, 0), screen)
         text_line += line_spacing
         display_text(center, text_line, f'Question {num_questions}. Press letter of choice below or Q to quit', (0, 0, 0), screen)
         text_line += line_spacing
@@ -171,6 +171,21 @@ while running:
             else:
                 display_text(center, text_line, f'ERROR! ({quiz_line["answers"][user_choice[0][0]][1]})', (255, 0, 0), screen)
 
+            text_line += line_spacing
+
+            total_right_h = 0.0
+            total_wrong_h = 0.0
+            total_error_h = 0.0
+            history = copy.deepcopy(qc.history)
+            v_list = history.get(str(quiz_line_index), [])
+            for v in v_list:
+                if v[1] < 0.0:
+                    total_wrong_h += 1.0
+                else:
+                    total_right_h += 1.0
+                total_error_h += v[1]
+
+            display_text(center, text_line, f'Right {total_right_h} Wrong {total_wrong_h} Error {total_error_h}', (0, 0, 0), screen)
             text_line += line_spacing
             display_text(center, text_line, 'Press any key to continue or Q to quit', (0, 0, 0), screen)
 

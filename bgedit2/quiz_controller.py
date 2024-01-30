@@ -27,15 +27,22 @@ class QuizController:
 
     def get_question_index(self):
         questions_indexes = list(range(self.count))
+        error_k = 200.0
+        base_blunder = 100.0 + error_k * 0.080
+        base_blunder *= self.decay
         weights = [100.0] * self.count
         for k in self.history.keys():
             if k in self.session:
                 continue
             data = self.history[k]
+            has_been_visited = False
             for choice, score in data:
-                weights[int(k)] += 200.0 * abs(score)
+                has_been_visited = True
+                weights[int(k)] += error_k * abs(score)
             for choice, score in data:
                 weights[int(k)] *= self.decay
+            if not has_been_visited:
+                weights[int(k)] = base_blunder
 
         # for x in range(len(weights)):
         #     print(x, weights[x])

@@ -46,7 +46,7 @@ dump_state("Start")
 
 # remove last quizline
 source_quizline = quiz.pop()
-target_file = source_quizline['flashcard'] + '.txt'
+target_file = quiz[quizline_index]['flashcard'] + '.txt'
 target_file = target_file.replace(':', '_')
 target = pos_dir + '/' + target_file
 
@@ -83,4 +83,5 @@ with open(quiz_filename, 'w') as json_file:
     json.dump(quiz, json_file, indent=4)
 
 qc.save()
+
 

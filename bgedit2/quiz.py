@@ -146,6 +146,7 @@ while running:
     text_line = bottom + line_spacing
     display_text(center, text_line, f'[{quiz_line_index}] ' + quiz_line['flashcard'] + ' (SPACE to copy)', (0, 0, 0), screen)
     text_line += line_spacing
+    text_line += line_spacing
 
     if stage == 0:
         display_text(center, text_line, quiz_line['prompt'], (0, 0, 0), screen)

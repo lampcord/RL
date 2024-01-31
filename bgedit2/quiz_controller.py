@@ -26,28 +26,32 @@ class QuizController:
             json.dump(self.history, json_file, indent=4)
 
     def get_question_index(self):
-        questions_indexes = list(range(self.count))
         error_k = 200.0
         base_blunder = 100.0 + error_k * 0.080
         base_blunder *= self.decay
-        weights = [100.0] * self.count
-        for k in self.history.keys():
+        choices = []
+        weights = []
+        for ndx in range(self.count):
+            k = str(ndx)
             if k in self.session:
                 continue
-            data = self.history[k]
-            has_been_visited = False
-            for choice, score in data:
-                has_been_visited = True
-                weights[int(k)] += error_k * abs(score)
-            for choice, score in data:
-                weights[int(k)] *= self.decay
-            if not has_been_visited:
-                weights[int(k)] = base_blunder
+            if k in self.history.keys():
+                weight = 100.0
+                data = self.history[k]
+                for choice, score in data:
+                    has_been_visited = True
+                    weight += error_k * abs(score)
+                for choice, score in data:
+                    weight *= self.decay
+            else:
+                weight = base_blunder
+            choices.append(ndx)
+            weights.append(weight)
 
         # for x in range(len(weights)):
         #     print(x, weights[x])
 
-        return random.choices(questions_indexes, weights, k=1)[0]
+        return random.choices(choices, weights, k=1)[0]
 
     def post_result(self, question_index, choice, score):
         key = str(question_index)

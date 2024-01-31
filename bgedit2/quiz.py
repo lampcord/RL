@@ -7,6 +7,9 @@ import pygame.image
 import copy
 import random
 import json
+
+import pyperclip
+
 from quiz_controller import QuizController
 import bg_board
 from XGID_to_position import *
@@ -105,6 +108,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                pyperclip.copy("XGID=" + quiz_line['flashcard'])
             if pygame.K_a <= event.key <= pygame.K_z:
                 key = chr(ord('A') + event.key - pygame.K_a)
                 # print(key)
@@ -139,9 +144,11 @@ while running:
     bottom = image.get_size()[1]
     center = WINDOW_SIZE[0] / 2
     text_line = bottom + line_spacing
+    display_text(center, text_line, f'[{quiz_line_index}] ' + quiz_line['flashcard'] + ' (SPACE to copy)', (0, 0, 0), screen)
+    text_line += line_spacing
 
     if stage == 0:
-        display_text(center, text_line, f'[{quiz_line_index}] ' + quiz_line['prompt'], (0, 0, 0), screen)
+        display_text(center, text_line, quiz_line['prompt'], (0, 0, 0), screen)
         text_line += line_spacing
         display_text(center, text_line, f'Question {num_questions}. Press letter of choice below or Q to quit', (0, 0, 0), screen)
         text_line += line_spacing

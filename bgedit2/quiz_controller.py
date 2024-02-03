@@ -5,10 +5,11 @@ import copy
 
 class QuizController:
 
-    def __init__(self, path, count, decay):
+    def __init__(self, path, count, decay, new_mult=1.0):
         self.path = path
         self.count = count
         self.decay = decay
+        self.new_mult = new_mult
         self.session = {}
         self.history = {}
         self.load()
@@ -27,7 +28,7 @@ class QuizController:
 
     def get_question_index(self):
         error_k = 200.0
-        base_blunder = 100.0 + error_k * 0.080
+        base_blunder = 100.0 + error_k * 0.080 * self.new_mult
         base_blunder *= self.decay
         choices = []
         weights = []

@@ -35,14 +35,20 @@ if len(sys.argv) > 1:
         # Attempt to open and read the JSON file
         with open(quiz_filename, 'r') as json_file:
             quiz = json.load(json_file)
-        qc = QuizController(directory + 'qc.json', len(quiz), 0.99)
     except Exception as e:
         print(f'ERROR: Problem loading quiz {str(e)}')
         sys.exit(1)
 
 else:
-    print('USAGE: quiz <directory>')
+    print('USAGE: quiz <directory> <opt: decay> <opt: new mult>')
     sys.exit(1)
+
+decay = 0.99 if len(sys.argv) <= 2 else float(sys.argv[2])
+new_mult = 1.0 if len(sys.argv) <= 3 else float(sys.argv[3])
+
+print(f'{directory} {decay} {new_mult}')
+
+qc = QuizController(directory + 'qc.json', len(quiz), decay, new_mult)
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -193,7 +199,7 @@ while running:
                     total_right_h += 1.0
                 total_error_h += v[1]
 
-            display_text(center, text_line, f'Right {total_right_h} Wrong {total_wrong_h} Error {total_error_h}', (0, 0, 0), screen)
+            display_text(center, text_line, f'Right {total_right_h} Wrong {total_wrong_h} Error {total_error_h:.3}', (0, 0, 0), screen)
             text_line += line_spacing
             display_text(center, text_line, 'Press any key to continue or Q to quit', (0, 0, 0), screen)
 

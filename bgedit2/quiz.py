@@ -184,8 +184,15 @@ while running:
                 display_text(center, text_line, 'CORRECT', (0, 255, 0), screen)
             else:
                 display_text(center, text_line, f'ERROR! ({quiz_line["answers"][user_choice[0][0]][1]})', (255, 0, 0), screen)
-
             text_line += line_spacing
+
+            for x in range(len(quiz_line['answers'])):
+                color = (0, 0, 0)
+                if x == user_choice[0][0]:
+                    color = (0, 255, 0) if x == 0 else (255, 0, 0)
+                display_text(columns[0], text_line, f'{quiz_line["answers"][x][0]}', color, screen, center_x=False)
+                display_text(columns[2], text_line, f'{float(quiz_line["answers"][x][1]):8.3}', color, screen, center_x=False)
+                text_line += line_spacing
 
             total_right_h = 0.0
             total_wrong_h = 0.0

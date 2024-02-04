@@ -27,6 +27,7 @@ files = glob.glob(pos_dir + '/*.txt')
 print (files)
 
 new_files = 0
+total_files = 0
 for file in files:
     filename = os.path.basename(file)
     quiz_line = file_to_quiz_line(file)
@@ -35,8 +36,9 @@ for file in files:
         print(quiz_line)
         quiz.append(quiz_line)
         new_files += 1
+    total_files += 1
 
-print(f'Found {new_files} new files.')
+print(f'Found {new_files} new files. {total_files} total.')
 
 with open(quiz_filename, 'w') as json_file:
     json.dump(quiz, json_file, indent=4)

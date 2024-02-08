@@ -43,8 +43,8 @@ else:
     print('USAGE: quiz <directory> <opt: decay> <opt: new mult>')
     sys.exit(1)
 
-decay = 0.99 if len(sys.argv) <= 2 else float(sys.argv[2])
-new_mult = 1.0 if len(sys.argv) <= 3 else float(sys.argv[3])
+decay = 0.95 if len(sys.argv) <= 2 else float(sys.argv[2])
+new_mult = 2.0 if len(sys.argv) <= 3 else float(sys.argv[3])
 
 print(f'{directory} {decay} {new_mult}')
 
@@ -180,19 +180,15 @@ while running:
             correct_answer = quiz_line['answers'][0][0]
             display_text(center, text_line, f'You chose {user_answer} the correct choice was {correct_answer}', (0, 0, 0), screen)
             text_line += line_spacing
-            if user_answer == correct_answer:
-                display_text(center, text_line, 'CORRECT', (0, 255, 0), screen)
-            else:
-                display_text(center, text_line, f'ERROR! ({quiz_line["answers"][user_choice[0][0]][1]})', (255, 0, 0), screen)
-            text_line += line_spacing
 
             for x in range(len(quiz_line['answers'])):
                 color = (0, 0, 0)
                 if x == user_choice[0][0]:
-                    color = (0, 255, 0) if x == 0 else (255, 0, 0)
+                    color = (0, 128, 0) if x == 0 else (255, 0, 0)
                 display_text(columns[0], text_line, f'{quiz_line["answers"][x][0]}', color, screen, center_x=False)
-                display_text(columns[2], text_line, f'{float(quiz_line["answers"][x][1]):8.3}', color, screen, center_x=False)
+                display_text(columns[2], text_line, f'{float(quiz_line["answers"][x][1]):8.3f}', color, screen, center_x=False)
                 text_line += line_spacing
+            text_line += line_spacing
 
             total_right_h = 0.0
             total_wrong_h = 0.0

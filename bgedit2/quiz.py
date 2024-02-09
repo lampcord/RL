@@ -53,7 +53,7 @@ qc = QuizController(directory + 'qc.json', len(quiz), decay, new_mult)
 pygame.init()
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode(WINDOW_SIZE)
-pygame.display.set_caption("Backgammon Position Editor")
+pygame.display.set_caption("Backgammon Quiz")
 font = pygame.font.Font(None, 24)
 
 running = True

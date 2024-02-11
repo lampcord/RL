@@ -40,9 +40,8 @@ class QuizController:
                 weight = 100.0
                 data = self.history[k]
                 for choice, score in data:
-                    has_been_visited = True
                     weight += error_k * abs(score)
-                for choice, score in data:
+                for _ in data:
                     weight *= self.decay
             else:
                 weight = base_blunder

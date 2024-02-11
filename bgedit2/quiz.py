@@ -43,8 +43,8 @@ else:
     print('USAGE: quiz <directory> <opt: decay> <opt: new mult>')
     sys.exit(1)
 
-decay = 0.95 if len(sys.argv) <= 2 else float(sys.argv[2])
-new_mult = 2.0 if len(sys.argv) <= 3 else float(sys.argv[3])
+decay = 0.90 if len(sys.argv) <= 2 else float(sys.argv[2])
+new_mult = 3.0 if len(sys.argv) <= 3 else float(sys.argv[3])
 
 print(f'{directory} {decay} {new_mult}')
 

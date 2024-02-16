@@ -42,7 +42,7 @@ except Exception as e:
     print(f'ERROR: Problem loading quiz {str(e)}')
     sys.exit(1)
 
-decay = 0.95
+decay = 0.90
 new_mult = 2.0
 
 qc = QuizController(directory + 'qc.json', len(quiz), decay, new_mult)

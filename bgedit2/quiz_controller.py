@@ -1,3 +1,4 @@
+import datetime
 import random
 import json
 import copy
@@ -12,6 +13,7 @@ class QuizController:
         self.new_mult = new_mult
         self.session = {}
         self.history = {}
+        self.last_visited = {}
         self.load()
 
     def load(self):
@@ -22,36 +24,67 @@ class QuizController:
         except Exception as e:
             print('History not found')
 
+        lv_path = self.path.replace('qc.json', 'qc_lv.json')
+        try:
+            with open(lv_path, 'r') as json_file:
+                self.last_visited = json.load(json_file)
+
+        except Exception as e:
+            print('Last visited not found')
+
     def save(self):
         with open(self.path, 'w') as json_file:
             json.dump(self.history, json_file, indent=4)
 
+        lv_path = self.path.replace('qc.json', 'qc_lv.json')
+        with open(lv_path, 'w') as json_file:
+            json.dump(self.last_visited, json_file, indent=4)
+
     def get_question_index(self):
-        error_k = 200.0
-        base_blunder = 100.0 + error_k * 0.080 * self.new_mult
-        base_blunder *= self.decay
+        # first find any that have never been seen
+        print(f'Looking for never seen questions')
         choices = []
-        weights = []
         for ndx in range(self.count):
             k = str(ndx)
             if k in self.session:
                 continue
-            if k in self.history.keys():
+            if k not in self.history.keys():
+                choices.append(ndx)
+        if len(choices) > 0:
+            return random.choice(choices)
+
+        # next find any that haven't been seen in N days
+        num_days = 3
+        while num_days >= 0:
+            print(f'Looking for questions over [{num_days}] old...')
+            error_k = 200.0
+            choices = []
+            weights = []
+            for ndx in range(self.count):
+                k = str(ndx)
+                if k in self.session:
+                    continue
+                if k in self.last_visited.keys():
+                    last_visited = datetime.datetime.fromtimestamp(self.last_visited[k])
+                    age = datetime.datetime.now() - last_visited
+                    if age <= datetime.timedelta(days=num_days):
+                        continue
+
                 weight = 100.0
-                data = self.history[k]
+                data = self.history.get(k, [])
                 for choice, score in data:
                     weight += error_k * abs(score)
                 for _ in data:
                     weight *= self.decay
-            else:
-                weight = base_blunder
-            choices.append(ndx)
-            weights.append(weight)
+                choices.append(ndx)
+                weights.append(weight)
 
-        # for x in range(len(weights)):
-        #     print(x, weights[x])
+            if len(choices) > 0:
+                return random.choices(choices, weights, k=1)[0]
 
-        return random.choices(choices, weights, k=1)[0]
+            num_days -= 1
+
+        return 0
 
     def post_result(self, question_index, choice, score):
         key = str(question_index)
@@ -61,6 +94,7 @@ class QuizController:
         history = self.history.get(key, [])
         history.append([choice, score])
         self.history[key] = history
+        self.last_visited[key] = datetime.datetime.now().timestamp()
 
     def dump(self):
         print('-' * 40)

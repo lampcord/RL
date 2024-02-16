@@ -1,0 +1,31 @@
+﻿XGID=-DDaBBB-a---a------bcbbc-A:2:-1:1:41:0:0:0:16:10
+
+X:lampcord   O:blearyeyed
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |    O  O  O  O  O |   |                  | +---+
+ |    O  O  O  O  O |   |                  | | 4 |
+ |    O        O    |   |                  | +---+
+ |                  |   |                  |
+ |                  | X |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ | X  X             |   |                  |
+ | X  X             |   |                  |
+ | X  X     X  X  X |   |                  |
+ | X  X  O  X  X  X |   |    O           O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 67  O: 99 X-O: 0-0/16
+Cube: 4, O own cube
+X to play 41
+
+    1. XG Roller+  Bar/24 6/2                   eq:-1.100
+      Player:   11.77% (G:2.56% B:0.03%)
+      Opponent: 88.23% (G:25.21% B:0.79%)
+
+    2. XG Roller+  Bar/24 5/1                   eq:-1.137 (-0.037)
+      Player:   10.91% (G:2.08% B:0.01%)
+      Opponent: 89.09% (G:27.33% B:0.88%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

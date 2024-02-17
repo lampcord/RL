@@ -64,14 +64,22 @@ if quizline_index < len(quiz):
 if str(quizline_index) in qc.history:
     del qc.history[str(quizline_index)]
 
+if str(quizline_index) in qc.last_visited:
+    del qc.last_visited[str(quizline_index)]
+
 if str(last_quizline_index) in qc.history:
     qc.history[str(quizline_index)] = qc.history[str(last_quizline_index)]
     del qc.history[str(last_quizline_index)]
+
+if str(last_quizline_index) in qc.last_visited:
+    qc.last_visited[str(quizline_index)] = qc.last_visited[str(last_quizline_index)]
+    del qc.last_visited[str(last_quizline_index)]
 
 
 dump_state("Old hist deleted")
 
 # remove source file
+
 print(target)
 
 if os.path.exists(target):

@@ -1,0 +1,39 @@
+﻿XGID=-b-B-bD-B---dE---b-dA-a--A:0:0:1:64:0:0:0:16:10
+
+X:lampcord   O:zaratoustra
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |       O     X  O |   |    O           X |
+ |                O |   |    O           X |
+ |                O |   |                X |
+ |                O |   |                X |
+ |                  | X |                X |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                X |   |                O |
+ |                X |   |                O |
+ | O     X     O  X |   |    X           O |
+ | O     X     O  X |   |    X           O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 156  O: 183 X-O: 0-0/16
+Cube: 1
+X to play 64
+
+    1. 4-ply       Bar/21 20/14                 eq:+0.238
+      Player:   55.82% (G:15.86% B:0.86%)
+      Opponent: 44.18% (G:11.27% B:0.35%)
+
+    2. 4-ply       Bar/15                       eq:+0.225 (-0.013)
+      Player:   55.44% (G:16.01% B:0.92%)
+      Opponent: 44.56% (G:11.61% B:0.37%)
+
+    3. 4-ply       Bar/21 13/7                  eq:+0.185 (-0.054)
+      Player:   53.77% (G:16.39% B:0.84%)
+      Opponent: 46.23% (G:11.02% B:0.42%)
+
+    4. 2-ply       Bar/21 8/2                   eq:-0.006 (-0.245)
+      Player:   49.54% (G:15.10% B:0.70%)
+      Opponent: 50.46% (G:14.49% B:0.68%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

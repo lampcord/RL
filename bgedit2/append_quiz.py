@@ -10,8 +10,6 @@ if len(sys.argv) < 3:
 dest_dir_target = './quiz/' + sys.argv[1]
 dest_dir_source = './quiz/' + sys.argv[2]
 
-quizline_index = int(sys.argv[2])
-
 # read the target quiz
 try:
     quiz_filename_target = dest_dir_target + '/quiz.json'

@@ -1,0 +1,43 @@
+﻿XGID=-AaBaBBBA---bA----bbCdAc--:0:0:1:31:0:0:0:16:10
+
+X:lampcord   O:danny_dice
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |    O  X  O  X  O |   | O              X |
+ |    O     O  X  O |   | O                |
+ |    O     O  X    |   |                  |
+ |          O       |   |                  |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                  |   |                  |
+ |                  |   |                  |
+ |       X     X  X |   | X              O |
+ | X  O  X  O  X  X |   | X  X           O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 146  O: 118 X-O: 0-0/16
+Cube: 1
+X to play 31
+
+    1. XG Roller+  8/4*                         eq:-0.132
+      Player:   49.42% (G:17.04% B:0.62%)
+      Opponent: 50.58% (G:27.63% B:1.24%)
+
+    2. XG Roller+  13/10 8/7                    eq:-0.406 (-0.275)
+      Player:   41.21% (G:11.23% B:0.42%)
+      Opponent: 58.79% (G:22.27% B:0.53%)
+
+    3. 2-ply       7/6 7/4*                     eq:-0.342 (-0.210)
+      Player:   44.98% (G:15.13% B:0.44%)
+      Opponent: 55.02% (G:33.75% B:2.66%)
+
+    4. 2-ply       20/17 8/7                    eq:-0.384 (-0.252)
+      Player:   42.59% (G:11.97% B:0.54%)
+      Opponent: 57.41% (G:25.84% B:0.99%)
+
+    5. 1-ply       7/4* 4/3                     eq:-0.457 (-0.326)
+      Player:   42.72% (G:13.96% B:0.57%)
+      Opponent: 57.28% (G:31.98% B:2.54%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

@@ -37,7 +37,7 @@ except Exception as e:
 qc_source = QuizController(dest_dir_source + '/qc.json', len(quiz_source), 0.99)
 
 # calculate append offset
-append_offset = len(quiz_target) + 1
+append_offset = len(quiz_target)
 
 # for each quiz line in source quiz
 for quizline in quiz_source:

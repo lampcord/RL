@@ -181,11 +181,25 @@ while running:
             display_text(center, text_line, f'You chose {user_answer} the correct choice was {correct_answer}', (0, 0, 0), screen)
             text_line += line_spacing
 
+            choice_ndx = int(user_choice[0][0])
             for x in range(len(quiz_line['answers'])):
+                pre_prompt = ''
+                post_prompt = ''
+                if choice_ndx == x:
+                    pre_prompt = '==> '
+                    post_prompt = ' <=='
+                error = float(quiz_line["answers"][x][1])
                 color = (0, 0, 0)
-                if x == user_choice[0][0]:
-                    color = (0, 128, 0) if x == 0 else (255, 0, 0)
-                display_text(columns[0], text_line, f'{quiz_line["answers"][x][0]}', color, screen, center_x=False)
+                if x == 0:
+                    color = (0, 128, 0)
+                elif error > -0.02:
+                    color = (0, 0, 0)
+                elif error > -0.08:
+                    color = (215, 70, 0)
+                else:
+                    color = (170, 0, 0)
+
+                display_text(columns[0], text_line, f'{pre_prompt}{quiz_line["answers"][x][0]}{post_prompt}', color, screen, center_x=False)
                 display_text(columns[2], text_line, f'{float(quiz_line["answers"][x][1]):8.3f}', color, screen, center_x=False)
                 text_line += line_spacing
             text_line += line_spacing

@@ -15,6 +15,7 @@ class QuizController:
         self.history = {}
         self.last_visited = {}
         self.load()
+        self.oldest_start = 14
 
     def load(self):
         try:
@@ -54,7 +55,8 @@ class QuizController:
             return random.choice(choices)
 
         # next find any that haven't been seen in N days
-        num_days = 3
+        num_days = self.oldest_start
+        target_count = self.count // 4
         while num_days >= 0:
             print(f'Looking for questions over [{num_days}] old...')
             error_k = 200.0
@@ -79,7 +81,8 @@ class QuizController:
                 choices.append(ndx)
                 weights.append(weight)
 
-            if len(choices) > 0:
+            if len(choices) >= target_count:
+                self.oldest_start = num_days
                 return random.choices(choices, weights, k=1)[0]
 
             num_days -= 1

@@ -42,6 +42,46 @@ except Exception as e:
     print(f'ERROR: Problem loading quiz {str(e)}')
     sys.exit(1)
 
+'''
+Opening
+Middlegame
+Ace-point Holding
+Bearing-In
+Bearing-Off
+Passes
+Post-Crawford
+Takes
+Too Good
+Backgame
+Blitz
+Holding Game
+Prime
+Race
+
+'''
+categories = [
+    'Opening',
+    'Middlegame',
+    'Ace-point Holding',
+    'Bearing-In',
+    'Bearing-Off',
+    'Passes',
+    'Post-Crawford',
+    'Takes',
+    'Too Good',
+    'Backgame',
+    'Blitz',
+    'Holding Game',
+    'Prime',
+    'Race'
+]
+category_map = {}
+key = 'A'
+for category in categories:
+    category_map[key] = category
+    key = chr(ord(key) + 1)
+
+print(category_map)
 decay = 0.90
 new_mult = 2.0
 
@@ -136,7 +176,6 @@ while running:
     text_line = bottom + line_spacing
     display_text(center, text_line, f'[{quiz_line_index}] ' + quiz_line['flashcard'] + ' (SPACE to copy)', (0, 0, 0), screen)
     text_line += line_spacing
-    text_line += line_spacing
 
     hist = qc.history[str(quiz_line_index)]
     counts = {}
@@ -155,7 +194,17 @@ while running:
         display_text(columns[1], text_line, f'{counts.get(x, 0)}', color, screen, center_x=False)
         display_text(columns[2], text_line, f'{float(quiz_line["answers"][x][1]):8.3f}', color, screen, center_x=False)
         text_line += line_spacing
+
     text_line += line_spacing
+
+    col = 0
+    for key in category_map.keys():
+        display_text(columns[col], text_line, f'{key}) {category_map[key]}', (0, 0, 0), screen, center_x=False)
+        col += 1
+        if col >= COLUMNS:
+            col = 0
+            text_line += line_spacing
+
 
     text_line += line_spacing
     display_text(center, text_line, 'Press any key to continue or Q to quit', (0, 0, 0), screen)

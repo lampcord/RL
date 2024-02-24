@@ -14,6 +14,7 @@ class QuizController:
         self.session = {}
         self.history = {}
         self.last_visited = {}
+        self.categories = {}
         self.load()
         self.oldest_start = 14
 
@@ -33,6 +34,14 @@ class QuizController:
         except Exception as e:
             print('Last visited not found')
 
+        cat_path = self.path.replace('qc.json', 'qc_cat.json')
+        try:
+            with open(cat_path, 'r') as json_file:
+                self.categories = json.load(json_file)
+
+        except Exception as e:
+            print('Categories not found')
+
     def save(self):
         with open(self.path, 'w') as json_file:
             json.dump(self.history, json_file, indent=4)
@@ -40,6 +49,11 @@ class QuizController:
         lv_path = self.path.replace('qc.json', 'qc_lv.json')
         with open(lv_path, 'w') as json_file:
             json.dump(self.last_visited, json_file, indent=4)
+
+        cat_path = self.path.replace('qc.json', 'qc_cat.json')
+        with open(cat_path, 'w') as json_file:
+            json.dump(self.categories, json_file, indent=4)
+
 
     def get_question_index(self):
         # first find any that have never been seen

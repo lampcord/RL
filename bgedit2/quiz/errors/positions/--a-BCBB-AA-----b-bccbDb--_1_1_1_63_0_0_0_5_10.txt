@@ -1,0 +1,43 @@
+﻿XGID=--a-BCBB-AA-----b-bccbDb--:1:1:1:63:0:0:0:5:10
+
+X:Michael   O:eXtremeGammon
+Score is X:0 O:0 5 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |    O  X  O  O  O |   | O     O          |
+ |    O  X  O  O  O |   | O     O          |
+ |       X     O  O |   |                  |
+ |       X          |   |                  |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                  |   |                  |
+ |             X    |   |                  | +---+
+ |          X  X  X |   | X                | | 2 |
+ |    O     X  X  X |   | X     X  X       | +---+
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 156  O: 100 X-O: 0-0/5
+Cube: 2, X own cube
+X to play 63
+
+    1. XG Roller+  10/4 9/6                     eq:-0.455
+      Player:   29.58% (G:3.37% B:0.10%)
+      Opponent: 70.42% (G:17.60% B:0.27%)
+
+    2. XG Roller+  10/4 5/2*                    eq:-0.657 (-0.202)
+      Player:   29.35% (G:4.08% B:0.13%)
+      Opponent: 70.65% (G:33.26% B:0.96%)
+
+    3. 3-ply       10/7 9/3                     eq:-0.598 (-0.144)
+      Player:   28.82% (G:3.29% B:0.09%)
+      Opponent: 71.18% (G:27.12% B:0.55%)
+
+    4. 2-ply       10/1                         eq:-0.641 (-0.187)
+      Player:   25.37% (G:2.94% B:0.04%)
+      Opponent: 74.63% (G:23.03% B:0.62%)
+
+    5. 2-ply       9/3 5/2*                     eq:-0.805 (-0.350)
+      Player:   28.06% (G:3.77% B:0.07%)
+      Opponent: 71.94% (G:41.67% B:2.10%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

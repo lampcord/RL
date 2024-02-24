@@ -9,10 +9,10 @@ if len(sys.argv) < 3:
 
 file_pattern = sys.argv[1]
 dest_dir = sys.argv[2] + '\\positions'
-
+files_found = 0
 while True:
     files = glob.glob(file_pattern)
-    print(files)
+    print(f'{files_found}) {files}')
     if len(files) > 0:
         time.sleep(2.0)
         position = file_to_quiz_line(files[0])
@@ -22,4 +22,5 @@ while True:
         target = dest_dir + '\\' + target_file
         print(target)
         os.rename(files[0], target)
+        files_found += 1
     time.sleep(1.0)

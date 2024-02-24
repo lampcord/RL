@@ -43,7 +43,7 @@ else:
     print('USAGE: quiz <directory> <opt: decay> <opt: new mult>')
     sys.exit(1)
 
-decay = 0.90 if len(sys.argv) <= 2 else float(sys.argv[2])
+decay = 0.95 if len(sys.argv) <= 2 else float(sys.argv[2])
 new_mult = 3.0 if len(sys.argv) <= 3 else float(sys.argv[3])
 
 print(f'{directory} {decay} {new_mult}')
@@ -178,16 +178,11 @@ while running:
         else:
             user_answer = quiz_line['answers'][user_choice[0][0]][0]
             correct_answer = quiz_line['answers'][0][0]
-            display_text(center, text_line, f'You chose {user_answer} the correct choice was {correct_answer}', (0, 0, 0), screen)
-            text_line += line_spacing
 
+            colors = []
+            choice_color = (0, 0, 0)
             choice_ndx = int(user_choice[0][0])
             for x in range(len(quiz_line['answers'])):
-                pre_prompt = ''
-                post_prompt = ''
-                if choice_ndx == x:
-                    pre_prompt = '==> '
-                    post_prompt = ' <=='
                 error = float(quiz_line["answers"][x][1])
                 color = (0, 0, 0)
                 if x == 0:
@@ -198,7 +193,23 @@ while running:
                     color = (215, 70, 0)
                 else:
                     color = (170, 0, 0)
+                colors.append(color)
+                if choice_ndx == x:
+                    choice_color = color
+                    pre_prompt = '==> '
+                    post_prompt = ' <=='
 
+            display_text(center, text_line, f'You chose {user_answer} the correct choice was {correct_answer}', choice_color, screen)
+            text_line += line_spacing
+            text_line += line_spacing
+
+            for x in range(len(quiz_line['answers'])):
+                color = colors[x]
+                pre_prompt = ''
+                post_prompt = ''
+                if choice_ndx == x:
+                    pre_prompt = '==> '
+                    post_prompt = ' <=='
                 display_text(columns[0], text_line, f'{pre_prompt}{quiz_line["answers"][x][0]}{post_prompt}', color, screen, center_x=False)
                 display_text(columns[2], text_line, f'{float(quiz_line["answers"][x][1]):8.3f}', color, screen, center_x=False)
                 text_line += line_spacing

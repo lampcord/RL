@@ -134,6 +134,17 @@ class QuizController:
             total_seen += 1
         print (f'Coverage {total_seen / self.count:.3}')
 
+    def print_last_visited(self):
+        report = {}
+        for k in self.last_visited.keys():
+            date = datetime.datetime.fromtimestamp(self.last_visited[k])
+            formatted_date_local = date.strftime('%Y-%m-%d')
+            report[formatted_date_local] = report.get(formatted_date_local, 0) + 1
+        keys = sorted(report.keys())
+        for k in keys:
+            print(k , report[k])
+
+
 if __name__ == '__main__':
     qc = QuizController('test.json', 30, 0.99)
     qc.dump()

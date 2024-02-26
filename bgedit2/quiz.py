@@ -292,5 +292,6 @@ while running:
             break
 
 qc.print_report()
+qc.print_last_visited()
 qc.save()
 pygame.quit()

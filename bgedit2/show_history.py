@@ -42,39 +42,23 @@ except Exception as e:
     print(f'ERROR: Problem loading quiz {str(e)}')
     sys.exit(1)
 
-'''
-Opening
-Middlegame
-Ace-point Holding
-Bearing-In
-Bearing-Off
-Passes
-Post-Crawford
-Takes
-Too Good
-Backgame
-Blitz
-Holding Game
-Prime
-Race
-
-'''
 categories = [
     'Opening',
     'Middlegame',
-    'Ace-point Holding',
-    'Bearing-In',
-    'Bearing-Off',
-    'Passes',
-    'Post-Crawford',
-    'Takes',
-    'Too Good',
-    'Backgame',
-    'Blitz',
-    'Holding Game',
-    'Prime',
-    'Race'
+    'EG - Ace-point Holding',
+    'EG - Bearing-In',
+    'EG - Bearing-Off',
+    'DBL - Passes',
+    'DBL - Post-Crawford',
+    'DBL - Takes',
+    'DBL - Too Good',
+    'Plan - Backgame',
+    'Plan - Blitz',
+    'Plan - Holding Game',
+    'Plan - Prime',
+    'Plan - Race'
 ]
+
 category_map = {}
 key = 'A'
 for category in categories:
@@ -118,6 +102,14 @@ def display_text(x, y, text, color, target, center_x=True, center_y=True):
         y -= text_surface.get_height() // 2
     target.blit(text_surface, (x, y))  # Position of the text
 
+def get_text_size(text):
+    text_surface = font.render(text, True, (0, 0, 0,))  # Text, antialiasing, color
+    return text_surface.get_size()
+
+max_category_width = 0
+for cat in categories:
+    w, h = get_text_size(cat)
+    max_category_width = max(w, max_category_width)
 
 key = ''
 
@@ -143,6 +135,7 @@ current_key = 0
 
 quiz_line_index = int(hist_keys[current_key])
 quiz_line = quiz[quiz_line_index]
+current_categories = qc.categories.get(str(quiz_line_index), [])
 image = load_flashcard(quiz_line)
 
 while running:
@@ -158,7 +151,7 @@ while running:
                 if key == 'Q':
                     running = False
                     break
-                elif key == 'N':
+                elif key == 'X':
                     current_key += 1
                     if current_key >= len(hist_keys):
                         running = False
@@ -166,6 +159,14 @@ while running:
                     quiz_line_index = int(hist_keys[current_key])
                     quiz_line = quiz[quiz_line_index]
                     image = load_flashcard(quiz_line)
+                    current_categories = qc.categories.get(str(quiz_line_index), [])
+                elif key in category_map.keys():
+                    if key in current_categories:
+                        current_categories.remove(key)
+                    else:
+                        current_categories.append(key)
+                    qc.categories[str(quiz_line_index)] = current_categories
+
 
     # Clear the screen
     screen.fill(BG_COLOR)
@@ -198,8 +199,12 @@ while running:
     text_line += line_spacing
 
     col = 0
-    for key in category_map.keys():
-        display_text(columns[col], text_line, f'{key}) {category_map[key]}', (0, 0, 0), screen, center_x=False)
+    for k in category_map.keys():
+        color = (0, 0, 0)
+        if k in current_categories:
+            color = (0, 128, 0)
+
+        display_text(columns[col] - max_category_width // 2, text_line, f'{k}) {category_map[k]}', color, screen, center_x=False)
         col += 1
         if col >= COLUMNS:
             col = 0
@@ -207,11 +212,12 @@ while running:
 
 
     text_line += line_spacing
-    display_text(center, text_line, 'Press any key to continue or Q to quit', (0, 0, 0), screen)
+    display_text(center, text_line, 'Press X to continue or Q to quit', (0, 0, 0), screen)
 
     pygame.display.flip()
 
     # Control the frame rate
     clock.tick(60)
 
+qc.save()
 pygame.quit()

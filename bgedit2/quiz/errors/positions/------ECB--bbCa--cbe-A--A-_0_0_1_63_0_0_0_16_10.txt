@@ -1,0 +1,43 @@
+﻿XGID=------ECB--bbCa--cbe-A--A-:0:0:1:63:0:0:0:16:10
+
+X:lampcord   O:ronenkohen
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ | X        X     O |   | O  O        O  X |
+ |                O |   | O  O           X |
+ |                O |   |    O           X |
+ |                O |   |                  |
+ |                O |   |                  |
+ |                  |BAR|                  |
+ |                X |   |                  |
+ |                X |   |                  |
+ |                X |   | X                |
+ |                X |   | X  X        O  O |
+ |                X |   | X  X        O  O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 151  O: 133 X-O: 0-0/16
+Cube: 1
+X to play 63
+
+    1. XG Roller+  24/21 13/7                   eq:-0.520
+      Player:   33.66% (G:2.52% B:0.05%)
+      Opponent: 66.34% (G:3.43% B:0.08%)
+
+    2. XG Roller+  13/4                         eq:-0.761 (-0.241)
+      Player:   30.30% (G:4.62% B:0.13%)
+      Opponent: 69.70% (G:13.07% B:0.48%)
+
+    3. 4-ply       24/21 8/2                    eq:-0.544 (-0.024)
+      Player:   32.83% (G:2.93% B:0.08%)
+      Opponent: 67.17% (G:4.48% B:0.14%)
+
+    4. 4-ply       24/21 7/1                    eq:-0.547 (-0.028)
+      Player:   32.73% (G:3.02% B:0.07%)
+      Opponent: 67.27% (G:4.47% B:0.13%)
+
+    5. 2-ply       13/7 6/3                     eq:-0.776 (-0.256)
+      Player:   30.24% (G:5.03% B:0.11%)
+      Opponent: 69.76% (G:14.08% B:0.46%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

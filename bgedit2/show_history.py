@@ -115,7 +115,6 @@ font = pygame.font.Font(None, 24)
 
 running = True
 
-
 def load_flashcard(quiz_line):
     if '.png' in quiz_line['flashcard']:
         image_path = directory + 'flashcards/' + quiz_line['flashcard']
@@ -249,6 +248,38 @@ while running:
 
     # Control the frame rate
     clock.tick(60)
+
+
+stats = {}
+for k in qc.categories:
+    hist = qc.history.get(k, [[0, 0]])
+    count = hist[0][0]
+    score = hist[0][1]
+    for cat in qc.categories[k]:
+        cat_name = category_map[cat][0]
+        stat = stats.get(cat, [0, 0.0])
+        stat[0] += count
+        stat[1] += score
+        stats[cat] = stat
+
+print('=' * 80)
+print('Most comon errors')
+print('=' * 80)
+sorted_by_total = {k: v for k, v in sorted(stats.items(), key=lambda item: item[1][0], reverse=True)}
+for cat in sorted_by_total.keys():
+    stat = sorted_by_total[cat]
+    cat_name = category_map[cat][0]
+    print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f}')
+
+print('=' * 80)
+print('Worst mistakes')
+print('=' * 80)
+sorted_by_score = {k: v for k, v in sorted(stats.items(), key=lambda item: item[1][1])}
+for cat in sorted_by_score.keys():
+    stat = sorted_by_score[cat]
+    cat_name = category_map[cat][0]
+    print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f}')
+
 
 qc.save()
 pygame.quit()

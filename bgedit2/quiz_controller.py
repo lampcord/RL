@@ -3,6 +3,47 @@ import random
 import json
 import copy
 
+category_map = {
+    '0': ['Opening', 'First 4 moves'],
+    '1': ['Middlegame', 'Both players have men back and developing.'],
+    '2': ['Blitz - O', 'Attacking and building points. Defender has blots or on bar.'],
+    '3': ['Blitz - D', 'Attacking and building points. Defender has blots or on bar.'],
+    '4': ['Long Race', 'Bearing in no contact.'],
+    '5': ['Bearoff Race', 'Bearing off no contact.'],
+    '6': ['Bearoff W/Cont - O', 'Bearing off with oponents back.'],
+    '7': ['Bearoff W/Cont - D', 'Bearing off with oponents back.'],
+    '8': ['Roll vs Roll', 'Late bearoff where you are counting rolls not pips.'],
+    '9': ['Mutual Holding', 'Both players have high anchor and are trying to hold and run'],
+    'A': ['One Way Holding - O', 'High anchor (6, 7, 9) vs. no one back.'],
+    'B': ['One Way Holding - D', 'High anchor (6, 7, 9) vs. no one back.'],
+    'C': ['Deep Anchor - O', 'Low anchor (1, 2) vs. no one back.'],
+    'D': ['Deep Anchor - D', 'Low anchor (1, 2) vs. no one back.'],
+    'E': ['3 Pt. Anchor - O', '3 point anchor vs. no one back.'],
+    'F': ['3 Pt. Anchor - D', '3 point anchor vs. no one back.'],
+    'G': ['No Anchor H - O', 'Holding game with no anchor but multiple blots.'],
+    'H': ['No Anchor H - D', 'Holding game with no anchor but multiple blots.'],
+    'I': ['One Man Back - O', 'Holding game with no anchor but one blot.'],
+    'J': ['One Man Back - D', 'Holding game with no anchor but one blot.'],
+    'K': ['6 Prime - O', 'One side has a 6 prime.'],
+    'L': ['6 Prime - D', 'One side has a 6 prime.'],
+    'M': ['Late Game Cont - O', 'Holding game at end.'],
+    'N': ['Late Game Cont - D', 'Holding game at end.'],
+    'O': ['Early Bk Game - O', 'Back game where both sides have men back'],
+    'P': ['Early Bk Game - D', 'Back game where both sides have men back'],
+    'Q': ['Mid Bk Game - O', 'Back game where offense has escaped.'],
+    'R': ['Mid Bk Game - D', 'Back game where offense has escaped.'],
+    'S': ['Late Bk Game - O', 'Bearing off / in'],
+    'T': ['Late Bk Game - D', 'Bearing off / in'],
+    'U': ['Containment - O', 'Post hit contain'],
+    'V': ['Containment - D', 'Post hit contain'],
+    'W': ['Stack Straggle - O', 'Bear off vs Straggler'],
+    'X': ['Stack Straggle - D', 'Bear off vs Straggler'],
+    'Y': ['Prime v Prime', 'Both priming with trapped checkers.'],
+    'Z': ['Blitz v Prime - B', 'One side blitzing other sid priming.'],
+    ',': ['Blitz v Prime - P', 'One side blitzing other sid priming.'],
+    '.': ['Crunch', 'Both sides have men back trying not to crunch'],
+    '/': ['Hypergammon', 'Both players trying to get 3 or less around and past each other.']
+}
 
 class QuizController:
 
@@ -41,6 +82,19 @@ class QuizController:
 
         except Exception as e:
             print('Categories not found')
+
+    def check_category_filter(self, k, filter):
+        passes = True
+        if filter:
+            passes = False
+            current_categories = self.categories.get(k, [])
+
+            for cat in current_categories:
+                if cat in filter:
+                    passes = True
+                    break
+
+        return passes
 
     def save(self):
         with open(self.path, 'w') as json_file:

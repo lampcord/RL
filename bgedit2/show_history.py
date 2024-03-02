@@ -11,7 +11,7 @@ import json
 import pyperclip
 
 from quiz_controller import QuizController
-from categories import category_map
+from quiz_controller import category_map
 import bg_board
 from XGID_to_position import *
 
@@ -36,7 +36,7 @@ if len(sys.argv) > 1:
 
 filter = None
 if len(sys.argv) > 2:
-    filter = sys.argv[2].split()
+    filter = list(sys.argv[2])
     print(f'Filter: {filter}')
 
 directory = './quiz/' + quiz_name + '/'
@@ -110,18 +110,13 @@ key = ''
 
 line_spacing = 20
 score_history = {}
+
 for k in qc.history.keys():
     current_categories = qc.categories.get(k, [])
     if len(current_categories) > 0 and not filter:
         continue
-    if filter:
-        found = False
-        for cat in current_categories:
-            if cat in filter:
-                found = True
-                break
-        if not found:
-            continue
+    if not qc.check_category_filter(k, filter):
+        continue
 
     hist = qc.history[k]
     print(k, hist)

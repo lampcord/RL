@@ -1,0 +1,43 @@
+﻿XGID=----bBB-D-B--Ba-Acde----B-:0:0:1:51:0:0:0:16:10
+
+X:lampcord   O:jake2000
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ | X              O |   | O  O  X     O  X |
+ | X              O |   | O  O           X |
+ |                O |   | O  O             |
+ |                O |   | O                |
+ |                O |   |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                  |   |    X             |
+ |                  |   |    X             |
+ |          O  X  X |   |    X     X       |
+ |          O  X  X |   |    X     X       |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 164  O: 135 X-O: 0-0/16
+Cube: 1
+X to play 51
+
+    1. XG Roller+  16/11 8/7                    eq:-0.109
+      Player:   49.74% (G:9.82% B:0.36%)
+      Opponent: 50.26% (G:17.45% B:1.07%)
+
+    2. XG Roller+  16/10                        eq:-0.209 (-0.100)
+      Player:   47.10% (G:8.76% B:0.31%)
+      Opponent: 52.90% (G:17.53% B:0.80%)
+
+    3. 4-ply       13/7                         eq:-0.169 (-0.060)
+      Player:   48.00% (G:9.74% B:0.35%)
+      Opponent: 52.00% (G:17.37% B:1.38%)
+
+    4. 4-ply       8/7 8/3                      eq:-0.200 (-0.091)
+      Player:   47.37% (G:9.99% B:0.40%)
+      Opponent: 52.63% (G:18.45% B:1.57%)
+
+    5. 4-ply       24/23 16/11                  eq:-0.207 (-0.098)
+      Player:   47.35% (G:9.05% B:0.26%)
+      Opponent: 52.65% (G:19.18% B:0.75%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

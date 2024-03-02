@@ -1,0 +1,39 @@
+﻿XGID=-BaB--CaB---BC---bdcbb---A:0:0:1:51:0:0:0:16:10
+
+X:lampcord   O:ff_bombers
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |          O  O  O |   | O  O           X |
+ |          O  O  O |   | O  O           X |
+ |                O |   | O              X |
+ |                  |   | O                |
+ |                  | X |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                  |   |                  |
+ |                X |   |                  |
+ | X     X        X |   |    X           X |
+ | X  O  X        X |   | O  X           X |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 130  O: 121 X-O: 0-0/16
+Cube: 1
+X to play 51
+
+    1. XG Roller+  Bar/24 12/7*                 eq:-0.747
+      Player:   33.65% (G:9.73% B:0.21%)
+      Opponent: 66.35% (G:24.37% B:1.27%)
+
+    2. XG Roller+  Bar/24 13/8                  eq:-1.000 (-0.253)
+      Player:   27.82% (G:6.36% B:0.13%)
+      Opponent: 72.18% (G:23.31% B:0.77%)
+
+    3. 1-ply       Bar/24 6/1                   eq:-1.000 (-0.253)
+      Player:   22.56% (G:4.00% B:0.10%)
+      Opponent: 77.44% (G:27.19% B:0.84%)
+
+    4. 1-ply       Bar/24 8/3                   eq:-1.112 (-0.366)
+      Player:   19.60% (G:3.60% B:0.10%)
+      Opponent: 80.40% (G:36.10% B:1.84%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

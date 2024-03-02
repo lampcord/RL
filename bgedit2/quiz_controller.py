@@ -16,7 +16,7 @@ class QuizController:
         self.last_visited = {}
         self.categories = {}
         self.load()
-        self.oldest_start = 14
+        self.oldest_start = 28
 
     def load(self):
         try:
@@ -72,7 +72,7 @@ class QuizController:
         num_days = self.oldest_start
         target_count = self.count // 4
         while num_days >= 0:
-            print(f'Looking for questions over [{num_days}] old...')
+            print(f'Looking for questions over [{num_days}] days old...')
             error_k = 200.0
             choices = []
             weights = []

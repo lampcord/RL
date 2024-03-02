@@ -11,6 +11,7 @@ import json
 import pyperclip
 
 from quiz_controller import QuizController
+from categories import category_map
 import bg_board
 from XGID_to_position import *
 
@@ -33,6 +34,11 @@ quiz_name = 'test'
 if len(sys.argv) > 1:
     quiz_name = sys.argv[1]
 
+filter = None
+if len(sys.argv) > 2:
+    filter = sys.argv[2].split()
+    print(f'Filter: {filter}')
+
 directory = './quiz/' + quiz_name + '/'
 print(directory)
 try:
@@ -45,47 +51,6 @@ except Exception as e:
     sys.exit(1)
 
 
-category_map = {
-    '0': ['Opening', 'First 4 moves'],
-    '1': ['Middlegame', 'Both players have men back and developing.'],
-    '2': ['Blitz - O', 'Attacking and building points. Defender has blots or on bar.'],
-    '3': ['Blitz - D', 'Attacking and building points. Defender has blots or on bar.'],
-    '4': ['Long Race', 'Bearing in no contact.'],
-    '5': ['Bearoff Race', 'Bearing off no contact.'],
-    '6': ['Bearoff W/Cont - O', 'Bearing off with oponents back.'],
-    '7': ['Bearoff W/Cont - D', 'Bearing off with oponents back.'],
-    '8': ['Roll vs Roll', 'Late bearoff where you are counting rolls not pips.'],
-    '9': ['Mutual Holding', 'Both players have high anchor and are trying to hold and run'],
-    'A': ['One Way Holding - O', 'High anchor (6, 7, 9) vs. no one back.'],
-    'B': ['One Way Holding - D', 'High anchor (6, 7, 9) vs. no one back.'],
-    'C': ['Deep Anchor - O', 'Low anchor (1, 2) vs. no one back.'],
-    'D': ['Deep Anchor - D', 'Low anchor (1, 2) vs. no one back.'],
-    'E': ['3 Pt. Anchor - O', '3 point anchor vs. no one back.'],
-    'F': ['3 Pt. Anchor - D', '3 point anchor vs. no one back.'],
-    'G': ['No Anchor H - O', 'Holding game with no anchor but multiple blots.'],
-    'H': ['No Anchor H - D', 'Holding game with no anchor but multiple blots.'],
-    'I': ['One Man Back - O', 'Holding game with no anchor but one blot.'],
-    'J': ['One Man Back - D', 'Holding game with no anchor but one blot.'],
-    'K': ['6 Prime - O', 'One side has a 6 prime.'],
-    'L': ['6 Prime - D', 'One side has a 6 prime.'],
-    'M': ['Late Game Cont - O', 'Holding game at end.'],
-    'N': ['Late Game Cont - D', 'Holding game at end.'],
-    'O': ['Early Bk Game - O', 'Back game where both sides have men back'],
-    'P': ['Early Bk Game - D', 'Back game where both sides have men back'],
-    'Q': ['Mid Bk Game - O', 'Back game where offense has escaped.'],
-    'R': ['Mid Bk Game - D', 'Back game where offense has escaped.'],
-    'S': ['Late Bk Game - O', 'Bearing off / in'],
-    'T': ['Late Bk Game - D', 'Bearing off / in'],
-    'U': ['Containment - O', 'Post hit contain'],
-    'V': ['Containment - D', 'Post hit contain'],
-    'W': ['Stack Straggle - O', 'Bear off vs Straggler'],
-    'X': ['Stack Straggle - D', 'Bear off vs Straggler'],
-    'Y': ['Prime v Prime', 'Both priming with trapped checkers.'],
-    'Z': ['Blitz v Prime - B', 'One side blitzing other sid priming.'],
-    ',': ['Blitz v Prime - P', 'One side blitzing other sid priming.'],
-    '.': ['Crunch', 'Both sides have men back trying not to crunch'],
-    '/': ['Hypergammon', 'Both players trying to get 3 or less around and past each other.']
-}
 
 key = 'A'
 key_mappings = {}
@@ -146,6 +111,18 @@ key = ''
 line_spacing = 20
 score_history = {}
 for k in qc.history.keys():
+    current_categories = qc.categories.get(k, [])
+    if len(current_categories) > 0 and not filter:
+        continue
+    if filter:
+        found = False
+        for cat in current_categories:
+            if cat in filter:
+                found = True
+                break
+        if not found:
+            continue
+
     hist = qc.history[k]
     print(k, hist)
     total_score = 0.0
@@ -180,6 +157,7 @@ while running:
                 break
             elif event.key == pygame.K_TAB:
                 current_key += 1
+                print(f'Position {current_key}')
                 if current_key >= len(hist_keys):
                     running = False
                     break

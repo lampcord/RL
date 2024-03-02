@@ -1,0 +1,43 @@
+﻿XGID=----BBDa-b--AD---b-cdB-ab-:1:1:1:33:0:0:0:16:10
+
+X:lampcord   O:amin72soltani
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ | O  O     X  O  O |   |    O           X |
+ | O        X  O  O |   |    O           X |
+ |             O  O |   |                X |
+ |             O    |   |                X |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                X |   |                  |
+ |                X |   |                  | +---+
+ |          X  X  X |   |       O          | | 2 |
+ |          X  X  X |   | O     O        X | +---+
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 148  O: 108 X-O: 0-0/16
+Cube: 2, X own cube
+X to play 33
+
+    1. XG Roller+  13/7* 6/3(2)                 eq:+0.792
+      Player:   68.29% (G:21.74% B:0.56%)
+      Opponent: 31.71% (G:8.61% B:0.14%)
+
+    2. XG Roller+  13/7*(2)                     eq:+0.512 (-0.281)
+      Player:   59.35% (G:17.80% B:0.62%)
+      Opponent: 40.65% (G:9.35% B:0.14%)
+
+    3. 1-ply       21/18(2) 13/7*               eq:+0.319 (-0.473)
+      Player:   55.29% (G:15.34% B:0.43%)
+      Opponent: 44.71% (G:14.43% B:0.20%)
+
+    4. 1-ply       13/10 13/7* 7/4              eq:+0.317 (-0.475)
+      Player:   54.03% (G:16.19% B:0.42%)
+      Opponent: 45.97% (G:12.14% B:0.24%)
+
+    5. 1-ply       13/7* 7/4 6/3                eq:+0.258 (-0.534)
+      Player:   53.19% (G:16.14% B:0.48%)
+      Opponent: 46.81% (G:16.24% B:0.33%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

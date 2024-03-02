@@ -1,0 +1,43 @@
+﻿XGID=----C-D-CB--eB--ad-d-a---A:0:0:1:42:0:0:0:16:10
+
+X:lampcord   O:lunatickiss
+Score is X:0 O:0 16 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |          O     O |   |    O  O        X |
+ |                O |   |    O           X |
+ |                O |   |    O             |
+ |                O |   |    O             |
+ |                  | X |                  |
+ |                  |BAR|                  |
+ |                  |   |                O |
+ |                X |   |                O |
+ |          X     X |   |    X           O |
+ |          X     X |   |    X  X        O |
+ |          X     X |   |    X  X        O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 129  O: 134 X-O: 0-0/16
+Cube: 1
+X to play 42
+
+    1. XG Roller+  Bar/21* 8/6                  eq:+0.949
+      Player:   70.12% (G:28.17% B:0.56%)
+      Opponent: 29.88% (G:4.60% B:0.15%)
+
+    2. XG Roller+  Bar/21* 13/11                eq:+0.773 (-0.176)
+      Player:   65.93% (G:27.94% B:0.73%)
+      Opponent: 34.07% (G:5.37% B:0.21%)
+
+    3. 4-ply       Bar/21* 6/4                  eq:+0.915 (-0.034)
+      Player:   69.89% (G:26.17% B:0.64%)
+      Opponent: 30.11% (G:4.54% B:0.18%)
+
+    4. 3-ply       Bar/21* 9/7                  eq:+0.799 (-0.151)
+      Player:   66.00% (G:29.48% B:0.71%)
+      Opponent: 34.00% (G:5.78% B:0.22%)
+
+    5. 2-ply       Bar/21* 4/2                  eq:+0.723 (-0.226)
+      Player:   65.29% (G:25.25% B:0.56%)
+      Opponent: 34.71% (G:5.93% B:0.25%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

@@ -1,0 +1,43 @@
+﻿XGID=-a-a--E-CA--eD---cAd----aA:0:0:1:32:0:0:0:7:10
+
+X:lampcord   O:gabe_the_sneaky
+Score is X:0 O:0 7 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ | O              O |   | X  O           X |
+ |                O |   |    O           X |
+ |                O |   |    O           X |
+ |                O |   |                X |
+ |                  | X |                  |
+ |                  |BAR|                  |
+ |                X |   |                O |
+ |                X |   |                O |
+ |                X |   |    X           O |
+ |                X |   |    X           O |
+ | O     O        X |   |    X  X        O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 158  O: 160 X-O: 0-0/7
+Cube: 1
+X to play 32
+
+    1. XG Roller+  Bar/23 6/3*                  eq:+0.053
+      Player:   51.59% (G:14.55% B:0.75%)
+      Opponent: 48.41% (G:14.54% B:0.57%)
+
+    2. XG Roller+  Bar/20                       eq:-0.066 (-0.119)
+      Player:   49.58% (G:11.51% B:0.51%)
+      Opponent: 50.42% (G:15.41% B:0.45%)
+
+    3. 4-ply       Bar/23 18/15                 eq:+0.007 (-0.046)
+      Player:   50.97% (G:12.23% B:0.58%)
+      Opponent: 49.03% (G:14.28% B:0.49%)
+
+    4. 4-ply       Bar/22 18/16                 eq:-0.016 (-0.069)
+      Player:   50.33% (G:11.77% B:0.53%)
+      Opponent: 49.67% (G:14.07% B:0.47%)
+
+    5. 4-ply       Bar/23 9/6                   eq:-0.027 (-0.080)
+      Player:   50.14% (G:11.45% B:0.45%)
+      Opponent: 49.86% (G:14.22% B:0.35%)
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

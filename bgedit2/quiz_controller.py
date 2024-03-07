@@ -83,14 +83,14 @@ class QuizController:
         except Exception as e:
             print('Categories not found')
 
-    def check_category_filter(self, k, filter):
+    def check_category_filter(self, k, category_filter):
         passes = True
-        if filter:
+        if category_filter:
             passes = False
             current_categories = self.categories.get(k, [])
 
             for cat in current_categories:
-                if cat in filter:
+                if cat in category_filter:
                     passes = True
                     break
 
@@ -108,13 +108,14 @@ class QuizController:
         with open(cat_path, 'w') as json_file:
             json.dump(self.categories, json_file, indent=4)
 
-
-    def get_question_index(self):
+    def get_question_index(self, category_filter=None):
         # first find any that have never been seen
         print(f'Looking for never seen questions')
         choices = []
         for ndx in range(self.count):
             k = str(ndx)
+            if not self.check_category_filter(k, category_filter):
+                continue
             if k in self.session:
                 continue
             if k not in self.history.keys():

@@ -1,0 +1,51 @@
+﻿XGID=-b---BD-BAA-bCb--c-dBb----:0:0:1:62:0:0:0:3:10
+
+X:Player 1   O:Player 2
+Score is X:0 O:0 3 pt.(s) match.
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |          O  X  O |   |    O        O  X |
+ |          O  X  O |   |    O        O  X |
+ |                O |   |    O           X |
+ |                O |   |                  |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                X |   |                  |
+ |                X |   |                  |
+ | O           X  X |   |    X           O |
+ | O           X  X |   |    X  X  X     O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 148  O: 152 X-O: 0-0/3
+Cube: 1
+X to play 62
+
+    1. Rollout¹    13/7 9/7                     eq:+0.915
+      Player:   68.18% (G:22.56% B:1.35%)
+      Opponent: 31.82% (G:6.15% B:0.37%)
+      Confidence: ±0.009 (+0.906..+0.923) - [100.0%]
+      Duration: 26.0 seconds
+
+    2. Rollout¹    10/4 6/4                     eq:+0.895 (-0.019)
+      Player:   68.36% (G:22.68% B:1.00%)
+      Opponent: 31.64% (G:5.35% B:0.22%)
+      Confidence: ±0.005 (+0.891..+0.900) - [0.0%]
+      Duration: 11.2 seconds
+
+    3. XG Roller++ 13/5                         eq:+0.589 (-0.325)
+      Player:   60.31% (G:20.82% B:0.65%)
+      Opponent: 39.69% (G:7.14% B:0.27%)
+
+    4. XG Roller++ 13/7 10/8                    eq:+0.410 (-0.504)
+      Player:   56.83% (G:17.08% B:0.62%)
+      Opponent: 43.17% (G:8.07% B:0.28%)
+
+    5. XG Roller++ 10/8 9/3                     eq:+0.403 (-0.512)
+      Player:   57.28% (G:17.50% B:0.51%)
+      Opponent: 42.72% (G:7.14% B:0.24%)
+
+
+¹  5184 Games rolled with Variance Reduction.
+   Moves: 2-ply, cube decisions: 3-ply Red
+
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2

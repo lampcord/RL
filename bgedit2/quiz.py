@@ -40,13 +40,14 @@ if len(sys.argv) > 1:
         sys.exit(1)
 
 else:
-    print('USAGE: quiz <directory> <opt: decay> <opt: new mult>')
+    print('USAGE: quiz <directory> <opt: filter> <opt: decay> <opt: new mult>')
     sys.exit(1)
 
-decay = 0.95 if len(sys.argv) <= 2 else float(sys.argv[2])
-new_mult = 3.0 if len(sys.argv) <= 3 else float(sys.argv[3])
+category_filter = None if len(sys.argv) <= 2 else list(sys.argv[2])
+decay = 0.95 if len(sys.argv) <= 3 else float(sys.argv[3])
+new_mult = 3.0 if len(sys.argv) <= 4 else float(sys.argv[4])
 
-print(f'{directory} {decay} {new_mult}')
+print(f'{directory} {filter} {decay} {new_mult}')
 
 qc = QuizController(directory + 'qc.json', len(quiz), decay, new_mult)
 
@@ -60,13 +61,13 @@ running = True
 
 
 def choose_quiz_line():
-    return qc.get_question_index()
+    return qc.get_question_index(category_filter)
 
 
 def load_flashcard(quiz_line):
     if '.png' in quiz_line['flashcard']:
         image_path = directory + 'flashcards/' + quiz_line['flashcard']
-        return pygame.image.load(image_path)
+        return pygame.image.load(image_path)(())
     else:
         board_image = pygame.Surface(bg_board.WINDOW_SIZE)
         board_image.fill(BG_COLOR)

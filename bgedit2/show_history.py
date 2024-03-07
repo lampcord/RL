@@ -34,10 +34,10 @@ quiz_name = 'test'
 if len(sys.argv) > 1:
     quiz_name = sys.argv[1]
 
-filter = None
+category_filter = None
 if len(sys.argv) > 2:
-    filter = list(sys.argv[2])
-    print(f'Filter: {filter}')
+    category_filter = list(sys.argv[2])
+    print(f'Filter: {category_filter}')
 
 directory = './quiz/' + quiz_name + '/'
 print(directory)
@@ -113,9 +113,9 @@ score_history = {}
 
 for k in qc.history.keys():
     current_categories = qc.categories.get(k, [])
-    if len(current_categories) > 0 and not filter:
+    if len(current_categories) > 0 and not category_filter:
         continue
-    if not qc.check_category_filter(k, filter):
+    if not qc.check_category_filter(k, category_filter):
         continue
 
     hist = qc.history[k]
@@ -207,9 +207,9 @@ while running:
 
     text_line = line_spacing
     for k in category_map.keys():
-        color = (0, 0, 0)
+        color = (64, 64, 64)
         if k in current_categories:
-            color = (0, 128, 0)
+            color = (0, 0, 255)
 
         display_text(CAT_COLS[0], text_line, f'{k}) {category_map[k][0]}', color, screen, center_x=False)
         display_text(CAT_COLS[1], text_line, f'{category_map[k][1]}', color, screen, center_x=False)
@@ -235,6 +235,15 @@ for k in qc.categories:
         stat[1] += score
         stats[cat] = stat
 
+for k in stats.keys():
+    stat = stats[k]
+    count = stat[0]
+    if count == 0:
+        count = 1
+    avg = stat[1] / count
+    stat.append(avg)
+    stats[k] = stat
+
 print('=' * 80)
 print('Most comon errors')
 print('=' * 80)
@@ -250,6 +259,15 @@ print('=' * 80)
 sorted_by_score = {k: v for k, v in sorted(stats.items(), key=lambda item: item[1][1])}
 for cat in sorted_by_score.keys():
     stat = sorted_by_score[cat]
+    cat_name = category_map[cat][0]
+    print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f}')
+
+print('=' * 80)
+print('Worst average')
+print('=' * 80)
+sorted_by_average = {k: v for k, v in sorted(stats.items(), key=lambda item: item[1][2])}
+for cat in sorted_by_average.keys():
+    stat = sorted_by_average[cat]
     cat_name = category_map[cat][0]
     print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f}')
 

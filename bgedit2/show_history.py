@@ -30,7 +30,7 @@ for x in range(COLUMNS):
     columns.append(next_column)
     next_column += COLUMN_WIDTH
 
-quiz_name = 'test'
+quiz_name = 'errors'
 if len(sys.argv) > 1:
     quiz_name = sys.argv[1]
 
@@ -224,10 +224,12 @@ while running:
 
 
 stats = {}
+total_with_categories = 0
 for k in qc.categories:
     hist = qc.history.get(k, [[0, 0]])
     count = hist[0][0]
     score = hist[0][1]
+    total_with_categories += 1
     for cat in qc.categories[k]:
         cat_name = category_map[cat][0]
         stat = stats.get(cat, [0, 0.0])
@@ -251,7 +253,7 @@ sorted_by_total = {k: v for k, v in sorted(stats.items(), key=lambda item: item[
 for cat in sorted_by_total.keys():
     stat = sorted_by_total[cat]
     cat_name = category_map[cat][0]
-    print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f}')
+    print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f} {stat[2]:8.3f}')
 
 print('=' * 80)
 print('Worst mistakes')
@@ -260,7 +262,7 @@ sorted_by_score = {k: v for k, v in sorted(stats.items(), key=lambda item: item[
 for cat in sorted_by_score.keys():
     stat = sorted_by_score[cat]
     cat_name = category_map[cat][0]
-    print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f}')
+    print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f} {stat[2]:8.3f}')
 
 print('=' * 80)
 print('Worst average')
@@ -269,8 +271,11 @@ sorted_by_average = {k: v for k, v in sorted(stats.items(), key=lambda item: ite
 for cat in sorted_by_average.keys():
     stat = sorted_by_average[cat]
     cat_name = category_map[cat][0]
-    print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f}')
+    print(f'{cat}) {cat_name:20} {stat[0]:3} {stat[1]:8.3f} {stat[2]:8.3f}')
 
+print('=' * 80)
+print(f'Total with categories: {total_with_categories} of {len(quiz)} pct {float(total_with_categories) / float(len(quiz)):5.3f}')
+print('=' * 80)
 
 qc.save()
 pygame.quit()

@@ -194,7 +194,7 @@ while running:
             if x == 0:
                 color = (0, 128, 0)
             else:
-                color = (255, 0 ,0)
+                color = (255, 0, 0)
         display_text(columns[0], text_line, f'{quiz_line["answers"][x][0]}', color, screen, center_x=False)
         display_text(columns[1], text_line, f'{counts.get(x, 0)}', color, screen, center_x=False)
         display_text(columns[2], text_line, f'{float(quiz_line["answers"][x][1]):8.3f}', color, screen, center_x=False)
@@ -209,7 +209,7 @@ while running:
     for k in category_map.keys():
         color = (64, 64, 64)
         if k in current_categories:
-            color = (0, 0, 255)
+            color = (255, 0, 0)
 
         display_text(CAT_COLS[0], text_line, f'{k}) {category_map[k][0]}', color, screen, center_x=False)
         display_text(CAT_COLS[1], text_line, f'{category_map[k][1]}', color, screen, center_x=False)

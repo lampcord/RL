@@ -1,0 +1,14 @@
+1) Have fun - Don’t get caught up in trying to win!
+2) Look at the whole board
+   A) Pip count
+   B) What kind of position is it?
+   C) Anchors / men back
+   D) Inner Board
+   E) Prime
+   F) Men in blitz zone
+   G) Stripped points
+   H) Stacked points
+3) What’s your strategy?
+4) Find all the reasonable candidates
+5) Pick the best move
+

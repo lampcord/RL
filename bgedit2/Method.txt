@@ -6,8 +6,9 @@
    D) Inner Board
    E) Prime
    F) Men in blitz zone
-   G) Stripped points
-   H) Stacked points
+   G) Blots
+   H) Stripped points
+   I) Stacked points
 3) What’s your strategy?
 4) Find all the reasonable candidates
 5) Pick the best move

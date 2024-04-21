@@ -1,0 +1,36 @@
+﻿XGID=eB-----------------bbbbb--:1:1:1:00:0:0:0:0:10
+
+X:Player 1   O:Player 2
+Score is X:0 O:0. Unlimited Game
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |    O  O  O  O  O |   |                  |
+ |    O  O  O  O  O |   |                  |
+ |                  |   |                  |
+ |                  |   |                  |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  | O |                  |
+ |                  | O |                  |
+ |                  | O |                  | +---+
+ | X                | O |                  | | 2 |
+ | X                | O |                  | +---+
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 2  O: 165 X-O: 0-0
+Cube: 2, X own cube
+X on roll, cube action
+
+Analyzed in XG Roller++
+Player Winning Chances:   100.00% (G:100.00% B:100.00%)
+Opponent Winning Chances: 0.00% (G:0.00% B:0.00%)
+
+Cubeless Equities: No Double=+3.000, Double=+6.000
+
+Cubeful Equities:
+       No redouble:     +3.000
+       Redouble/Take:   +6.000 (+3.000)
+       Redouble/Pass:   +1.000 (-2.000)
+
+Best Cube action: Too good to redouble / Pass
+Percentage of wrong take needed to make the double decision right: 40.0%
+
+eXtreme Gammon Version: 2.10

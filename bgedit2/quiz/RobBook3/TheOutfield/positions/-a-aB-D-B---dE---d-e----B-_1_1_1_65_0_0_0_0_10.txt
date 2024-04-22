@@ -1,0 +1,43 @@
+﻿XGID=-a-aB-D-B---dE---d-e----B-:1:1:1:65:0:0:0:0:10
+
+X:Player 1   O:Player 2
+Score is X:0 O:0. Unlimited Game
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ | X              O |   |    O           X |
+ | X              O |   |    O           X |
+ |                O |   |    O           X |
+ |                O |   |    O           X |
+ |                O |   |                X |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                X |   |                O |
+ |                X |   |                O | +---+
+ |          X     X |   |    X           O | | 2 |
+ | O     O  X     X |   |    X           O | +---+
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 161  O: 160 X-O: 0-0
+Cube: 2, X own cube
+X to play 65
+
+    1. XG Roller++ 24/13                        eq:+0.355
+      Player:   55.98% (G:12.12% B:0.38%)
+      Opponent: 44.02% (G:9.71% B:0.28%)
+
+    2. XG Roller++ 24/18 13/8                   eq:+0.331 (-0.024)
+      Player:   54.87% (G:13.41% B:0.50%)
+      Opponent: 45.13% (G:10.66% B:0.35%)
+
+    3. XG Roller++ 13/8 13/7                    eq:+0.251 (-0.104)
+      Player:   51.48% (G:15.29% B:0.52%)
+      Opponent: 48.52% (G:12.16% B:0.61%)
+
+    4. XG Roller++ 24/18 6/1*                   eq:+0.227 (-0.128)
+      Player:   51.72% (G:13.40% B:0.39%)
+      Opponent: 48.28% (G:12.92% B:0.53%)
+
+    5. XG Roller++ 13/7 6/1*                    eq:+0.223 (-0.132)
+      Player:   50.52% (G:16.59% B:0.44%)
+      Opponent: 49.48% (G:13.64% B:0.79%)
+
+
+eXtreme Gammon Version: 2.10

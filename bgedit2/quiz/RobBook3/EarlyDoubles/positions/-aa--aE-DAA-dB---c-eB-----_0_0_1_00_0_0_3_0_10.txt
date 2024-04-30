@@ -1,0 +1,51 @@
+﻿XGID=-aa--aE-DAA-dB---c-eB-----:0:0:1:00:0:0:3:0:10
+
+X:Player 1   O:Player 2
+Score is X:0 O:0. Unlimited Game, Jacoby Beaver
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |             X  O |   |    O           X |
+ |             X  O |   |    O           X |
+ |                O |   |    O             |
+ |                O |   |                  |
+ |                O |   |                  |
+ |                  |BAR|                  |
+ |                X |   |                  |
+ |                X |   |    X           O |
+ |                X |   |    X           O |
+ |                X |   |    X           O |
+ | O  O        O  X |   |    X  X  X     O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 147  O: 173 X-O: 0-0
+Cube: 1
+X on roll, cube action
+
+Analyzed in Rollout
+No double
+  Player Winning Chances:   64.32% (G:21.60% B:1.22%)
+  Opponent Winning Chances: 35.68% (G:6.78% B:0.23%)
+Double/Take
+  Player Winning Chances:   64.75% (G:21.48% B:1.18%)
+  Opponent Winning Chances: 35.25% (G:6.58% B:0.25%)
+
+Cubeless Equities: No Double=+0.445, Double=+0.906
+
+Cubeful Equities:
+       No double:     +0.648
+       Double/Take:   +0.638 (-0.010)
+       Double/Pass:   +1.000 (+0.352)
+
+Best Cube action: No double / Take
+Percentage of wrong pass needed to make the double decision right: 2.7%
+
+Rollout:
+  1296 Games rolled with Variance Reduction.
+  Moves: 2-ply, cube decisions: 3-ply Red
+  Confidence No Double: ± 0.019 (+0.629..+0.667)
+  Confidence Double:    ± 0.023 (+0.615..+0.662)
+
+  Double Decision confidence: 74.0%
+  Take Decision confidence: 100.0%
+
+  Duration: 20.9 seconds
+
+eXtreme Gammon Version: 2.10

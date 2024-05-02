@@ -1,0 +1,272 @@
+[
+    {
+        "flashcard": "-aa--aE-DAA-dB---c-eB-----:0:0:1:00:0:0:3:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "No double:",
+                "0.000"
+            ],
+            [
+                "Double/Take:",
+                "-0.010"
+            ],
+            [
+                "Double/Pass:",
+                "-0.352"
+            ]
+        ]
+    },
+    {
+        "flashcard": "-aa-a-EBC--AbBB--cbe------:0:0:1:00:0:0:3:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.135"
+            ],
+            [
+                "Double/Pass:",
+                "-0.002"
+            ]
+        ]
+    },
+    {
+        "flashcard": "-b---aEBC---cD-Aac-da-----:0:0:1:00:0:0:3:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.044"
+            ],
+            [
+                "Double/Pass:",
+                "-0.171"
+            ]
+        ]
+    },
+    {
+        "flashcard": "aa----EBC---dCa--cBe------:0:0:1:00:0:0:3:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.096"
+            ],
+            [
+                "Double/Pass:",
+                "-0.073"
+            ]
+        ]
+    },
+    {
+        "flashcard": "aa--a-EBC---cDA--cae------:0:0:1:00:0:0:3:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Pass:",
+                "0.000"
+            ],
+            [
+                "Double/Take:",
+                "-0.199"
+            ],
+            [
+                "No double:",
+                "-0.066"
+            ]
+        ]
+    },
+    {
+        "flashcard": "aaa-a-E-C--AdE---c-dA-----:0:0:1:00:0:0:3:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "No double:",
+                "0.000"
+            ],
+            [
+                "Double/Take:",
+                "-0.011"
+            ],
+            [
+                "Double/Pass:",
+                "-0.349"
+            ]
+        ]
+    },
+    {
+        "flashcard": "--b--BDAC---dC---cBe--a---:0:0:1:00:0:0:2:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.021"
+            ],
+            [
+                "Double/Pass:",
+                "-0.088"
+            ]
+        ]
+    },
+    {
+        "flashcard": "-a---BCBB-a-cDa--d-e---AA-:0:0:1:00:0:0:2:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "No double:",
+                "0.000"
+            ],
+            [
+                "Double/Take:",
+                "-0.043"
+            ],
+            [
+                "Double/Pass:",
+                "-0.343"
+            ]
+        ]
+    },
+    {
+        "flashcard": "-aa--BD-C-A-bC-a-d-dBb----:0:0:1:00:0:0:2:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.007"
+            ],
+            [
+                "Double/Pass:",
+                "-0.216"
+            ]
+        ]
+    },
+    {
+        "flashcard": "-aaB--DBB---dC---cBd--b---:0:0:1:00:0:0:2:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.030"
+            ],
+            [
+                "Double/Pass:",
+                "-0.231"
+            ]
+        ]
+    },
+    {
+        "flashcard": "-b--aBC-C---cE---cad-AA-a-:0:0:1:00:0:0:2:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.078"
+            ],
+            [
+                "Double/Pass:",
+                "-0.097"
+            ]
+        ]
+    },
+    {
+        "flashcard": "a--C-bC-D---bDaA-c-d-b----:0:0:1:00:0:0:2:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "No double:",
+                "0.000"
+            ],
+            [
+                "Double/Take:",
+                "-0.062"
+            ],
+            [
+                "Double/Pass:",
+                "-0.323"
+            ]
+        ]
+    },
+    {
+        "flashcard": "aa--B-C-C--BdC--ac-e----B-:0:0:1:00:0:0:2:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.021"
+            ],
+            [
+                "Double/Pass:",
+                "-0.255"
+            ]
+        ]
+    },
+    {
+        "flashcard": "aA-aB-CAB---dDa--c-e----B-:0:0:1:00:0:0:2:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.037"
+            ],
+            [
+                "Double/Pass:",
+                "-0.310"
+            ]
+        ]
+    },
+    {
+        "flashcard": "aaB---E-C-A-cD---b-cba-b--:0:0:1:00:0:0:2:0:10",
+        "prompt": "Choose best move for cube",
+        "answers": [
+            [
+                "Double/Take:",
+                "0.000"
+            ],
+            [
+                "No double:",
+                "-0.106"
+            ],
+            [
+                "Double/Pass:",
+                "-0.100"
+            ]
+        ]
+    }
+]

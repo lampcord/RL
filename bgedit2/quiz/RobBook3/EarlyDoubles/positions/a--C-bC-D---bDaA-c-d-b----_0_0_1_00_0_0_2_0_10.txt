@@ -1,0 +1,36 @@
+﻿XGID=a--C-bC-D---bDaA-c-d-b----:0:0:1:00:0:0:2:0:10
+
+X:Player 1   O:Player 2
+Score is X:0 O:0. Unlimited Game, Beaver
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ |          O     O |   |    O     X  O  X |
+ |          O     O |   |    O           X |
+ |                O |   |    O           X |
+ |                O |   |                X |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  | O |                  |
+ |                  |   |    X             |
+ |       X        X |   |    X             |
+ |       X     O  X |   |    X           O |
+ |       X     O  X |   |    X           O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 126  O: 158 X-O: 0-0
+Cube: 1
+X on roll, cube action
+
+Analyzed in XG Roller++
+Player Winning Chances:   67.16% (G:13.87% B:0.33%)
+Opponent Winning Chances: 32.84% (G:5.89% B:0.15%)
+
+Cubeless Equities: No Double=+0.425, Double=+0.855
+
+Cubeful Equities:
+       No double:     +0.677
+       Double/Take:   +0.615 (-0.062)
+       Double/Pass:   +1.000 (+0.323)
+
+Best Cube action: No double / Take
+Percentage of wrong pass needed to make the double decision right: 13.8%
+
+eXtreme Gammon Version: 2.10

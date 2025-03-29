@@ -1,0 +1,43 @@
+﻿XGID=-B-B-bC-B---cDa--c-db--AA-:0:0:1:53:0:0:3:0:10
+
+X:Michael   O:eXtremeGammon
+Score is X:0 O:0. Unlimited Game, Jacoby Beaver
+ +24-23-22-21-20-19------18-17-16-15-14-13-+
+ | X  X        O  O |   |    O        O  X |
+ |             O  O |   |    O           X |
+ |                O |   |    O           X |
+ |                O |   |                X |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                  |   |                  |
+ |                X |   |                O |
+ | X     X     O  X |   |    X           O |
+ | X     X     O  X |   |    X           O |
+ +-1--2--3--4--5--6-------7--8--9-10-11-12-+
+Pip count  X: 141  O: 148 X-O: 0-0
+Cube: 1
+X to play 53
+
+    1. XG Roller+  24/21 13/8                   eq:-0.464
+      Player:   38.78% (G:8.35% B:0.18%)
+      Opponent: 61.22% (G:17.29% B:0.52%)
+
+    2. XG Roller+  24/16                        eq:-0.536 (-0.071)
+      Player:   37.64% (G:7.48% B:0.17%)
+      Opponent: 62.36% (G:19.18% B:0.54%)
+
+    3. 4-ply       23/15                        eq:-0.505 (-0.041)
+      Player:   38.25% (G:7.24% B:0.14%)
+      Opponent: 61.75% (G:18.21% B:0.59%)
+
+    4. 4-ply       24/21 23/18                  eq:-0.543 (-0.079)
+      Player:   37.01% (G:7.43% B:0.15%)
+      Opponent: 62.99% (G:20.47% B:0.63%)
+
+    5. 2-ply       13/10 13/8                   eq:-0.611 (-0.147)
+      Player:   34.23% (G:8.46% B:0.14%)
+      Opponent: 65.77% (G:18.83% B:0.87%)
+
+
+eXtreme Gammon Version: 2.10
